@@ -64,19 +64,52 @@ extern "C" {
         
         // Prevent OOB
         // We should have enough threads up to 256 ^ 2
-        if (tid < (maxValue + 1) * (maxValue + 1)){
-            float g_value = (float)(g[tid]);
-            assert(i < maxValue + 1);
-            assert(j < maxValue + 1);
-            atomicAdd(
-                &features[ASM], 
-                pow(g_value, 2.0f) 
-            );
-            atomicAdd(
-                &features[CONTRAST], 
-                g_value * pow(i - j, 2.0f) 
-            );
-        }
+        if (tid >= (maxValue + 1) * (maxValue + 1)) return;
+        
+        float g_value = (float)(g[tid]);
+        assert(i < maxValue + 1);
+        assert(j < maxValue + 1);
+        atomicAdd(
+            &features[ASM], 
+            powf(g_value, 2.0f) 
+        );
+        atomicAdd(
+            &features[CONTRAST], 
+            g_value * powf(i - j, 2.0f) 
+        );
+        atomicAdd(
+            &features[HOMOGENEITY], 
+            g_value / (1 + powf(i - j, 2.0f)) 
+        );
+        atomicAdd(
+            &features[MEAN_I], 
+            g_value * i 
+        );
+        atomicAdd(
+            &features[MEAN_J], 
+            g_value * j 
+        );
+        
+        __syncthreads();
+        
+        atomicAdd(
+            &features[VAR_I], 
+            g_value * powf((i - features[MEAN_I]), 2.0f) 
+        );
+        atomicAdd(
+            &features[VAR_J], 
+            g_value * powf((i - features[MEAN_J]), 2.0f)
+        );
+        
+        if (features[VAR_I] == 0 || features[VAR_J] == 0) return 
+        
+        __syncthreads();
+        
+        atomicAdd(
+            &features[CORRELATION], 
+            g_value * (i - features[MEAN_I]) * (j - features[MEAN_J]) * 
+             rsqrtf(features[VAR_I] * features[VAR_J])
+        );
     }
 }
     """, "glcm",

@@ -1,5 +1,4 @@
 import cupy as cp
-from cupy.cuda.texture import TextureObject, CUDAarray
 from cupyx.profiler import benchmark
 
 glcm_kernel = cp.RawKernel(
@@ -126,19 +125,23 @@ j = cp.random.randint(0, max_value, no_of_values, dtype=cp.int_)
 # May or may not be disruptive
 max_value = int(max(cp.max(i), cp.max(j)))
 glcm = cp.zeros((max_value + 1) ** 2, dtype=cp.uint8).flatten()
-
-assert max_value < 256, "Max value supported is 255"
-assert no_of_values < 256**2, f"Max number of values supported is {256 ** 2 - 1}"
-
 features = cp.zeros(8, dtype=cp.float32)
-glcm_kernel(
-    grid=(256,),
-    block=(256,),
-    args=(
-        i, j, max_value, no_of_values, glcm, features
-    ),
-)
-glcm_sq = glcm.reshape((max_value + 1), (max_value + 1))
+def benchmarkable():
+    glcm[:] = 0
+    features[:] = 0
+    assert max_value < 256, "Max value supported is 255"
+    assert no_of_values < 256 ** 2, f"Max number of values supported is {256 ** 2 - 1}"
 
+    glcm_kernel(
+        grid=(256,),
+        block=(256,),
+        args=(
+            i, j, max_value, no_of_values, glcm, features
+        ),
+    )
+# glcm_sq = glcm.reshape((max_value + 1), (max_value + 1))
+
+# %%
+print(benchmark(benchmarkable, n_repeat=2000* 100))
 #%%
 glcm.sum()

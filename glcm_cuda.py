@@ -84,6 +84,9 @@ class GLCM:
         """
         diameter = self.radius * 2 + 1
 
+        assert im.dtype == np.uint8, \
+            f"Image dtype must be of np.uint8, it's {im.dtype}"
+
         if self.bins is not None:
             im = self.binarize(im, self.max_value, self.bins)
 
@@ -186,8 +189,9 @@ class GLCM:
                         return (char) (masked_old >> 8 * long_address_modulo);
                     }
                 }
-                __global__ void glcm(const int* window_i,
-                    const int* window_j,
+                __global__ void glcm(
+                    const unsigned char* window_i,
+                    const unsigned char* window_j,
                     const int maxValue,
                     const int noOfValues,
                     unsigned char* g,
@@ -197,8 +201,8 @@ class GLCM:
                     unsigned char x = 1;
                     // Prevent OOB
                     if (tid < noOfValues){
-                        int row = window_i[tid];
-                        int col = window_j[tid];
+                        unsigned char row = window_i[tid];
+                        unsigned char col = window_j[tid];
                         atomicAdd(&(g[col + row * (maxValue + 1)]), x);
                     }
                     __syncthreads();

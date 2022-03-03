@@ -1,37 +1,95 @@
 import cupy as cp
+import numpy as np
 import pytest
-
-from .test_cases import *
 
 from glcm_cuda import GLCM
 
 
-
-
 @pytest.mark.parametrize(
-    "i,j,homogeneity,contrast,asm,mean_i,mean_j,var_i,var_j,correlation",
+    "i",
     [
-        simple_0, simple_1
+        np.asarray([0, 0, 0, 0], dtype=np.uint8),
+        np.asarray([1, 1, 1, 1], dtype=np.uint8),
+        np.asarray([255, 255, 255, 255], dtype=np.uint8),
     ]
 )
-def test_glcm(
-        i, j,
-        homogeneity,
-        contrast,
-        asm,
-        mean_i,
-        mean_j,
-        var_i,
-        var_j,
-        correlation
-):
-    g = GLCM()._from_windows(i, j)
+@pytest.mark.parametrize(
+    "j",
+    [
+        np.asarray([0, 0, 0, 0], dtype=np.uint8),
+        np.asarray([1, 1, 1, 1], dtype=np.uint8),
+        np.asarray([255, 255, 255, 255], dtype=np.uint8),
+    ]
+)
+def test_glcm(i, j):
+    g = GLCM()._from_windows(cp.asarray(i),
+                             cp.asarray(j))
+    actual = dict(
+        homogeneity=g[..., GLCM.HOMOGENEITY].sum().get(),
+        contrast=g[..., GLCM.CONTRAST].sum().get(),
+        asm=g[..., GLCM.ASM].sum().get(),
+        mean_i=g[..., GLCM.MEAN_I].sum().get(),
+        mean_j=g[..., GLCM.MEAN_J].sum().get(),
+        var_i=g[..., GLCM.VAR_I].sum().get(),
+        var_j=g[..., GLCM.VAR_J].sum().get(),
+        correlation=g[..., GLCM.CORRELATION].sum().get()
+    )
 
-    assert g[..., GLCM.HOMOGENEITY].sum() == homogeneity
-    assert g[..., GLCM.CONTRAST].sum() == contrast
-    assert g[..., GLCM.ASM].sum() == asm
-    assert g[..., GLCM.MEAN_I].sum() == mean_i
-    assert g[..., GLCM.MEAN_J].sum() == mean_j
-    assert g[..., GLCM.VAR_I].sum() == var_i
-    assert g[..., GLCM.VAR_J].sum() == var_j
-    assert g[..., GLCM.CORRELATION].sum() == correlation
+    expected = ground_truth(i, j)
+    assert pytest.approx(expected) == actual
+
+
+def ground_truth(i: np.ndarray,
+                 j: np.ndarray):
+    i_flat = i.flatten()
+    j_flat = j.flatten()
+    assert len(i_flat) == len(j_flat)
+    glcm_size = max(max(i_flat) + 1, max(j_flat) + 1)
+    glcm = np.zeros((glcm_size, glcm_size), dtype=float)
+
+    for i_, j_ in zip(i_flat, j_flat):
+        glcm[i_, j_] += 1
+
+    glcm /= len(i_flat)
+
+    homogeneity = 0.0
+    contrast = 0.0
+    asm = 0.0
+    mean_i = 0.0
+    mean_j = 0.0
+    var_i = 0.0
+    var_j = 0.0
+    correlation = 0.0
+
+    for i in range(glcm.shape[0]):
+        for j in range(glcm.shape[1]):
+            homogeneity += glcm[i, j] / (1 + (i - j) ** 2)
+            contrast += glcm[i, j] * (i - j) ** 2
+            asm += glcm[i, j] ** 2
+            mean_i += glcm[i, j] * i
+            mean_j += glcm[i, j] * j
+
+    for i in range(glcm.shape[0]):
+        for j in range(glcm.shape[1]):
+            var_i += glcm[i, j] * (i - mean_i) ** 2
+            var_j += glcm[i, j] * (j - mean_j) ** 2
+
+    if var_i != 0 and var_j != 0:
+        for i in range(glcm.shape[0]):
+            for j in range(glcm.shape[1]):
+                correlation += \
+                    glcm[i, j] \
+                    * (i - mean_i) \
+                    * (j - mean_j) \
+                    / ((var_i * var_j) ** 0.5)
+
+    return dict(
+        homogeneity=homogeneity,
+        contrast=contrast,
+        asm=asm,
+        mean_i=mean_i,
+        mean_j=mean_j,
+        var_i=var_i,
+        var_j=var_j,
+        correlation=correlation
+    )

@@ -147,9 +147,7 @@ class GLCM:
 
         return features
 
-    @property
-    def glcm_kernel(self) -> cp.RawKernel:
-        return cp.RawKernel(
+    glcm_kernel = cp.RawKernel(
             r"""
             #define HOMOGENEITY 0 
             #define CONTRAST 1    
@@ -222,7 +220,7 @@ class GLCM:
                     if (i >= (maxValue + 1 - 0.5)) return;
                     if (j >= (maxValue + 1 - 0.5)) return;
                     
-                    float g_value = (float)(g[tid]);
+                    float p = (float)(g[tid]) / noOfValues;
                     assert(i < maxValue + 1);
                     assert(j < maxValue + 1);
                     
@@ -230,39 +228,39 @@ class GLCM:
                     
                     atomicAdd(
                         &features[HOMOGENEITY], 
-                        g_value / (1 + powf((i - j), 2.0f))
+                        p / (1 + powf((i - j), 2.0f))
                     );
                     
                     atomicAdd(
                         &features[ASM], 
-                        powf(g_value, 2.0f) 
+                        powf(p, 2.0f)
                     );
                     
                     atomicAdd(
                         &features[CONTRAST], 
-                        g_value * powf(i - j, 2.0f) 
+                        p * powf(i - j, 2.0f)
                     );
                     
                     atomicAdd(
                         &features[MEAN_I], 
-                        g_value * i 
+                        p * i
                     );
                     
                     atomicAdd(
                         &features[MEAN_J], 
-                        g_value * j 
+                        p * j
                     );
             
                     __syncthreads();
                     
                     atomicAdd(
                         &features[VAR_I], 
-                        g_value * powf((i - features[MEAN_I]), 2.0f) 
+                        p * powf((i - features[MEAN_I]), 2.0f) 
                     );
                     
                     atomicAdd(
                         &features[VAR_J], 
-                        g_value * powf((i - features[MEAN_J]), 2.0f)
+                        p * powf((j - features[MEAN_J]), 2.0f)
                     );
             
                     __syncthreads();
@@ -271,7 +269,7 @@ class GLCM:
             
                     atomicAdd(
                         &features[CORRELATION], 
-                        g_value 
+                        p 
                          * (i - features[MEAN_I])
                          * (j - features[MEAN_J]) 
                          * rsqrtf(features[VAR_I] * features[VAR_J])

@@ -39,9 +39,14 @@ class GLCM:
         """
         diameter = radius * 2 + 1
 
+        # This will yield a shape (window_i, window_j, row, col)
+        # E.g. 100x100 with 5x5 window -> 96, 96, 5, 5
         windows_ij = cp.asarray(view_as_windows(im, (diameter, diameter)))
+
+        # We flatten the cells as cell order is not important
         windows_ij = windows_ij.reshape((*windows_ij.shape[:-2], -1))
 
+        # Yield Windows and flatten the windows
         windows_i = windows_ij[:-step_size, :-step_size] \
             .reshape((-1, windows_ij.shape[-1]))
         windows_j = windows_ij[step_size:, step_size:] \

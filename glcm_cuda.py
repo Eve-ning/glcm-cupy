@@ -53,8 +53,8 @@ class GLCM:
         """
         return (im / from_bins * to_bins).astype(int)
 
-    def from_nd_image(self,
-                      im: np.ndarray):
+    def from_3dimage(self,
+                     im: np.ndarray):
         """ Generates the GLCM from a multi band image
 
         Args:
@@ -67,12 +67,12 @@ class GLCM:
 
         glcm_chs = []
         for ch in range(im.shape[-1]):
-            glcm_chs.append(self.from_image(im[...,ch]))
+            glcm_chs.append(self.from_2dimage(im[..., ch]))
 
         return np.stack(glcm_chs, axis=2)
 
-    def from_image(self,
-                   im: np.ndarray) -> np.ndarray:
+    def from_2dimage(self,
+                     im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a single band image
 
         Args:

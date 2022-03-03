@@ -21,8 +21,25 @@ class GLCM:
     VAR_J = 6
     CORRELATION = 7
 
+    def from_nd_image(self,
+                      im: np.ndarray):
+        """ Generates the GLCM from a multi band image
+
+        Args:
+            im: A 3 dim image as an ndarray
+
+        Returns:
+            The GLCM Array 4dim with shape
+                rows, cols, channel, feature
+        """
+
+        glcm_chs = []
+        for ch in range(im.shape[-1]):
+            glcm_chs.append(self.from_image(im[...,ch]))
+
+        return np.stack(glcm_chs, axis=2)
+
     def from_image(self,
-                   im: np.ndarray,
                    step_size: int = 1,
                    radius: int = 2) -> np.ndarray:
         """ Generates the GLCM from an image

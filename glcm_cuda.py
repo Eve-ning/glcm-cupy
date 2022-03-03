@@ -232,13 +232,13 @@ class GLCM:
                     );
                     
                     atomicAdd(
-                        &features[ASM], 
-                        powf(p, 2.0f)
+                        &features[CONTRAST], 
+                        p * powf(i - j, 2.0f)
                     );
                     
                     atomicAdd(
-                        &features[CONTRAST], 
-                        p * powf(i - j, 2.0f)
+                        &features[ASM], 
+                        powf(p, 2.0f)
                     );
                     
                     atomicAdd(

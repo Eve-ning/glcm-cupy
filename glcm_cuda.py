@@ -23,7 +23,7 @@ class GLCM:
         bins: Bin reduction. If None, then no reduction is done
 
     """
-    
+
     max_value: int = 255
     step_size: int = 1
     radius: int = 2
@@ -145,7 +145,7 @@ class GLCM:
             block=(256,),
             args=(
                 i_flat, j_flat, self.max_value, no_of_values, glcm, features
-            ),
+            ), shared_mem=16
         )
 
         return features
@@ -254,12 +254,33 @@ class GLCM:
                         &features[MEAN_J], 
                         p * j
                     );
-            
+                    __syncthreads();
+                    // if (p > 0){
+                    //    printf("%f %f %f\n", i, features[MEAN_I], p);
+                    //    printf("%f %f %f\n", j, features[MEAN_J], p);
+                    // }
+                    
                     __syncthreads();
                     
+                    __shared__ float meanI;
+                    __shared__ float meanJ;
+                    
+                    float meanI = features[MEAN_I];
+                    float meanJ = features[MEAN_J];
+                    
+                    
+                    // NEED TO SYNC BLOCK HERE
+                    __syncthreads();
+                    
+                    
+                    float a = p * powf((i - meanI), 2.0f);
+                    if (a > 0) {
+                        printf("%f %f %f\n", i, meanI, a);
+                        }
+                    __syncthreads();
                     atomicAdd(
                         &features[VAR_I], 
-                        p * powf((i - features[MEAN_I]), 2.0f) 
+                        a 
                     );
                     
                     atomicAdd(
@@ -271,15 +292,27 @@ class GLCM:
             
                     if (features[VAR_I] == 0 || features[VAR_J] == 0) return;
             
+                    __syncthreads();
+                    __shared__ float varI;
+                    __shared__ float varJ;
+                    varI = features[VAR_I];
+                    varJ = features[VAR_J];
+                    __syncthreads();
+                    
                     atomicAdd(
                         &features[CORRELATION], 
-                        p 
-                         * (i - features[MEAN_I])
-                         * (j - features[MEAN_J]) 
-                         * rsqrtf(features[VAR_I] * features[VAR_J])
+                        p * (i - meanI) * (j - meanJ) 
+                         * rsqrtf(varI * varJ)
                     );
                 }
             }""",
             "glcm"
         )
 
+#%%
+GLCM()._from_windows(cp.asarray([0,1,250,255], dtype=cp.uint8),
+                     cp.asarray([0,0,0,0], dtype=cp.uint8))
+#%%
+GLCM()._from_windows(
+                     cp.asarray([0,0,0,0], dtype=cp.uint8),
+cp.asarray([0,1,254,255], dtype=cp.uint8),)

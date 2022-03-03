@@ -278,18 +278,4 @@ class GLCM:
             }""",
             "glcm"
         )
-#%%
-
-np.random.seed(0)
-# im = np.random.randint(0, 128, (50,50), dtype=int)
-# im = np.random.randint(1, 256, (200,50), dtype=int)
-im = np.linspace(0, 17, 100*25, dtype=int).reshape(100,25)
-
-a = GLCM().from_image(im, radius=1)
-import matplotlib.pyplot as plt
-#
-# plt.imshow(im)
-# plt.show()
-plt.imshow(a[...,2].get(), cmap='rainbow')
-plt.show()
 

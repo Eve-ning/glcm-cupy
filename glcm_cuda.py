@@ -159,9 +159,16 @@ class GLCM:
                     const float j = (float)(tid % (maxValue + 1));
             
                     // Prevent OOB
-                    // We should have enough threads up to 256 ^ 2
-                    if (tid >= (maxValue + 1) * (maxValue + 1)) return;
-            
+                    // As i, j are integers, we avoid float rounding errors
+                    // by -0.5
+                    // E.g. If i should be 16, it may round down incorrectly
+                    // i = 15.9999999
+                    // maxValue + 1 = 16          <- Incorrectly passed
+                    // maxValue + 1 - 0.5 = 15.5  <- Correctly stopped
+                    
+                    if (i >= (maxValue + 1 - 0.5)) return;
+                    if (j >= (maxValue + 1 - 0.5)) return;
+                    
                     float g_value = (float)(g[tid]);
                     assert(i < maxValue + 1);
                     assert(j < maxValue + 1);

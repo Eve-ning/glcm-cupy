@@ -21,6 +21,21 @@ class GLCM:
     VAR_J = 6
     CORRELATION = 7
 
+    @staticmethod
+    def binarize(im: np.ndarray, from_bins: int, to_bins: int):
+        """ Binarize an image from a certain bin to another
+
+        Args:
+            im: Image as np.ndarray
+            from_bins: From the Bin of input image
+            to_bins: To the Bin of output image
+
+        Returns:
+            Binarized Image
+
+        """
+        return (im / from_bins * to_bins).astype(int)
+
     def from_nd_image(self,
                       im: np.ndarray):
         """ Generates the GLCM from a multi band image

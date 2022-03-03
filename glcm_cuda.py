@@ -154,10 +154,13 @@ class GLCM:
                         atomicAdd(&(g[col + row * (maxValue + 1)]), x);
                     }
                     __syncthreads();
+
                     // Calculate the GLCM metrics from here         
                     const float i = (float)(tid / (maxValue + 1));
                     const float j = (float)(tid % (maxValue + 1));
             
+                    __syncthreads();
+                                       
                     // Prevent OOB
                     // As i, j are integers, we avoid float rounding errors
                     // by -0.5
@@ -172,47 +175,56 @@ class GLCM:
                     float g_value = (float)(g[tid]);
                     assert(i < maxValue + 1);
                     assert(j < maxValue + 1);
+                    
                     __syncthreads();
+                    
+                    atomicAdd(
+                        &features[HOMOGENEITY], 
+                        g_value / (1 + powf((i - j), 2.0f))
+                    );
+                    
                     atomicAdd(
                         &features[ASM], 
                         powf(g_value, 2.0f) 
                     );
+                    
                     atomicAdd(
                         &features[CONTRAST], 
-                        1.0f // g_value * powf(i - j, 2.0f) 
+                        g_value * powf(i - j, 2.0f) 
                     );
+                    
                     atomicAdd(
                         &features[MEAN_I], 
                         g_value * i 
                     );
+                    
                     atomicAdd(
                         &features[MEAN_J], 
                         g_value * j 
                     );
             
-                    atomicAdd(
-                        &features[0], 
-                        1.0f
-                    );
                     __syncthreads();
-            
+                    
                     atomicAdd(
                         &features[VAR_I], 
                         g_value * powf((i - features[MEAN_I]), 2.0f) 
                     );
+                    
                     atomicAdd(
                         &features[VAR_J], 
                         g_value * powf((i - features[MEAN_J]), 2.0f)
                     );
             
-                    if (features[VAR_I] == 0 || features[VAR_J] == 0) return 
-            
                     __syncthreads();
+            
+                    if (features[VAR_I] == 0 || features[VAR_J] == 0) return;
             
                     atomicAdd(
                         &features[CORRELATION], 
-                        g_value * (i - features[MEAN_I]) * (j - features[MEAN_J]) * 
-                         rsqrtf(features[VAR_I] * features[VAR_J])
+                        g_value 
+                         * (i - features[MEAN_I])
+                         * (j - features[MEAN_J]) 
+                         * rsqrtf(features[VAR_I] * features[VAR_J])
                     );
                 }
             }""",

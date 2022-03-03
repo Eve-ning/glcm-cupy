@@ -14,6 +14,14 @@ NO_VALUES_SUPPORTED = 256 ** 2
 
 
 class GLCM:
+    HOMOGENEITY = 0
+    CONTRAST = 1
+    ASM = 2
+    MEAN_I = 3
+    MEAN_J = 4
+    VAR_I = 5
+    VAR_J = 6
+    CORRELATION = 7
 
     def from_image(self,
                    im: np.ndarray,

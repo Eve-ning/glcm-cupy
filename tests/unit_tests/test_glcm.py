@@ -1,16 +1,17 @@
-import numpy as np
 import cupy as cp
 import pytest
 
+from .test_cases import *
+
 from glcm_cuda import GLCM
 
-@pytest.mark.parametrize(
-    "i,j",
-    [
-        [
-            cp.asarray([0,0,0,0]),cp.asarray([1,1,1,1]),
 
-        ]
+
+
+@pytest.mark.parametrize(
+    "i,j,homogeneity,contrast,asm,mean_i,mean_j,var_i,var_j,correlation",
+    [
+        simple_0, simple_1
     ]
 )
 def test_glcm_asm(i, j):

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from time import sleep
-
 import cupy as cp
 import numpy as np
 from skimage.util import view_as_windows

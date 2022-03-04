@@ -39,5 +39,5 @@ def test_glcm(i, j):
     )
 
     expected = glcm_expected(i, j)
-    assert pytest.approx(expected) == actual
+    assert actual == pytest.approx(expected)
 

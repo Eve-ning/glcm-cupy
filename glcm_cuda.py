@@ -7,6 +7,8 @@ import numpy as np
 from skimage.util import view_as_windows
 from tqdm import tqdm
 
+from kernel import glcm_module
+
 BLOCKS = 256
 THREADS = 256
 MAX_VALUE_SUPPORTED = 255
@@ -140,175 +142,35 @@ class GLCM:
         assert no_of_values < NO_VALUES_SUPPORTED, \
             f"Max number of values supported is {NO_VALUES_SUPPORTED}"
 
-        self.glcm_kernel(
+        glcm_k0 = glcm_module.get_function('glcm_0')
+        glcm_k1 = glcm_module.get_function('glcm_1')
+        glcm_k2 = glcm_module.get_function('glcm_2')
+        glcm_k0(
             grid=(256,),
             block=(256,),
             args=(
                 i_flat, j_flat, self.max_value, no_of_values, glcm, features
-            ), shared_mem=16
+            )
+        )
+        glcm_k1(
+            grid=(256,),
+            block=(256,),
+            args=(
+                glcm, self.max_value, no_of_values, features
+            )
+        )
+        glcm_k2(
+            grid=(256,),
+            block=(256,),
+            args=(
+                glcm, self.max_value, no_of_values, features
+            )
         )
 
         return features
 
-    glcm_kernel = cp.RawKernel(
-            r"""
-            #define HOMOGENEITY 0 
-            #define CONTRAST 1    
-            #define ASM 2         
-            #define MEAN_I 3      
-            #define MEAN_J 4      
-            #define VAR_I 5      
-            #define VAR_J 6       
-            #define CORRELATION 7 
-            extern "C" {
-                __device__ static inline char atomicAdd(
-                    unsigned char* address,
-                    unsigned char val
-                    ) 
-                {
-                    // https://stackoverflow.com/questions/5447570/cuda-atomic-operations-on-unsigned-chars
-                    size_t long_address_modulo = (size_t) address & 3;
-                    unsigned int* base_address = (unsigned int*) ((char*) address - long_address_modulo);
-                    unsigned int long_val = (unsigned int) val << (8 * long_address_modulo);
-                    unsigned int long_old = atomicAdd(base_address, long_val);
-            
-                    if (long_address_modulo == 3) {
-                        // the first 8 bits of long_val represent the char value,
-                        // hence the first 8 bits of long_old represent its previous value.
-                        return (char) (long_old >> 24);
-                    } else {
-                        // bits that represent the char value within long_val
-                        unsigned int mask = 0x000000ff << (8 * long_address_modulo);
-                        unsigned int masked_old = long_old & mask;
-                        // isolate the bits that represent the char value within long_old, add the long_val to that,
-                        // then re-isolate by excluding bits that represent the char value
-                        unsigned int overflow = (masked_old + long_val) & ~mask;
-                        if (overflow) {
-                            atomicSub(base_address, overflow);
-                        }
-                        return (char) (masked_old >> 8 * long_address_modulo);
-                    }
-                }
-                __global__ void glcm(
-                    const unsigned char* window_i,
-                    const unsigned char* window_j,
-                    const int maxValue,
-                    const int noOfValues,
-                    unsigned char* g,
-                    float* features) 
-                {
-                    int tid = threadIdx.x + blockIdx.x * blockDim.x;
-                    unsigned char x = 1;
-                    // Prevent OOB
-                    if (tid < noOfValues){
-                        unsigned char row = window_i[tid];
-                        unsigned char col = window_j[tid];
-                        atomicAdd(&(g[col + row * (maxValue + 1)]), x);
-                    }
-                    __syncthreads();
 
-                    // Calculate the GLCM metrics from here         
-                    const float i = (float)(tid / (maxValue + 1));
-                    const float j = (float)(tid % (maxValue + 1));
-            
-                    __syncthreads();
-                                       
-                    // Prevent OOB
-                    // As i, j are integers, we avoid float rounding errors
-                    // by -0.5
-                    // E.g. If i should be 16, it may round down incorrectly
-                    // i = 15.9999999
-                    // maxValue + 1 = 16          <- Incorrectly passed
-                    // maxValue + 1 - 0.5 = 15.5  <- Correctly stopped
-                    
-                    if (i >= (maxValue + 1 - 0.5)) return;
-                    if (j >= (maxValue + 1 - 0.5)) return;
-                    
-                    float p = (float)(g[tid]) / noOfValues;
-                    assert(i < maxValue + 1);
-                    assert(j < maxValue + 1);
-                    
-                    __syncthreads();
-                    
-                    atomicAdd(
-                        &features[HOMOGENEITY], 
-                        p / (1 + powf((i - j), 2.0f))
-                    );
-                    
-                    atomicAdd(
-                        &features[CONTRAST], 
-                        p * powf(i - j, 2.0f)
-                    );
-                    
-                    atomicAdd(
-                        &features[ASM], 
-                        powf(p, 2.0f)
-                    );
-                    
-                    atomicAdd(
-                        &features[MEAN_I], 
-                        p * i
-                    );
-                    
-                    atomicAdd(
-                        &features[MEAN_J], 
-                        p * j
-                    );
-                    __syncthreads();
-                    // if (p > 0){
-                    //    printf("%f %f %f\n", i, features[MEAN_I], p);
-                    //    printf("%f %f %f\n", j, features[MEAN_J], p);
-                    // }
-                    
-                    __syncthreads();
-                    
-                    __shared__ float meanI;
-                    __shared__ float meanJ;
-                    
-                    float meanI = features[MEAN_I];
-                    float meanJ = features[MEAN_J];
-                    
-                    
-                    // NEED TO SYNC BLOCK HERE
-                    __syncthreads();
-                    
-                    
-                    float a = p * powf((i - meanI), 2.0f);
-                    if (a > 0) {
-                        printf("%f %f %f\n", i, meanI, a);
-                        }
-                    __syncthreads();
-                    atomicAdd(
-                        &features[VAR_I], 
-                        a 
-                    );
-                    
-                    atomicAdd(
-                        &features[VAR_J], 
-                        p * powf((j - features[MEAN_J]), 2.0f)
-                    );
-            
-                    __syncthreads();
-            
-                    if (features[VAR_I] == 0 || features[VAR_J] == 0) return;
-            
-                    __syncthreads();
-                    __shared__ float varI;
-                    __shared__ float varJ;
-                    varI = features[VAR_I];
-                    varJ = features[VAR_J];
-                    __syncthreads();
-                    
-                    atomicAdd(
-                        &features[CORRELATION], 
-                        p * (i - meanI) * (j - meanJ) 
-                         * rsqrtf(varI * varJ)
-                    );
-                }
-            }""",
-            "glcm"
-        )
-
+# TODO: Synchronize Blocks by separating kernels
 #%%
 GLCM()._from_windows(cp.asarray([0,1,250,255], dtype=cp.uint8),
                      cp.asarray([0,0,0,0], dtype=cp.uint8))

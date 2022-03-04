@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 
 import cupy as cp
@@ -13,6 +14,7 @@ BLOCKS = 256
 THREADS = 256
 MAX_VALUE_SUPPORTED = 255
 NO_VALUES_SUPPORTED = 256 ** 2
+
 
 @dataclass
 class GLCM:
@@ -31,6 +33,8 @@ class GLCM:
     radius: int = 2
     bins: int | None = None
 
+    threads: int = 256
+
     HOMOGENEITY = 0
     CONTRAST = 1
     ASM = 2
@@ -39,6 +43,27 @@ class GLCM:
     VAR_I = 5
     VAR_J = 6
     CORRELATION = 7
+
+    @property
+    def diameter(self):
+        return self.radius * 2 + 1
+
+    @property
+    def no_of_values(self):
+        return self.diameter ** 2
+
+    def __post_init__(self):
+        self.i_flat = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
+        self.j_flat = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
+        self.glcm = cp.zeros((self.max_value + 1) ** 2, dtype=cp.uint8)
+        self.features = cp.zeros(8, dtype=cp.float32)
+
+        assert self.max_value <= MAX_VALUE_SUPPORTED, \
+            f"Max value supported is {MAX_VALUE_SUPPORTED}"
+        assert self.no_of_values < NO_VALUES_SUPPORTED, \
+            f"Max number of values supported is {NO_VALUES_SUPPORTED}"
+
+        os.environ['CUPY_EXPERIMENTAL_SLICE_COPY'] = '1'
 
     @staticmethod
     def binarize(im: np.ndarray, from_bins: int, to_bins: int):
@@ -84,7 +109,6 @@ class GLCM:
             The GLCM Array 3dim with shape
                 rows, cols, feature
         """
-        diameter = self.radius * 2 + 1
 
         assert im.dtype == np.uint8, \
             f"Image dtype must be of np.uint8, it's {im.dtype}"
@@ -94,7 +118,7 @@ class GLCM:
 
         # This will yield a shape (window_i, window_j, row, col)
         # E.g. 100x100 with 5x5 window -> 96, 96, 5, 5
-        windows_ij = cp.asarray(view_as_windows(im, (diameter, diameter)))
+        windows_ij = view_as_windows(im, (self.diameter, self.diameter))
 
         # We flatten the cells as cell order is not important
         windows_ij = windows_ij.reshape((*windows_ij.shape[:-2], -1))
@@ -115,8 +139,8 @@ class GLCM:
                                      windows_ij.shape[1] - self.step_size, 8)
 
     def _from_windows(self,
-                      i: cp.ndarray,
-                      j: cp.ndarray, ) -> np.ndarray:
+                      i: np.ndarray,
+                      j: np.ndarray, ) -> np.ndarray:
         """ Generate the GLCM from the I J Window
 
         Notes:
@@ -131,50 +155,39 @@ class GLCM:
 
         """
         assert i.shape == j.shape, f"Shape of i {i.shape} != j {j.shape}"
-        i_flat = i.flatten()
-        j_flat = j.flatten()
-        no_of_values = i_flat.size
-        glcm = cp.zeros((self.max_value + 1) ** 2, dtype=cp.uint8).flatten()
-        features = cp.zeros(8, dtype=cp.float32)
-
-        assert self.max_value <= MAX_VALUE_SUPPORTED, \
-            f"Max value supported is {MAX_VALUE_SUPPORTED}"
-        assert no_of_values < NO_VALUES_SUPPORTED, \
-            f"Max number of values supported is {NO_VALUES_SUPPORTED}"
+        blocks = int(max(i.max(), j.max())) + 1
+        self.i_flat[:] = i.flatten()
+        self.j_flat[:] = j.flatten()
+        self.glcm[:] = 0
+        self.features[:] = 0
 
         glcm_k0 = glcm_module.get_function('glcm_0')
         glcm_k1 = glcm_module.get_function('glcm_1')
         glcm_k2 = glcm_module.get_function('glcm_2')
         glcm_k0(
-            grid=(256,),
-            block=(256,),
+            grid=(blocks,),
+            block=(self.threads,),
             args=(
-                i_flat, j_flat, self.max_value, no_of_values, glcm, features
+                self.i_flat, self.j_flat,
+                self.max_value, self.no_of_values,
+                self.glcm, self.features
             )
         )
         glcm_k1(
-            grid=(256,),
-            block=(256,),
+            grid=(blocks,),
+            block=(self.threads,),
             args=(
-                glcm, self.max_value, no_of_values, features
+                self.glcm, self.max_value,
+                self.no_of_values, self.features
             )
         )
         glcm_k2(
-            grid=(256,),
-            block=(256,),
+            grid=(blocks,),
+            block=(self.threads,),
             args=(
-                glcm, self.max_value, no_of_values, features
+                self.glcm, self.max_value,
+                self.no_of_values, self.features
             )
         )
 
-        return features
-
-
-# TODO: Synchronize Blocks by separating kernels
-#%%
-GLCM()._from_windows(cp.asarray([0,1,250,255], dtype=cp.uint8),
-                     cp.asarray([0,0,0,0], dtype=cp.uint8))
-#%%
-GLCM()._from_windows(
-                     cp.asarray([0,0,0,0], dtype=cp.uint8),
-cp.asarray([0,1,254,255], dtype=cp.uint8),)
+        return self.features

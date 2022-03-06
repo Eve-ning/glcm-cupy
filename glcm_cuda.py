@@ -78,7 +78,7 @@ class GLCM:
             Binarized Image
 
         """
-        return (im / from_bins * to_bins).astype(int)
+        return (im / from_bins * to_bins).astype(np.uint8)
 
     def from_3dimage(self,
                      im: np.ndarray):
@@ -154,6 +154,7 @@ class GLCM:
             The GLCM array, of size (8,)
 
         """
+
         assert i.shape == j.shape, f"Shape of i {i.shape} != j {j.shape}"
         blocks = int(max(i.max(), j.max())) + 1
         self.i_flat[:] = i.flatten()

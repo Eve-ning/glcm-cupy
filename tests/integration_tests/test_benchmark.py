@@ -1,18 +1,25 @@
+import os
+
 import numpy as np
 import cupy as cp
+import pytest
 from cupyx.profiler import benchmark
 
 from glcm_cuda import GLCM
 
 TEST_SIZE = 100
 
-def test_benchmark_3dimage():
+@pytest.fixture(autouse=True)
+def set_env():
+    os.environ['CUPY_EXPERIMENTAL_SLICE_COPY'] = '1'
+
+def test_benchmark_3dimage(set_env):
     """ Simply benchmarks the GLCM
 
     Returns:
 
     """
-    GLCM().from_3dimage(
+    GLCM(bins=16).from_3dimage(
         np.random.randint(0, 256, (TEST_SIZE, TEST_SIZE, 3), dtype=np.uint8)
     )
 

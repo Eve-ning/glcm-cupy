@@ -10,10 +10,13 @@ from tqdm import tqdm
 
 from kernel import glcm_module
 
-BLOCKS = 256
-THREADS = 256
 MAX_VALUE_SUPPORTED = 255
-NO_VALUES_SUPPORTED = 256 ** 2
+NO_OF_VALUES_SUPPORTED = 256 ** 2
+MAX_RADIUS_SUPPORTED = 127
+
+MAX_THREADS = 512  # Lowest Maximum supported threads.
+
+NO_OF_FEATURES = 8
 
 
 @dataclass
@@ -28,12 +31,12 @@ class GLCM:
 
     """
 
-    max_value: int = 255
+    max_value: int = MAX_VALUE_SUPPORTED
     step_size: int = 1
     radius: int = 2
     bins: int | None = None
 
-    threads: int = 256
+    threads = MAX_VALUE_SUPPORTED + 1
 
     HOMOGENEITY = 0
     CONTRAST = 1
@@ -58,10 +61,22 @@ class GLCM:
         self.glcm = cp.zeros((self.max_value + 1) ** 2, dtype=cp.uint8)
         self.features = cp.zeros(8, dtype=cp.float32)
 
-        assert self.max_value <= MAX_VALUE_SUPPORTED, \
-            f"Max value supported is {MAX_VALUE_SUPPORTED}"
-        assert self.no_of_values < NO_VALUES_SUPPORTED, \
-            f"Max number of values supported is {NO_VALUES_SUPPORTED}"
+        if not 1 <= self.max_value <= MAX_VALUE_SUPPORTED:
+            raise ValueError(
+                f"Max value {self.max_value} should be in [1, {MAX_VALUE_SUPPORTED}]")
+        if not 0 <= self.radius <= MAX_RADIUS_SUPPORTED:
+            f"Radius {self.radius} should be in [0, {MAX_RADIUS_SUPPORTED}]"
+        if self.bins is not None and \
+                not (2 <= self.bins <= MAX_VALUE_SUPPORTED):
+            raise ValueError(
+                f"Bins {self.bins} should be in [2, {MAX_RADIUS_SUPPORTED}]. "
+                f"If bins == 256, just use None."
+            )
+        if not 1 <= self.step_size:
+            raise ValueError(
+                f"Step Size {self.step_size} should be >= 1" \
+                f"If bins == 256, just use None."
+            )
 
         os.environ['CUPY_EXPERIMENTAL_SLICE_COPY'] = '1'
 
@@ -110,11 +125,6 @@ class GLCM:
                 rows, cols, feature
         """
 
-        assert im.dtype == np.uint8, \
-            f"Image dtype must be of np.uint8, it's {im.dtype}"
-
-        if self.bins is not None:
-            im = self.binarize(im, self.max_value, self.bins)
 
         # This will yield a shape (window_i, window_j, row, col)
         # E.g. 100x100 with 5x5 window -> 96, 96, 5, 5
@@ -129,14 +139,16 @@ class GLCM:
         windows_j = windows_ij[self.step_size:, self.step_size:] \
             .reshape((-1, windows_ij.shape[-1]))
 
-        glcm_features = cp.zeros((windows_i.shape[0], 8), dtype=cp.float32)
+        glcm_features = cp.zeros((windows_i.shape[0], NO_OF_FEATURES),
+                                 dtype=cp.float32)
 
         for e, (i, j) in tqdm(enumerate(zip(windows_i, windows_j)),
                               total=len(windows_i)):
             glcm_features[e] = self._from_windows(i, j)
 
         return glcm_features.reshape(windows_ij.shape[0] - self.step_size,
-                                     windows_ij.shape[1] - self.step_size, 8)
+                                     windows_ij.shape[1] - self.step_size,
+                                     NO_OF_FEATURES)
 
     def _from_windows(self,
                       i: np.ndarray,
@@ -156,9 +168,18 @@ class GLCM:
         """
 
         assert i.shape == j.shape, f"Shape of i {i.shape} != j {j.shape}"
+        if i.dtype != np.uint8 or j.dtype != np.uint8:
+            raise ValueError(
+                f"Image dtype must be np.uint8, i: {i.dtype} j: {j.dtype}"
+            )
+
+        if self.bins is not None:
+            i = self.binarize(i, self.max_value, self.bins)
+            j = self.binarize(j, self.max_value, self.bins)
+
         blocks = int(max(i.max(), j.max())) + 1
-        self.i_flat[:] = i.flatten()
-        self.j_flat[:] = j.flatten()
+        self.i_flat = cp.asarray(i.flatten())
+        self.j_flat = cp.asarray(j.flatten())
         self.glcm[:] = 0
         self.features[:] = 0
 

@@ -9,24 +9,29 @@ from tests.unit_tests import glcm_expected
 @pytest.mark.parametrize(
     "i",
     [
-        np.asarray([0, 0, 0, 0], dtype=np.uint8),
-        np.asarray([1, 1, 1, 1], dtype=np.uint8),
-        np.asarray([255, 255, 255, 255], dtype=np.uint8),
-        np.asarray([0, 1, 254, 255], dtype=np.uint8),
+        np.asarray([0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.uint8),
+        np.asarray([1, 1, 1, 1, 1, 1, 1, 1, 1], dtype=np.uint8),
+        np.asarray([127,] * 9, dtype=np.uint8),
+        np.asarray([128,] * 9, dtype=np.uint8),
+        np.asarray([255, 255, 255, 255, 255, 255, 255, 255, 255], dtype=np.uint8),
+        # np.asarray([0, 1, 254, 255, 255, 255, 255, 255, 255], dtype=np.uint8),
     ]
 )
 @pytest.mark.parametrize(
     "j",
     [
-        np.asarray([0, 0, 0, 0], dtype=np.uint8),
-        np.asarray([1, 1, 1, 1], dtype=np.uint8),
-        np.asarray([255, 255, 255, 255], dtype=np.uint8),
-        np.asarray([0, 1, 254, 255], dtype=np.uint8),
+        # np.asarray([0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.uint8),
+        np.asarray([0,] * 9, dtype=np.uint8),
+        np.asarray([1,] * 9, dtype=np.uint8),
+        np.asarray([2,] * 9, dtype=np.uint8),
+        np.asarray([254,] * 9, dtype=np.uint8),
+        np.asarray([255,] * 9, dtype=np.uint8),
+        # np.asarray([255, 255, 255, 255, 255, 255, 255, 255, 255], dtype=np.uint8),
+        np.asarray([0, 1, 254, 255, 255, 255, 255, 255, 255], dtype=np.uint8),
     ]
 )
 def test_glcm(i, j):
-    g = GLCM()._from_windows(cp.asarray(i),
-                             cp.asarray(j))
+    g = GLCM(radius=1)._from_windows(cp.asarray(i), cp.asarray(j))
     actual = dict(
         homogeneity=float(g[..., GLCM.HOMOGENEITY].sum()),
         contrast=float(g[..., GLCM.CONTRAST].sum()),
@@ -39,5 +44,5 @@ def test_glcm(i, j):
     )
 
     expected = glcm_expected(i, j)
-    assert actual == pytest.approx(expected)
+    assert actual == pytest.approx(expected, abs=1e-2)
 

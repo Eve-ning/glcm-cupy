@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import os
 from dataclasses import dataclass
 
@@ -18,6 +19,8 @@ MAX_THREADS = 512  # Lowest Maximum supported threads.
 
 NO_OF_FEATURES = 8
 
+PARTITION_SIZE = 10000
+
 
 @dataclass
 class GLCM:
@@ -34,7 +37,7 @@ class GLCM:
     max_value: int = MAX_VALUE_SUPPORTED
     step_size: int = 1
     radius: int = 2
-    bins: int | None = None
+    bins: int = 256
 
     threads = MAX_VALUE_SUPPORTED + 1
 
@@ -66,15 +69,14 @@ class GLCM:
                 f"Max value {self.max_value} should be in [1, {MAX_VALUE_SUPPORTED}]")
         if not 0 <= self.radius <= MAX_RADIUS_SUPPORTED:
             f"Radius {self.radius} should be in [0, {MAX_RADIUS_SUPPORTED}]"
-        if self.bins is not None and \
-                not (2 <= self.bins <= MAX_VALUE_SUPPORTED):
+        if not (2 <= self.bins <= MAX_VALUE_SUPPORTED + 1):
             raise ValueError(
-                f"Bins {self.bins} should be in [2, {MAX_RADIUS_SUPPORTED}]. "
+                f"Bins {self.bins} should be in [2, {MAX_VALUE_SUPPORTED + 1}]. "
                 f"If bins == 256, just use None."
             )
         if not 1 <= self.step_size:
             raise ValueError(
-                f"Step Size {self.step_size} should be >= 1" \
+                f"Step Size {self.step_size} should be >= 1"
                 f"If bins == 256, just use None."
             )
 
@@ -117,6 +119,11 @@ class GLCM:
                      im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a single band image
 
+        Notes:
+            This will actively partition the processing by blocks
+            of PARTITION_SIZE.
+            This allows for a reduction in GLCM creation.
+
         Args:
             im: Image in np.ndarray. Cannot be in cp.ndarray
 
@@ -124,7 +131,6 @@ class GLCM:
             The GLCM Array 3dim with shape
                 rows, cols, feature
         """
-
 
         # This will yield a shape (window_i, window_j, row, col)
         # E.g. 100x100 with 5x5 window -> 96, 96, 5, 5
@@ -142,9 +148,19 @@ class GLCM:
         glcm_features = cp.zeros((windows_i.shape[0], NO_OF_FEATURES),
                                  dtype=cp.float32)
 
-        for e, (i, j) in tqdm(enumerate(zip(windows_i, windows_j)),
-                              total=len(windows_i)):
-            glcm_features[e] = self._from_windows(i, j)
+        windows_count = windows_i.shape[0]
+        glcm_ix = 0
+        for partition in range(math.ceil(windows_count / PARTITION_SIZE)):
+            for i, j in tqdm(
+                zip(windows_i[
+                    (start := partition * PARTITION_SIZE):
+                    (end := (partition + 1) * PARTITION_SIZE)
+                    ],
+                    windows_j[start:end]
+                    ),
+                total=len(windows_i[start:end])):
+                glcm_features[glcm_ix] = self._from_windows(i, j)
+                glcm_ix += 1
 
         return glcm_features.reshape(windows_ij.shape[0] - self.step_size,
                                      windows_ij.shape[1] - self.step_size,
@@ -168,14 +184,14 @@ class GLCM:
         """
 
         assert i.shape == j.shape, f"Shape of i {i.shape} != j {j.shape}"
+
+        i = self.binarize(i, self.max_value, self.bins)
+        j = self.binarize(j, self.max_value, self.bins)
+
         if i.dtype != np.uint8 or j.dtype != np.uint8:
             raise ValueError(
                 f"Image dtype must be np.uint8, i: {i.dtype} j: {j.dtype}"
             )
-
-        if self.bins is not None:
-            i = self.binarize(i, self.max_value, self.bins)
-            j = self.binarize(j, self.max_value, self.bins)
 
         blocks = int(max(i.max(), j.max())) + 1
         self.i_flat = cp.asarray(i.flatten())

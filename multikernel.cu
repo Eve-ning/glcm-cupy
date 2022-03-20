@@ -164,11 +164,11 @@ extern "C" {
 
         **/
 
-        const float wid = (float)(tid / glcmArea)
+        const int wid = tid / glcmArea;
         if (wid >= noOfWindows) return;
 
-        const float i = (float)((tid % glcmArea) / glcmSize)
-        const float j = (float)((tid % glcmArea) % glcmSize)
+        const float i = (float)((tid % glcmArea) / glcmSize);
+        const float j = (float)((tid % glcmArea) % glcmSize);
 
         float p = (float)(g[tid]) / noOfValues;
 
@@ -221,6 +221,7 @@ extern "C" {
         const unsigned char* g,
         const int glcmSize,
         const int noOfValues,
+        const int noOfWindows,
         float* features)
     {
         /**
@@ -230,15 +231,15 @@ extern "C" {
 
         See above.
         **/
+
         int blockId = blockIdx.y * gridDim.x + blockIdx.x;
         int tid = blockId * blockDim.x + threadIdx.x;
 
-        const float wid = (float)(tid / glcmArea)
-        if (wid >= noOfWindows) return;
-        const float i = (float)((tid % glcmArea) / glcmSize)
-        const float j = (float)((tid % glcmArea) % glcmSize)
-
         const int glcmArea = glcmSize * glcmSize;
+        const int wid = tid / glcmArea;
+        if (wid >= noOfWindows) return;
+        const float i = (float)((tid % glcmArea) / glcmSize);
+        const float j = (float)((tid % glcmArea) % glcmSize);
 
         float p = (float)(g[tid]) / noOfValues;
 
@@ -258,6 +259,7 @@ extern "C" {
         const unsigned char* g,
         const int glcmSize,
         const int noOfValues,
+        const int noOfWindows,
         float* features)
     {
         /**
@@ -271,17 +273,16 @@ extern "C" {
         int blockId = blockIdx.y * gridDim.x + blockIdx.x;
         int tid = blockId * blockDim.x + threadIdx.x;
 
-        const float wid = (float)(tid / glcmArea)
+        const int glcmArea = glcmSize * glcmSize;
+        const int wid = tid / glcmArea;
         if (wid >= noOfWindows) return;
 
         // As we invert Variance, they should never be 0.
         if (features[VAR_I + wid * NO_OF_FEATURES] == 0 ||
             features[VAR_J + wid * NO_OF_FEATURES] == 0) return;
 
-        const float i = (float)((tid % glcmArea) / glcmSize)
-        const float j = (float)((tid % glcmArea) % glcmSize)
-
-        const int glcmArea = glcmSize * glcmSize;
+        const float i = (float)((tid % glcmArea) / glcmSize);
+        const float j = (float)((tid % glcmArea) % glcmSize);
 
         float p = (float)(g[tid]) / noOfValues;
 

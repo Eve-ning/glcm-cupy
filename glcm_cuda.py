@@ -8,6 +8,7 @@ from typing import Tuple
 import cupy as cp
 import numpy as np
 from skimage.util import view_as_windows
+from tqdm import tqdm
 
 from multikernel import glcm_module
 
@@ -82,14 +83,14 @@ class GLCM:
                 f"If bins == 256, just use None."
             )
 
-        self.glcm_k0 = glcm_module.get_function('glcm_0')
-        self.glcm_k1 = glcm_module.get_function('glcm_1')
-        self.glcm_k2 = glcm_module.get_function('glcm_2')
+        self.glcm_0 = glcm_module.get_function('glcm_0')
+        self.glcm_1 = glcm_module.get_function('glcm_1')
+        self.glcm_2 = glcm_module.get_function('glcm_2')
 
         os.environ['CUPY_EXPERIMENTAL_SLICE_COPY'] = '1'
 
     @staticmethod
-    def binarize(im: np.ndarray, from_bins: int, to_bins: int):
+    def binarize(im: np.ndarray, from_bins: int, to_bins: int) -> np.ndarray:
         """ Binarize an image from a certain bin to another
 
         Args:
@@ -101,10 +102,10 @@ class GLCM:
             Binarized Image
 
         """
-        return (im / from_bins * to_bins).astype(np.uint8)
+        return (im.astype(np.float32) / from_bins * to_bins).astype(np.uint8)
 
     def from_3dimage(self,
-                     im: np.ndarray):
+                     im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a multi band image
 
         Args:
@@ -138,43 +139,36 @@ class GLCM:
                 rows, cols, feature
         """
 
-        # This will yield a shape (window_i, window_j, row, col)
-        # E.g. 100x100 with 5x5 window -> 96, 96, 5, 5
-        windows_ij = view_as_windows(im, (self.diameter, self.diameter))
+        windows_i, windows_j = \
+            self.make_windows(im, self.diameter, self.step_size)
 
-        # We flatten the cells as cell order is not important
-        windows_ij = windows_ij.reshape((*windows_ij.shape[:-2], -1))
-
-        # Yield Windows and flatten the windows
-        windows_i = windows_ij[:-self.step_size, :-self.step_size] \
-            .reshape((-1, windows_ij.shape[-1]))
-        windows_j = windows_ij[self.step_size:, self.step_size:] \
-            .reshape((-1, windows_ij.shape[-1]))
-
-        glcm_features = cp.zeros((windows_i.shape[0], NO_OF_FEATURES),
-                                 dtype=cp.float32)
+        glcm_features = cp.zeros(
+            (windows_i.shape[0], NO_OF_FEATURES),
+            dtype=cp.float32
+        )
 
         windows_count = windows_i.shape[0]
-        for partition in range(math.ceil(windows_count / PARTITION_SIZE)):
+        for partition in tqdm(range(math.ceil(windows_count / PARTITION_SIZE))):
             windows_part_i = windows_i[
                              (start := partition * PARTITION_SIZE):
                              (end := (partition + 1) * PARTITION_SIZE)
                              ]
             windows_part_j = windows_j[start:end]
-            self._from_partitioned_windows(
-                windows_part_i,
-                windows_part_j
-            )
+            glcm_features[start:start + windows_part_i.shape[0]] = \
+                self._from_windows(
+                    windows_part_i,
+                    windows_part_j
+                )
 
         return glcm_features.reshape(
-            windows_ij.shape[0] - self.step_size,
-            windows_ij.shape[1] - self.step_size,
+            im.shape[0] - self.radius * 2 - self.step_size,
+            im.shape[1] - self.radius * 2 - self.step_size,
             NO_OF_FEATURES
         )
 
-    def _from_partitioned_windows(self,
-                                  i: np.ndarray,
-                                  j: np.ndarray):
+    def _from_windows(self,
+                      i: np.ndarray,
+                      j: np.ndarray):
         """ Generate the GLCM from the I J Window
 
         Notes:
@@ -204,15 +198,10 @@ class GLCM:
                 f"Image dtype must be np.uint8,"
                 f" i: {i.dtype} j: {j.dtype}"
             )
-
-        glcm_0 = glcm_module.get_function('glcm_0')
-        glcm_1 = glcm_module.get_function('glcm_1')
-        glcm_2 = glcm_module.get_function('glcm_2')
-
         self.i_flat = cp.asarray(i)
         self.j_flat = cp.asarray(j)
         grid = self.calculate_grid(i.shape[0], self.bins)
-        glcm_0(
+        self.glcm_0(
             grid=grid,
             block=(MAX_THREADS,),
             args=(
@@ -225,7 +214,7 @@ class GLCM:
                 self.features
             )
         )
-        glcm_1(
+        self.glcm_1(
             grid=grid,
             block=(MAX_THREADS,),
             args=(
@@ -236,7 +225,7 @@ class GLCM:
                 self.features
             )
         )
-        glcm_2(
+        self.glcm_2(
             grid=grid,
             block=(MAX_THREADS,),
             args=(
@@ -269,6 +258,78 @@ class GLCM:
 
         """
         blocks_req_glcm_calc = window_count * glcm_size * glcm_size / thread_per_block
-        blocks_req_glcm_populate = glcm_size * window_count # Do we need to div by thread_per_block?
+        blocks_req_glcm_populate = glcm_size * window_count  # Do we need to div by thread_per_block?
         blocks_req = max(blocks_req_glcm_calc, blocks_req_glcm_populate)
         return (_ := int(blocks_req ** 0.5) + 1), _
+
+    @staticmethod
+    def make_windows(im: np.ndarray,
+                     diameter: int,
+                     step_size: int) -> Tuple[np.ndarray, np.ndarray]:
+        """ From a 2D image np.ndarray, convert it into GLCM IJ windows.
+
+        Examples:
+
+            Input 4 x 4 image. Radius = 1. Step Size = 1.
+
+            +-+-+-+-+         +-----+
+            |       |         | +---+-+
+            |       |  ---->  | |   | |
+            |       |         | |   | |
+            |       |         +-+---+ |
+            +-+-+-+-+           +-----+      flat
+              4 x 4           1 x 1 x 3 x 3  ----> 1 x 9
+                              +---+   +---+
+                              flat    flat
+
+            The output will be flattened on the x,y,
+
+            Input 5 x 5 image. Radius = 1. Step Size = 1.
+
+            1-2-+-+-+-+         1-----+    2-----+
+            3 4       |         | +---+-+  | +---+-+  3-----+    4-----+
+            |         |  ---->  | |   | |  | |   | |  | +---+-+  | +---+-+
+            |         |         | |   | |  | |   | |  | |   | |  | |   | |
+            |         |         +-+---+ |  +-+---+ |  | |   | |  | |   | |
+            |         |           +-----+    +-----+  +-+---+ |  +-+---+ |
+            +-+-+-+-+-+                                 +-----+    +-----+
+              4 x 4                         2 x 2 x 3 x 3 ----> 4 x 9
+                                            +---+   +---+ flat
+                                            flat    flat
+        Args:
+            im: Input Image
+            diameter: Diameter of Window
+            step_size: Step Size between ij pairs
+
+        Returns:
+            The windows I, J suitable for GLCM.
+            The first dimension: xy flat window indexes,
+            the last dimension: xy flat indexes within each window.
+
+        """
+        # This will yield a shape (window_i, window_j, row, col)
+        # E.g. 100x100 with 5x5 window -> 96, 96, 5, 5
+
+        if im.shape[0] - step_size - diameter + 1 <= 0 or \
+           im.shape[1] - step_size - diameter + 1 <= 0:
+            raise ValueError(
+                f"Step Size & Diameter exceeds size for windowing. "
+                f"im.shape[0] {im.shape[0]} "
+                f"- step_size {step_size} "
+                f"- diameter{diameter} + 1 <= 0 or"
+                f"im.shape[1] {im.shape[1]} "
+                f"- step_size {step_size} "
+                f"- diameter{diameter} + 1 <= 0 was not satisfied."
+            )
+
+
+        ij = view_as_windows(im, (diameter, diameter))
+        i: np.ndarray = ij[:-step_size, :-step_size]
+        j: np.ndarray = ij[step_size:, step_size:]
+
+        i = i.reshape((-1, i.shape[-2], i.shape[-1])) \
+            .reshape((i.shape[0] * i.shape[1], -1))
+        j = j.reshape((-1, j.shape[-2], j.shape[-1])) \
+            .reshape((j.shape[0] * j.shape[1], -1))
+
+        return i, j

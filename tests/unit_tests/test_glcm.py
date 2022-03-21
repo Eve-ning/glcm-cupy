@@ -32,19 +32,20 @@ from tests.unit_tests import glcm_expected
     ]
 )
 def test_glcm(i, j):
+    windows = 2
     g = GLCM(radius=1)._from_partitioned_windows(
-        cp.asarray(np.tile(i, (2, 1))),
-        cp.asarray(np.tile(j, (2, 1)))
+        cp.asarray(np.tile(i, (windows, 1))),
+        cp.asarray(np.tile(j, (windows, 1)))
     )
     actual = dict(
-        homogeneity=float(g[..., GLCM.HOMOGENEITY].sum()),
-        contrast=float(g[..., GLCM.CONTRAST].sum()),
-        asm=float(g[..., GLCM.ASM].sum()),
-        mean_i=float(g[..., GLCM.MEAN_I].sum()),
-        mean_j=float(g[..., GLCM.MEAN_J].sum()),
-        var_i=float(g[..., GLCM.VAR_I].sum()),
-        var_j=float(g[..., GLCM.VAR_J].sum()),
-        correlation=float(g[..., GLCM.CORRELATION].sum())
+        homogeneity=float(g[..., GLCM.HOMOGENEITY].sum() / windows),
+        contrast=float(g[..., GLCM.CONTRAST].sum() / windows),
+        asm=float(g[..., GLCM.ASM].sum() / windows),
+        mean_i=float(g[..., GLCM.MEAN_I].sum() / windows),
+        mean_j=float(g[..., GLCM.MEAN_J].sum() / windows),
+        var_i=float(g[..., GLCM.VAR_I].sum() / windows),
+        var_j=float(g[..., GLCM.VAR_J].sum() / windows),
+        correlation=float(g[..., GLCM.CORRELATION].sum()/ windows)
     )
 
     expected = glcm_expected(i, j)

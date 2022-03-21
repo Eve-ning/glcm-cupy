@@ -291,7 +291,7 @@ extern "C" {
         float p = (float)(g[tid]) / noOfValues;
 
         atomicAdd(
-            &features[CORRELATION],
+            &features[CORRELATION + wid * NO_OF_FEATURES],
             p * (i - features[MEAN_I + wid * NO_OF_FEATURES])
               * (j - features[MEAN_J + wid * NO_OF_FEATURES])
               * rsqrtf(features[VAR_I + wid * NO_OF_FEATURES]

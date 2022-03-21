@@ -3,15 +3,15 @@ from __future__ import annotations
 import math
 import os
 from dataclasses import dataclass
+from typing import Tuple
 
 import cupy as cp
 import numpy as np
 from skimage.util import view_as_windows
-from tqdm import tqdm
 
-from kernel import glcm_module
+from multikernel import glcm_module
 
-MAX_VALUE_SUPPORTED = 255
+MAX_VALUE_SUPPORTED = 256
 NO_OF_VALUES_SUPPORTED = 256 ** 2
 MAX_RADIUS_SUPPORTED = 127
 
@@ -34,9 +34,9 @@ class GLCM:
 
     """
 
-    max_value: int = MAX_VALUE_SUPPORTED
     step_size: int = 1
     radius: int = 2
+    bins_from: int = 256
     bins: int = 256
 
     threads = MAX_VALUE_SUPPORTED + 1
@@ -61,24 +61,30 @@ class GLCM:
     def __post_init__(self):
         self.i_flat = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
         self.j_flat = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
-        self.glcm = cp.zeros((self.max_value + 1) ** 2, dtype=cp.uint8)
-        self.features = cp.zeros(8, dtype=cp.float32)
+        self.glcm = cp.zeros(
+            (PARTITION_SIZE, self.bins, self.bins),
+            dtype=cp.uint8
+        )
+        self.features = cp.zeros(
+            (PARTITION_SIZE, 8),
+            dtype=cp.float32
+        )
 
-        if not 1 <= self.max_value <= MAX_VALUE_SUPPORTED:
+        if not 0 <= self.radius < MAX_RADIUS_SUPPORTED:
+            f"Radius {self.radius} should be in [0, {MAX_RADIUS_SUPPORTED})"
+        if not (2 <= self.bins <= MAX_VALUE_SUPPORTED):
             raise ValueError(
-                f"Max value {self.max_value} should be in [1, {MAX_VALUE_SUPPORTED}]")
-        if not 0 <= self.radius <= MAX_RADIUS_SUPPORTED:
-            f"Radius {self.radius} should be in [0, {MAX_RADIUS_SUPPORTED}]"
-        if not (2 <= self.bins <= MAX_VALUE_SUPPORTED + 1):
-            raise ValueError(
-                f"Bins {self.bins} should be in [2, {MAX_VALUE_SUPPORTED + 1}]. "
-                f"If bins == 256, just use None."
+                f"Bins {self.bins} should be in [2, {MAX_VALUE_SUPPORTED}]. "
             )
         if not 1 <= self.step_size:
             raise ValueError(
                 f"Step Size {self.step_size} should be >= 1"
                 f"If bins == 256, just use None."
             )
+
+        self.glcm_k0 = glcm_module.get_function('glcm_0')
+        self.glcm_k1 = glcm_module.get_function('glcm_1')
+        self.glcm_k2 = glcm_module.get_function('glcm_2')
 
         os.environ['CUPY_EXPERIMENTAL_SLICE_COPY'] = '1'
 
@@ -149,26 +155,26 @@ class GLCM:
                                  dtype=cp.float32)
 
         windows_count = windows_i.shape[0]
-        glcm_ix = 0
         for partition in range(math.ceil(windows_count / PARTITION_SIZE)):
-            for i, j in tqdm(
-                zip(windows_i[
-                    (start := partition * PARTITION_SIZE):
-                    (end := (partition + 1) * PARTITION_SIZE)
-                    ],
-                    windows_j[start:end]
-                    ),
-                total=len(windows_i[start:end])):
-                glcm_features[glcm_ix] = self._from_windows(i, j)
-                glcm_ix += 1
+            windows_part_i = windows_i[
+                             (start := partition * PARTITION_SIZE):
+                             (end := (partition + 1) * PARTITION_SIZE)
+                             ]
+            windows_part_j = windows_j[start:end]
+            self._from_partitioned_windows(
+                windows_part_i,
+                windows_part_j
+            )
 
-        return glcm_features.reshape(windows_ij.shape[0] - self.step_size,
-                                     windows_ij.shape[1] - self.step_size,
-                                     NO_OF_FEATURES)
+        return glcm_features.reshape(
+            windows_ij.shape[0] - self.step_size,
+            windows_ij.shape[1] - self.step_size,
+            NO_OF_FEATURES
+        )
 
-    def _from_windows(self,
-                      i: np.ndarray,
-                      j: np.ndarray, ) -> np.ndarray:
+    def _from_partitioned_windows(self,
+                                  i: np.ndarray,
+                                  j: np.ndarray):
         """ Generate the GLCM from the I J Window
 
         Notes:
@@ -183,49 +189,86 @@ class GLCM:
 
         """
 
-        assert i.shape == j.shape, f"Shape of i {i.shape} != j {j.shape}"
+        self.glcm[:] = 0
+        self.features[:] = 0
+        assert i.shape == j.shape, \
+            f"Shape of i {i.shape} != j {j.shape}"
 
-        i = self.binarize(i, self.max_value, self.bins)
-        j = self.binarize(j, self.max_value, self.bins)
+        i = self.binarize(i, self.bins_from, self.bins)
+        j = self.binarize(j, self.bins_from, self.bins)
+
+        no_of_windows = i.shape[0]
 
         if i.dtype != np.uint8 or j.dtype != np.uint8:
             raise ValueError(
-                f"Image dtype must be np.uint8, i: {i.dtype} j: {j.dtype}"
+                f"Image dtype must be np.uint8,"
+                f" i: {i.dtype} j: {j.dtype}"
             )
 
-        blocks = int(max(i.max(), j.max())) + 1
-        self.i_flat = cp.asarray(i.flatten())
-        self.j_flat = cp.asarray(j.flatten())
-        self.glcm[:] = 0
-        self.features[:] = 0
+        glcm_0 = glcm_module.get_function('glcm_0')
+        glcm_1 = glcm_module.get_function('glcm_1')
+        glcm_2 = glcm_module.get_function('glcm_2')
 
-        glcm_k0 = glcm_module.get_function('glcm_0')
-        glcm_k1 = glcm_module.get_function('glcm_1')
-        glcm_k2 = glcm_module.get_function('glcm_2')
-        glcm_k0(
-            grid=(blocks,),
-            block=(self.threads,),
+        self.i_flat = cp.asarray(i)
+        self.j_flat = cp.asarray(j)
+        grid = self.calculate_grid(i.shape[0], self.bins)
+        glcm_0(
+            grid=grid,
+            block=(MAX_THREADS,),
             args=(
-                self.i_flat, self.j_flat,
-                self.max_value, self.no_of_values,
-                self.glcm, self.features
+                self.i_flat,
+                self.j_flat,
+                self.bins,
+                self.no_of_values,
+                no_of_windows,
+                self.glcm,
+                self.features
             )
         )
-        glcm_k1(
-            grid=(blocks,),
-            block=(self.threads,),
+        glcm_1(
+            grid=grid,
+            block=(MAX_THREADS,),
             args=(
-                self.glcm, self.max_value,
-                self.no_of_values, self.features
+                self.glcm,
+                self.bins,
+                self.no_of_values,
+                no_of_windows,
+                self.features
             )
         )
-        glcm_k2(
-            grid=(blocks,),
-            block=(self.threads,),
+        glcm_2(
+            grid=grid,
+            block=(MAX_THREADS,),
             args=(
-                self.glcm, self.max_value,
-                self.no_of_values, self.features
+                self.glcm,
+                self.bins,
+                self.no_of_values,
+                no_of_windows,
+                self.features
             )
         )
 
-        return self.features
+        return self.features[:no_of_windows]
+
+    @staticmethod
+    def calculate_grid(
+        window_count: int,
+        glcm_size: int,
+        thread_per_block: int = MAX_THREADS
+    ) -> Tuple[int, int]:
+        """ Calculates the required grid size
+
+        Notes:
+            There's 2 points where the number of threads
+
+        Args:
+            window_count:
+            glcm_size:
+
+        Returns:
+
+        """
+        blocks_req_glcm_calc = window_count * glcm_size * glcm_size / thread_per_block
+        blocks_req_glcm_populate = glcm_size * window_count # Do we need to div by thread_per_block?
+        blocks_req = max(blocks_req_glcm_calc, blocks_req_glcm_populate)
+        return (_ := int(blocks_req ** 0.5) + 1), _

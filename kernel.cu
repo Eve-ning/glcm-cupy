@@ -1,7 +1,3 @@
-import cupy as cp
-
-glcm_module = cp.RawModule(
-    code=r"""
 #define HOMOGENEITY 0
 #define CONTRAST 1
 #define ASM 2
@@ -315,5 +311,3 @@ extern "C" {
         );
     }
 }
-"""
-)

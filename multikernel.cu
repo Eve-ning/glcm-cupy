@@ -140,7 +140,15 @@ extern "C" {
                 wid_image * glcmArea
                 ]), x);
         }
-        __syncthreads();
+    }
+
+    __global__ void glcm_1(
+        const unsigned char* g,
+        const int glcmSize,
+        const int noOfValues,
+        const int noOfWindows,
+        float* features)
+    {
 
         /**
         ===================================
@@ -164,6 +172,10 @@ extern "C" {
 
         **/
 
+        int blockId = blockIdx.y * gridDim.x + blockIdx.x;
+        int tid = blockId * blockDim.x + threadIdx.x;
+
+        const int glcmArea = glcmSize * glcmSize;
         const int wid = tid / glcmArea;
         if (wid >= noOfWindows) return;
 
@@ -192,6 +204,9 @@ extern "C" {
         +----------------+ +----------------+ +----------------+
         Window 0           Window 1           Window 2           ...
         **/
+
+        __syncthreads();
+
         atomicAdd(
             &features[HOMOGENEITY + wid * NO_OF_FEATURES],
             p / (1 + powf((i - j), 2.0f))
@@ -217,7 +232,7 @@ extern "C" {
             p * j
         );
     }
-    __global__ void glcm_1(
+    __global__ void glcm_2(
         const unsigned char* g,
         const int glcmSize,
         const int noOfValues,
@@ -238,6 +253,7 @@ extern "C" {
         const int glcmArea = glcmSize * glcmSize;
         const int wid = tid / glcmArea;
         if (wid >= noOfWindows) return;
+
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
@@ -255,7 +271,7 @@ extern "C" {
 
     }
 
-    __global__ void glcm_2(
+    __global__ void glcm_3(
         const unsigned char* g,
         const int glcmSize,
         const int noOfValues,
@@ -287,7 +303,7 @@ extern "C" {
         float p = (float)(g[tid]) / noOfValues;
 
         atomicAdd(
-            &features[CORRELATION],
+            &features[CORRELATION + wid * NO_OF_FEATURES],
             p * (i - features[MEAN_I + wid * NO_OF_FEATURES])
               * (j - features[MEAN_J + wid * NO_OF_FEATURES])
               * rsqrtf(features[VAR_I + wid * NO_OF_FEATURES]

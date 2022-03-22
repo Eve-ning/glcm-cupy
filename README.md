@@ -6,14 +6,15 @@ This directly utilizes CUDA to speed up the processing of GLCM.
 
 ## Notes
 
-### Why is the kernel split into 3?
+### Why is the kernel split into 4?
 
-The kernel is split into 3 sections
-1) GLCM Creation & the Features (ASM, Contrast, Homogeneity, GLCM Mean I, GLCM Mean J)
-2) Features (GLCM Variance I, GLCM Variance J)
-3) Features (GLCM Correlation)
+The kernel is split into 4 sections
+1) GLCM Creation 
+2) Features (ASM, Contrast, Homogeneity, GLCM Mean I, GLCM Mean J)
+3) Features (GLCM Variance I, GLCM Variance J)
+4) Features (GLCM Correlation)
 
-The reason why it's split is due to (2) being reliant on (1), and (3) on (2).
+The reason why it's split is due to (2) being reliant on (1), and (3) on (2), ... .
 
 There are some other solutions tried
 

@@ -6,22 +6,27 @@ import os
 import numpy as np
 import cupy as cp
 import pytest
+from PIL import Image
 from cupyx.profiler import benchmark
 
+from definitions import ROOT_DIR
 from glcm_cuda import GLCM
 
 TEST_SIZE = 25
 
 
 @pytest.fixture()
-def np_array_3d():
+def ar_3d():
     return np.random.randint(0, 256, (TEST_SIZE, TEST_SIZE, 3), dtype=np.uint8)
 
+@pytest.fixture()
+def ar_img_3d():
+    return Image.open(f"{ROOT_DIR}/data/image.jpg")
 
 @pytest.fixture()
-def np_array_2d():
+def ar_2d():
     return np.random.randint(0, 256, (TEST_SIZE, TEST_SIZE), dtype=np.uint8)
 
 @pytest.fixture()
-def np_array_1d():
+def ar_1d():
     return np.random.randint(0, 256, (TEST_SIZE, ), dtype=np.uint8)

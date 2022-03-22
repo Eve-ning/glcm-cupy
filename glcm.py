@@ -10,7 +10,7 @@ import numpy as np
 from skimage.util import view_as_windows
 from tqdm import tqdm
 
-from multikernel import glcm_module
+from kernel import glcm_module
 
 MAX_VALUE_SUPPORTED = 256
 NO_OF_VALUES_SUPPORTED = 256 ** 2
@@ -274,15 +274,13 @@ class GLCM:
         Notes:
             There's 2 points where the number of threads
 
-        Args:
-            window_count:
-            glcm_size:
-
         Returns:
+            The optimal minimum grid shape for GLCM
 
         """
         blocks_req_glcm_calc = window_count * glcm_size * glcm_size / thread_per_block
-        blocks_req_glcm_populate = glcm_size * window_count  # Do we need to div by thread_per_block?
+        # TODO: Do we need to div by thread_per_block?
+        blocks_req_glcm_populate = glcm_size * window_count
         blocks_req = max(blocks_req_glcm_calc, blocks_req_glcm_populate)
         return (_ := int(blocks_req ** 0.5) + 1), _
 

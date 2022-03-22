@@ -62,14 +62,6 @@ class GLCM:
     def __post_init__(self):
         self.i_flat = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
         self.j_flat = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
-        self.glcm = cp.zeros(
-            (PARTITION_SIZE, self.bins, self.bins),
-            dtype=cp.uint8
-        )
-        self.features = cp.zeros(
-            (PARTITION_SIZE, 8),
-            dtype=cp.float32
-        )
 
         if not 0 <= self.radius < MAX_RADIUS_SUPPORTED:
             f"Radius {self.radius} should be in [0, {MAX_RADIUS_SUPPORTED})"
@@ -86,6 +78,7 @@ class GLCM:
         self.glcm_0 = glcm_module.get_function('glcm_0')
         self.glcm_1 = glcm_module.get_function('glcm_1')
         self.glcm_2 = glcm_module.get_function('glcm_2')
+        self.glcm_3 = glcm_module.get_function('glcm_3')
 
         os.environ['CUPY_EXPERIMENTAL_SLICE_COPY'] = '1'
 
@@ -182,9 +175,14 @@ class GLCM:
             The GLCM array, of size (8,)
 
         """
-
-        self.glcm[:] = 0
-        self.features[:] = 0
+        self.glcm = cp.zeros(
+            (i.shape[0], self.bins, self.bins),
+            dtype=cp.uint8
+        )
+        self.features = cp.zeros(
+            (i.shape[0], 8),
+            dtype=cp.float32
+        )
         assert i.shape == j.shape, \
             f"Shape of i {i.shape} != j {j.shape}"
 
@@ -201,41 +199,55 @@ class GLCM:
         self.i_flat = cp.asarray(i)
         self.j_flat = cp.asarray(j)
         grid = self.calculate_grid(i.shape[0], self.bins)
-        self.glcm_0(
-            grid=grid,
-            block=(MAX_THREADS,),
-            args=(
-                self.i_flat,
-                self.j_flat,
-                self.bins,
-                self.no_of_values,
-                no_of_windows,
-                self.glcm,
-                self.features
+        with cp.cuda.Device() as dev:
+            dev.use()
+            self.glcm_0(
+                grid=grid,
+                block=(MAX_THREADS,),
+                args=(
+                    self.i_flat,
+                    self.j_flat,
+                    self.bins,
+                    self.no_of_values,
+                    no_of_windows,
+                    self.glcm,
+                    self.features
+                )
             )
-        )
-        self.glcm_1(
-            grid=grid,
-            block=(MAX_THREADS,),
-            args=(
-                self.glcm,
-                self.bins,
-                self.no_of_values,
-                no_of_windows,
-                self.features
+            self.glcm_1(
+                grid=grid,
+                block=(MAX_THREADS,),
+                args=(
+                    self.glcm,
+                    self.bins,
+                    self.no_of_values,
+                    no_of_windows,
+                    self.features
+                )
             )
-        )
-        self.glcm_2(
-            grid=grid,
-            block=(MAX_THREADS,),
-            args=(
-                self.glcm,
-                self.bins,
-                self.no_of_values,
-                no_of_windows,
-                self.features
+            self.glcm_2(
+                grid=grid,
+                block=(MAX_THREADS,),
+                args=(
+                    self.glcm,
+                    self.bins,
+                    self.no_of_values,
+                    no_of_windows,
+                    self.features
+                )
             )
-        )
+            self.glcm_3(
+                grid=grid,
+                block=(MAX_THREADS,),
+                args=(
+                    self.glcm,
+                    self.bins,
+                    self.no_of_values,
+                    no_of_windows,
+                    self.features
+                )
+            )
+            dev.synchronize()
 
         return self.features[:no_of_windows]
 

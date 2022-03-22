@@ -141,7 +141,8 @@ class GLCM:
         )
 
         windows_count = windows_i.shape[0]
-        for partition in tqdm(range(math.ceil(windows_count / PARTITION_SIZE))):
+        for partition in tqdm(
+            range(math.ceil(windows_count / PARTITION_SIZE))):
             windows_part_i = windows_i[
                              (start := partition * PARTITION_SIZE):
                              (end := (partition + 1) * PARTITION_SIZE)
@@ -164,6 +165,12 @@ class GLCM:
                       j: np.ndarray):
         """ Generate the GLCM from the I J Window
 
+        Examples:
+
+            >>> ar_0 = np.random.randint(0, 100, 10, dtype=np.uint8)
+            >>> ar_1 = np.random.randint(0, 100, 10, dtype=np.uint8)
+            >>> g = GLCM()._from_windows(ar_0[...,np.newaxis], ar_1[...,np.newaxis])
+
         Notes:
             i must be the same shape as j
 
@@ -175,6 +182,11 @@ class GLCM:
             The GLCM array, of size (8,)
 
         """
+        assert i.ndim == 2 and j.ndim == 2, \
+            "The input dimensions must be 2. " \
+            "The 1st Dim is the partitioned windows flattened, " \
+            "The 2nd is the window cells flattened"
+
         self.glcm = cp.zeros(
             (i.shape[0], self.bins, self.bins),
             dtype=cp.uint8
@@ -323,7 +335,7 @@ class GLCM:
         # E.g. 100x100 with 5x5 window -> 96, 96, 5, 5
 
         if im.shape[0] - step_size - diameter + 1 <= 0 or \
-           im.shape[1] - step_size - diameter + 1 <= 0:
+            im.shape[1] - step_size - diameter + 1 <= 0:
             raise ValueError(
                 f"Step Size & Diameter exceeds size for windowing. "
                 f"im.shape[0] {im.shape[0]} "
@@ -333,7 +345,6 @@ class GLCM:
                 f"- step_size {step_size} "
                 f"- diameter{diameter} + 1 <= 0 was not satisfied."
             )
-
 
         ij = view_as_windows(im, (diameter, diameter))
         i: np.ndarray = ij[:-step_size, :-step_size]

@@ -1,3 +1,3 @@
-from .glcm_expected import glcm_expected
+from .glcm_py import glcm_py
 
-__all__ = ['glcm_expected']
+__all__ = ['glcm_py']

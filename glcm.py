@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-import os
+import os 
 from dataclasses import dataclass
 from typing import Tuple
 
@@ -20,6 +20,7 @@ MAX_THREADS = 512  # Lowest Maximum supported threads.
 
 NO_OF_FEATURES = 8
 
+# For a 10000 x 256 x 256 GLCM, you need ~ 600MB of memory.
 PARTITION_SIZE = 10000
 
 
@@ -75,10 +76,14 @@ class GLCM:
                 f"If bins == 256, just use None."
             )
 
-        self.glcm_0 = glcm_module.get_function('glcm_0')
-        self.glcm_1 = glcm_module.get_function('glcm_1')
-        self.glcm_2 = glcm_module.get_function('glcm_2')
-        self.glcm_3 = glcm_module.get_function('glcm_3')
+        self.glcm_create_kernel = \
+            glcm_module.get_function('glcmCreateKernel')
+        self.glcm_feature_kernel_0 = \
+            glcm_module.get_function('glcmFeatureKernel0')
+        self.glcm_feature_kernel_1 = \
+            glcm_module.get_function('glcmFeatureKernel1')
+        self.glcm_feature_kernel_2 = \
+            glcm_module.get_function('glcmFeatureKernel2')
 
         os.environ['CUPY_EXPERIMENTAL_SLICE_COPY'] = '1'
 
@@ -211,56 +216,27 @@ class GLCM:
         self.i_flat = cp.asarray(i)
         self.j_flat = cp.asarray(j)
         grid = self.calculate_grid(i.shape[0], self.bins)
-        with cp.cuda.Device() as dev:
-            dev.use()
-            self.glcm_0(
-                grid=grid,
-                block=(MAX_THREADS,),
-                args=(
-                    self.i_flat,
-                    self.j_flat,
-                    self.bins,
-                    self.no_of_values,
-                    no_of_windows,
-                    self.glcm,
-                    self.features
-                )
-            )
-            self.glcm_1(
-                grid=grid,
-                block=(MAX_THREADS,),
-                args=(
-                    self.glcm,
-                    self.bins,
-                    self.no_of_values,
-                    no_of_windows,
-                    self.features
-                )
-            )
-            self.glcm_2(
-                grid=grid,
-                block=(MAX_THREADS,),
-                args=(
-                    self.glcm,
-                    self.bins,
-                    self.no_of_values,
-                    no_of_windows,
-                    self.features
-                )
-            )
-            self.glcm_3(
-                grid=grid,
-                block=(MAX_THREADS,),
-                args=(
-                    self.glcm,
-                    self.bins,
-                    self.no_of_values,
-                    no_of_windows,
-                    self.features
-                )
-            )
-            dev.synchronize()
 
+        self.glcm_create_kernel(
+            grid=grid,
+            block=(MAX_THREADS,),
+            args=(
+                self.i_flat,
+                self.j_flat,
+                self.bins,
+                self.no_of_values,
+                no_of_windows,
+                self.glcm,
+                self.features
+            )
+        )
+        feature_args = dict(
+            grid=grid, block=(MAX_THREADS,),
+            args=(self.glcm, self.bins, self.no_of_values, no_of_windows,
+                  self.features))
+        self.glcm_feature_kernel_0(**feature_args)
+        self.glcm_feature_kernel_1(**feature_args)
+        self.glcm_feature_kernel_2(**feature_args)
         return self.features[:no_of_windows]
 
     @staticmethod

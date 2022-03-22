@@ -6,7 +6,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from glcm_cuda import GLCM, PARTITION_SIZE
-from tests.unit_tests import glcm_expected
+from tests.unit_tests import glcm_py
 
 
 @pytest.mark.parametrize(
@@ -28,11 +28,14 @@ from tests.unit_tests import glcm_expected
     ]
 )
 def test_glcm_from_windows(i, j):
+    # We only test with 2 windows to reduce time taken.
     windows = 2
     g = GLCM(radius=1)._from_windows(
         cp.asarray(np.tile(i, (windows, 1))),
         cp.asarray(np.tile(j, (windows, 1)))
     )
+
+    # The sum of the values, since tiled, will be scaled by no of windows.
     actual = dict(
         homogeneity=float(g[..., GLCM.HOMOGENEITY].sum() / windows),
         contrast=float(g[..., GLCM.CONTRAST].sum() / windows),
@@ -44,7 +47,7 @@ def test_glcm_from_windows(i, j):
         correlation=float(g[..., GLCM.CORRELATION].sum() / windows)
     )
 
-    expected = glcm_expected(i, j)
+    expected = glcm_py(i, j)
     assert actual == pytest.approx(expected)
 
 
@@ -86,16 +89,22 @@ def test_glcm_make_windows(
     x_cells = radius * 2 + 1
 
     if y_windows <= 0 or x_windows <= 0:
+        # If the make windows is invalid, we assert that it throws an error
         with pytest.raises(ValueError):
             GLCM.make_windows(im, radius * 2 + 1, step_size)
     else:
+        # Else, we assert the correct shape returns
         windows = GLCM.make_windows(im, radius * 2 + 1, step_size)
         assert (x_windows * y_windows, x_cells * y_cells) == windows[0].shape
 
 
 @pytest.mark.parametrize(
     "windows",
-    [1, 10000, 12000, 100000, 125000]
+    [1,
+     PARTITION_SIZE,
+     PARTITION_SIZE + 1,
+     PARTITION_SIZE * 2,
+     PARTITION_SIZE * 2 + 1]
 )
 def test_glcm_partition(
     windows: int,
@@ -116,13 +125,11 @@ def test_glcm_partition(
     WINDOW_SIZE = 1
 
     class MockFeatures:
+        """ Mocks the np.ndarray to do nothing """
         def reshape(self, *args, **kwargs): ...
-
         def __setitem__(self, key, value): ...
 
-    glcm_features = mocker.patch('cupy.zeros',
-                                 return_value=MockFeatures())
-    glcm_features.reshape = lambda *args: []
+    mocker.patch('cupy.zeros', return_value=MockFeatures())
     mocker.patch.object(
         glcm_instance, 'make_windows',
         return_value=(

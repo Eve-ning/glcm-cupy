@@ -1,7 +1,6 @@
 import numpy as np
-import pytest
 
-from glcm_cuda import GLCM
+from glcm import GLCM
 
 
 def test_from_3dimage(ar_3d):

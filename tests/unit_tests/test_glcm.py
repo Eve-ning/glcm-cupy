@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 
-from glcm_cuda import GLCM, PARTITION_SIZE
+from glcm import GLCM, PARTITION_SIZE
 from tests.unit_tests import glcm_py
 
 
@@ -126,7 +126,9 @@ def test_glcm_partition(
 
     class MockFeatures:
         """ Mocks the np.ndarray to do nothing """
+
         def reshape(self, *args, **kwargs): ...
+
         def __setitem__(self, key, value): ...
 
     mocker.patch('cupy.zeros', return_value=MockFeatures())

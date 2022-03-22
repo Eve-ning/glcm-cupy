@@ -39,13 +39,99 @@ glcm_module = cp.RawModule(
                 return (char) (masked_old >> 8 * long_address_modulo);
             }
         }
-        __global__ void glcm_0(
-            const unsigned char* window_i,
-            const unsigned char* window_j,
-            const int maxValue,
-            const int noOfValues,
-            unsigned char* g,
-            float* features) 
+    }
+    __global__ void glcmCreateKernel(
+        const unsigned char* windows_i,
+        const unsigned char* windows_j,
+        const int glcmSize,
+        const int noOfValues,
+        const int noOfWindows,
+        unsigned char* g,
+        float* features)
+    {
+        /**
+        =====================================
+        Definitions
+        =====================================
+
+        windows_i, windows_j = 2D Array. Shape: (noOfValues, noOfWindows)
+
+        It should be an array of windows to be used
+
+        Take for example the following input:
+
+            +---------+  +---------+  +---------+  +---------+
+            |         |  |         |  |         |  |         |
+            |  3 x 3  |  |         |  |         |  |         |
+            |         |  |         |  |         |  |         |
+            +---------+  +---------+  +---------+  +---------+
+
+            +---------+  +---------+  +---------+  +---------+
+            |         |  |         |  |         |  |         |
+            |         |  |         |  |         |  |         |
+            |         |  |         |  |         |  |         |
+            +---------+  +---------+  +---------+  +---------+
+
+            We don't require the y dimensions. Thus, [3 x 3] x [4 x 2] = 9 x 8
+
+            windows_i will thus be 9 x 8 large. Though in CuPy, we simply flatten everything anyways.m
+            It's a simpler way to represent how it works.
+
+        glcmSize = The maximum value of the input + 1, the maximum GLCM size.
+
+        noOfValues = Number of values per window. In the above, it's 3 x 3 = 9
+
+        noOfWindows = Number of windows in total. In the above, it's 4 x 2 = 8
+
+        g = Empty initialized GLCM array. Shape of (glcmSize, glcmSize, noOfWindows)
+
+        features = Empty initialized feature array. Shape of (8, noOfWindows)
+
+        **/
+
+        /**
+        =====================================
+        Thread ID Calculation
+        =====================================
+        We are not interested in matching the block/thread dim to
+        any dims of the input. We just want to ensure that we have
+        enough threads in total.
+        **/
+
+        int blockId = blockIdx.y * gridDim.x + blockIdx.x;
+        int tid = blockId * blockDim.x + threadIdx.x;
+
+        /**
+        =====================================
+        TID to respective windows
+        =====================================
+        TID is 1D, we need to partition them to their windows
+        Each window area is `noOfValues` == diameter ^ 2
+        We have total of `noOfWindows` number of windows
+        Thus, we simply take `wid = tid / noOfValues`
+        WID: Window ID
+
+        Note integer division
+        Example:
+            1  / 50 = 0
+            49 / 50 = 0
+            50 / 50 = 1
+            51 / 50 = 1
+
+        If we have `noOfWindows == 4`, we reject any results >= 4
+        Example:
+            1   / 50 = 0 (Accept)
+            199 / 50 = 3 (Accept)
+            200 / 50 = 4 (Reject)
+            201 / 50 = 4 (Reject)
+
+        **/
+
+        const int glcmArea = glcmSize * glcmSize;
+
+        int wid_image = tid / noOfValues;
+        const static unsigned char x = 1;
+        if (tid < noOfValues * noOfWindows)
         {
             int tid = threadIdx.x + blockIdx.x * blockDim.x;
             unsigned char x = 1;
@@ -105,27 +191,165 @@ glcm_module = cp.RawModule(
                 p * j
             );
         }
-        __global__ void glcm_1(
-            const unsigned char* g,
-            const int maxValue,
-            const int noOfValues,
-            float* features) 
-        {
-            int tid = threadIdx.x + blockIdx.x * blockDim.x;
-            const float i = (float)(tid / (maxValue + 1));
-            const float j = (float)(tid % (maxValue + 1));
-            if (i >= (maxValue + 1 - 0.5)) return;
-            if (j >= (maxValue + 1 - 0.5)) return;
-            float p = (float)(g[tid]) / noOfValues;
-            atomicAdd(
-                &features[VAR_I], 
-                p * powf((i - features[MEAN_I]), 2.0f)
-            );
+    }
 
-            atomicAdd(
-                &features[VAR_J], 
-                p * powf((j - features[MEAN_J]), 2.0f)
-            );
+    __global__ void glcmFeatureKernel0(
+        const unsigned char* g,
+        const int glcmSize,
+        const int noOfValues,
+        const int noOfWindows,
+        float* features)
+    {
+
+        /**
+        ===================================
+        TID to respective GLCM i, j, window
+        ===================================
+
+        To calculate the window for the tid, we simply divide by the max i & j
+
+        +---------+ +---------+ +---------+
+        |         | |         | |         |
+        |  i x j  | |         | |         |
+        |         | |         | |         |
+        +---------+ +---------+ +---------+
+        Window 0    Window 1    Window 2    ...
+
+        The area for each GLCM window is glcmSize * glcmSize
+
+        wid = tid / glcmArea
+        i = (tid % glcmArea) / glcmSize
+        j = (tid % glcmArea) % glcmSize
+
+        **/
+
+        int blockId = blockIdx.y * gridDim.x + blockIdx.x;
+        int tid = blockId * blockDim.x + threadIdx.x;
+
+        const int glcmArea = glcmSize * glcmSize;
+        const int wid = tid / glcmArea;
+        if (wid >= noOfWindows) return;
+
+        const float i = (float)((tid % glcmArea) / glcmSize);
+        const float j = (float)((tid % glcmArea) % glcmSize);
+
+        float p = (float)(g[tid]) / noOfValues;
+
+        /**
+        =====================================
+        Feature Calculation
+        =====================================
+
+        For each feature, we require a wid * NO_OF_FEATURES offset.
+
+        8 x 1 for each GLCM
+        +----------------+ +----------------+ +----------------+
+        | HOMOGENEITY    | | HOMOGENEITY    | | HOMOGENEITY    |
+        | CONTRAST       | | CONTRAST       | | CONTRAST       |
+        | ASM            | | ASM            | | ASM            |
+        | MEAN_I         | | MEAN_I         | | MEAN_I         |
+        | MEAN_J         | | MEAN_J         | | MEAN_J         |
+        | VAR_I          | | VAR_I          | | VAR_I          |
+        | VAR_J          | | VAR_J          | | VAR_J          |
+        | CORRELATION    | | CORRELATION    | | CORRELATION    |
+        +----------------+ +----------------+ +----------------+
+        Window 0           Window 1           Window 2           ...
+        **/
+
+        __syncthreads();
+
+        atomicAdd(
+            &features[HOMOGENEITY + wid * NO_OF_FEATURES],
+            p / (1 + powf((i - j), 2.0f))
+        );
+
+        atomicAdd(
+            &features[CONTRAST + wid * NO_OF_FEATURES],
+            p * powf(i - j, 2.0f)
+        );
+
+        atomicAdd(
+            &features[ASM + wid * NO_OF_FEATURES],
+            powf(p, 2.0f)
+        );
+
+        atomicAdd(
+            &features[MEAN_I + wid * NO_OF_FEATURES],
+            p * i
+        );
+
+        atomicAdd(
+            &features[MEAN_J + wid * NO_OF_FEATURES],
+            p * j
+        );
+    }
+    __global__ void glcmFeatureKernel1(
+        const unsigned char* g,
+        const int glcmSize,
+        const int noOfValues,
+        const int noOfWindows,
+        float* features)
+    {
+        /**
+        =====================================
+        Feature Calculation
+        =====================================
+
+        See above.
+        **/
+
+        int blockId = blockIdx.y * gridDim.x + blockIdx.x;
+        int tid = blockId * blockDim.x + threadIdx.x;
+
+        const int glcmArea = glcmSize * glcmSize;
+        const int wid = tid / glcmArea;
+        if (wid >= noOfWindows) return;
+
+        const float i = (float)((tid % glcmArea) / glcmSize);
+        const float j = (float)((tid % glcmArea) % glcmSize);
+
+        float p = (float)(g[tid]) / noOfValues;
+
+        atomicAdd(
+            &features[VAR_I + wid * NO_OF_FEATURES],
+            p * powf((i - features[MEAN_I + wid * NO_OF_FEATURES]), 2.0f)
+        );
+
+        atomicAdd(
+            &features[VAR_J + wid * NO_OF_FEATURES],
+            p * powf((j - features[MEAN_J + wid * NO_OF_FEATURES]), 2.0f)
+        );
+
+    }
+
+    __global__ void glcmFeatureKernel2(
+        const unsigned char* g,
+        const int glcmSize,
+        const int noOfValues,
+        const int noOfWindows,
+        float* features)
+    {
+        /**
+        =====================================
+        Feature Calculation
+        =====================================
+
+        See above.
+        **/
+
+        int blockId = blockIdx.y * gridDim.x + blockIdx.x;
+        int tid = blockId * blockDim.x + threadIdx.x;
+
+        const int glcmArea = glcmSize * glcmSize;
+        const int wid = tid / glcmArea;
+        if (wid >= noOfWindows) return;
+
+        // As we invert Variance, they should never be 0.
+        if (features[VAR_I + wid * NO_OF_FEATURES] == 0 ||
+            features[VAR_J + wid * NO_OF_FEATURES] == 0) return;
+
+        const float i = (float)((tid % glcmArea) / glcmSize);
+        const float j = (float)((tid % glcmArea) % glcmSize);
 
         }
 

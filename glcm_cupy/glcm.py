@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 import math
-from typing import Tuple
+from typing import Tuple, List
 
 import cupy as cp
 import numpy as np
-from skimage.util import view_as_windows
 from tqdm import tqdm
 
-from glcm_pycuda.conf import *
-from glcm_pycuda.kernel import glcm_module
+from glcm_cupy.conf import *
+from glcm_cupy.kernel import glcm_module
+from glcm_cupy.windowing import make_windows, im_shape_after_glcm
 
 
 class GLCM:
@@ -102,53 +102,61 @@ class GLCM:
         """
 
         if im.ndim != 2:
-            raise ValueError(
-                f"Image must be 2 dimensional. im.ndim={im.ndim}"
-            )
+            raise ValueError(f"Image must be 2 dimensional. "
+                             f"im.ndim={im.ndim}")
 
         # Both dims are xy flattened.
         # windows.shape == [window_ix, cell_ix]
-        windows_i, windows_j = \
-            self._make_windows(im, self.diameter, self.step_size)
+        dirs_ij = make_windows(im, self.radius, self.step_size)
+        dirs_ij: List[Tuple[np.ndarray, np.ndarray]]
+        glcm_features_dirs = []
 
-        windows_count = windows_i.shape[0]
+        # For each direction
+        for dir_ij in dirs_ij:
+            windows_i, windows_j = dir_ij
 
-        glcm_features = cp.zeros(
-            (windows_count, NO_OF_FEATURES),
-            dtype=cp.float32
-        )
+            windows_count = windows_i.shape[0]
+            glcm_features_dir = cp.zeros(
+                (windows_count, NO_OF_FEATURES),
+                dtype=cp.float32
+            )
 
-        # If 45000 windows, 10000 partition size,
-        # We have 5 partitions (10K, 10K, 10K, 10K, 5K)
-        partition_count = math.ceil(windows_count / MAX_PARTITION_SIZE)
+            # If 45000 windows, 10000 partition size,
+            # We have 5 partitions (10K, 10K, 10K, 10K, 5K)
+            partition_count = math.ceil(windows_count / MAX_PARTITION_SIZE)
 
-        for partition in tqdm(range(partition_count)):
-            with cp.cuda.Device() as dev:
-                # As above, we have an uneven partition
-                # Though [1,2,3][:5] == [1,2,3]
-                # This means windows_part_i will be correctly partitioned.
-                windows_part_i = windows_i[
-                                 (start := partition * MAX_PARTITION_SIZE):
-                                 (end := (partition + 1) * MAX_PARTITION_SIZE)
-                                 ]
-                windows_part_j = windows_j[start:end]
+            for partition in tqdm(range(partition_count)):
+                with cp.cuda.Device() as dev:
+                    # As above, we have an uneven partition
+                    # Though [1,2,3][:5] == [1,2,3]
+                    # This means windows_part_i will be correctly partitioned.
+                    part_i = windows_i[
+                             (start := partition * MAX_PARTITION_SIZE):
+                             (end := (partition + 1) * MAX_PARTITION_SIZE)
+                             ]
+                    part_j = windows_j[start:end]
 
-                # We don't need to figure out the leftover partition size
-                # We can simply yield the length of the leftover partition
-                windows_part_count = windows_part_i.shape[0]
+                    # We don't need to figure out the leftover partition size
+                    # We can simply yield the length of the leftover partition
+                    windows_part_count = part_i.shape[0]
 
-                glcm_features[start:start + windows_part_count] = \
-                    self._from_windows(
-                        windows_part_i,
-                        windows_part_j
-                    )
-                dev.synchronize()
+                    glcm_features_dir[start:start + windows_part_count] = \
+                        self._from_windows(
+                            part_i,
+                            part_j
+                        )
+                    dev.synchronize()
 
-        return glcm_features.reshape(
-            im.shape[0] - self.radius * 2 - self.step_size,
-            im.shape[1] - self.radius * 2 - self.step_size,
-            NO_OF_FEATURES
-        )
+            shape = im_shape_after_glcm(im.shape,
+                                        step_size=self.step_size,
+                                        radius=self.radius)
+            glcm_features_dirs.append(
+                glcm_features_dir
+                    .reshape(shape[0], shape[1], NO_OF_FEATURES)
+                    .get()
+            )
+
+        return np.stack(glcm_features_dirs).mean(axis=0)
 
     def _from_windows(self,
                       i: np.ndarray,
@@ -270,77 +278,6 @@ class GLCM:
 
         # We split it to 2 dims: A -> B x B
         return (_ := int(blocks_req ** 0.5) + 1), _
-
-    @staticmethod
-    def _make_windows(im: np.ndarray,
-                      diameter: int,
-                      step_size: int) -> Tuple[np.ndarray, np.ndarray]:
-        """ From a 2D image np.ndarray, convert it into GLCM IJ windows.
-
-        Examples:
-
-            Input 4 x 4 image. Radius = 1. Step Size = 1.
-
-            +-+-+-+-+         +-----+
-            |       |         | +---+-+
-            |       |  ---->  | |   | |
-            |       |         | |   | |
-            |       |         +-+---+ |
-            +-+-+-+-+           +-----+      flat
-              4 x 4           1 x 1 x 3 x 3  ----> 1 x 9
-                              +---+   +---+
-                              flat    flat
-
-            The output will be flattened on the x,y,
-
-            Input 5 x 5 image. Radius = 1. Step Size = 1.
-
-            1-2-+-+-+-+         1-----+    2-----+
-            3 4       |         | +---+-+  | +---+-+  3-----+    4-----+
-            |         |  ---->  | |   | |  | |   | |  | +---+-+  | +---+-+
-            |         |         | |   | |  | |   | |  | |   | |  | |   | |
-            |         |         +-+---+ |  +-+---+ |  | |   | |  | |   | |
-            |         |           +-----+    +-----+  +-+---+ |  +-+---+ |
-            +-+-+-+-+-+                                 +-----+    +-----+
-              4 x 4                         2 x 2 x 3 x 3 ----> 4 x 9
-                                            +---+   +---+ flat
-                                            flat    flat
-        Args:
-            im: Input Image
-            diameter: Diameter of Window
-            step_size: Step Size between ij pairs
-
-        Returns:
-            The windows I, J suitable for GLCM.
-            The first dimension: xy flat window indexes,
-            the last dimension: xy flat indexes within each window.
-
-        """
-
-        # This will yield a shape (window_i, window_j, row, col)
-        # E.g. 100x100 with 5x5 window -> 96, 96, 5, 5
-        if im.shape[0] - step_size - diameter + 1 <= 0 or \
-            im.shape[1] - step_size - diameter + 1 <= 0:
-            raise ValueError(
-                f"Step Size & Diameter exceeds size for windowing. "
-                f"im.shape[0] {im.shape[0]} "
-                f"- step_size {step_size} "
-                f"- diameter{diameter} + 1 <= 0 or"
-                f"im.shape[1] {im.shape[1]} "
-                f"- step_size {step_size} "
-                f"- diameter{diameter} + 1 <= 0 was not satisfied."
-            )
-
-        ij = view_as_windows(im, (diameter, diameter))
-        i: np.ndarray = ij[:-step_size, :-step_size]
-        j: np.ndarray = ij[step_size:, step_size:]
-
-        i = i.reshape((-1, i.shape[-2], i.shape[-1])) \
-            .reshape((i.shape[0] * i.shape[1], -1))
-        j = j.reshape((-1, j.shape[-2], j.shape[-1])) \
-            .reshape((j.shape[0] * j.shape[1], -1))
-
-        return i, j
 
     @staticmethod
     def _binarize(im: np.ndarray, from_bins: int, to_bins: int) -> np.ndarray:

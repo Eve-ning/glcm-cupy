@@ -143,6 +143,12 @@ extern "C" {
                 row * glcmSize +
                 wid_image * glcmArea
                 ]), x);
+            atomicAdd(&(
+                g[
+                row +
+                col * glcmSize +
+                wid_image * glcmArea
+                ]), x);
         }
     }
 

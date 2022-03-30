@@ -1,18 +1,21 @@
 [tool.poetry]
-name = "glcm_pycuda"
+name = "glcm_cupy"
 version = "0.1.0"
 description = "Binned GLCM 5 Features implemented in CuPy"
 authors = ["Evening"]
 license = "MIT"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: GPU :: NVIDIA CUDA",
+    "Programming Language :: Python :: 3.8"
+]
 
 [tool.poetry.dependencies]
-python = "3.7"
-cupy = "10.2.0"
-scikit-image = "0.18.3"
+python = ">=3.8"
+scikit-image = "~=0.18.3"
 
 [tool.poetry.dev-dependencies]
-cupy = "10.2.0"
-scikit-image = "0.18.3"
+scikit-image = "~=0.18.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

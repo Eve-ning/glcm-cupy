@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
 from typing import Tuple
 
 import cupy as cp
@@ -13,47 +12,48 @@ from conf import *
 from kernel import glcm_module
 
 
-@dataclass
 class GLCM:
-    """
-    
-    Args:
-        max_value: Maximum value of the image, default 256
-        step_size: Step size of the window
-        radius: Radius of the windows
-        bins: Bin reduction. If None, then no reduction is done
 
-    """
+    def __init__(self, step_size: int = 1, radius: int = 2,
+                 bin_from: int = 256,
+                 bin_to: int = 256):
+        """ Initialize Settings for GLCM
 
-    step_size: int = 1
-    radius: int = 2
-    bins_from: int = 256
-    bins: int = 256
+        Examples:
+            To scale down the image from a 128 max value to 32, we use
+            bin_from = 128, bin_to = 32.
 
-    @property
-    def diameter(self):
-        return self.radius * 2 + 1
+            The range will collapse from 128 to 32.
 
-    @property
-    def no_of_values(self):
-        return self.diameter ** 2
+            This thus optimizes the GLCM speed.
 
-    def __post_init__(self):
+        Args:
+            step_size: Stride Between GLCMs
+            radius: Radius of Window
+            bin_from: Binarize from.
+            bin_to: Binarize to.
+        """
+        self.step_size = step_size
+        self.radius = radius
+        self.bin_from = bin_from
+        self.bin_to = bin_to
+
         with cp.cuda.Device():
             self.i_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
             self.j_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
 
         if not self.radius in range(MAX_RADIUS_SUPPORTED):
             raise ValueError(
-                f"Radius {self.radius} should be [0, {MAX_RADIUS_SUPPORTED})"
+                f"Radius {radius} should be [0, {MAX_RADIUS_SUPPORTED})"
             )
-        if not self.bins in range(2, MAX_VALUE_SUPPORTED):
+        if not bin_to in range(2, MAX_VALUE_SUPPORTED):
             raise ValueError(
-                f"Bins {self.bins} should be [2, {MAX_VALUE_SUPPORTED}]. "
+                f"Target Bins {bin_to} should be "
+                f"[2, {MAX_VALUE_SUPPORTED}]. "
             )
         if not 1 <= self.step_size:
             raise ValueError(
-                f"Step Size {self.step_size} should be >= 1"
+                f"Step Size {step_size} should be >= 1"
             )
 
         self.glcm_create_kernel = \
@@ -64,6 +64,10 @@ class GLCM:
             glcm_module.get_function('glcmFeatureKernel1')
         self.glcm_feature_kernel_2 = \
             glcm_module.get_function('glcmFeatureKernel2')
+
+    @property
+    def diameter(self):
+        return self.radius * 2 + 1
 
     def from_3dimage(self, im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a multi band image
@@ -187,15 +191,18 @@ class GLCM:
         # It may be the leftover partition.
         partition_size = i.shape[0]
 
-        self.glcm = cp.zeros((partition_size, self.bins, self.bins),
+        self.glcm = cp.zeros((partition_size,
+                              self.bin_to,
+                              self.bin_to),
                              dtype=cp.uint8)
         self.features = cp.zeros((partition_size, NO_OF_FEATURES),
                                  dtype=cp.float32)
 
-        i = self._binarize(i, self.bins_from, self.bins)
-        j = self._binarize(j, self.bins_from, self.bins)
+        i = self._binarize(i, self.bin_from, self.bin_to)
+        j = self._binarize(j, self.bin_from, self.bin_to)
 
         no_of_windows = i.shape[0]
+        no_of_values = self.diameter ** 2
 
         if i.dtype != np.uint8 or j.dtype != np.uint8:
             raise ValueError(
@@ -207,13 +214,13 @@ class GLCM:
         self.j_gpu = cp.asarray(j)
 
         self.glcm_create_kernel(
-            grid=(grid := self._calc_grid_size(i.shape[0], self.bins)),
+            grid=(grid := self._calc_grid_size(no_of_windows, self.bin_to)),
             block=(MAX_THREADS,),
             args=(
                 self.i_gpu,
                 self.j_gpu,
-                self.bins,
-                self.no_of_values,
+                self.bin_to,
+                no_of_values,
                 no_of_windows,
                 self.glcm,
                 self.features
@@ -222,8 +229,12 @@ class GLCM:
 
         feature_args = dict(
             grid=grid, block=(MAX_THREADS,),
-            args=(self.glcm, self.bins, self.no_of_values, no_of_windows,
-                  self.features))
+            args=(self.glcm,
+                  self.bin_to,
+                  no_of_values,
+                  no_of_windows,
+                  self.features)
+        )
 
         self.glcm_feature_kernel_0(**feature_args)
         self.glcm_feature_kernel_1(**feature_args)

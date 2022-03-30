@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import math
-import os 
 from dataclasses import dataclass
 from typing import Tuple
 
@@ -10,18 +9,8 @@ import numpy as np
 from skimage.util import view_as_windows
 from tqdm import tqdm
 
+from conf import *
 from kernel import glcm_module
-
-MAX_VALUE_SUPPORTED = 256
-NO_OF_VALUES_SUPPORTED = 256 ** 2
-MAX_RADIUS_SUPPORTED = 127
-
-MAX_THREADS = 512  # Lowest Maximum supported threads.
-
-NO_OF_FEATURES = 8
-
-# For a 10000 x 256 x 256 GLCM, you need ~ 600MB of memory.
-PARTITION_SIZE = 10000
 
 
 @dataclass
@@ -41,17 +30,6 @@ class GLCM:
     bins_from: int = 256
     bins: int = 256
 
-    threads = MAX_VALUE_SUPPORTED + 1
-
-    HOMOGENEITY = 0
-    CONTRAST = 1
-    ASM = 2
-    MEAN_I = 3
-    MEAN_J = 4
-    VAR_I = 5
-    VAR_J = 6
-    CORRELATION = 7
-
     @property
     def diameter(self):
         return self.radius * 2 + 1
@@ -61,19 +39,21 @@ class GLCM:
         return self.diameter ** 2
 
     def __post_init__(self):
-        self.i_flat = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
-        self.j_flat = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
+        with cp.cuda.Device():
+            self.i_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
+            self.j_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
 
-        if not 0 <= self.radius < MAX_RADIUS_SUPPORTED:
-            f"Radius {self.radius} should be in [0, {MAX_RADIUS_SUPPORTED})"
-        if not (2 <= self.bins <= MAX_VALUE_SUPPORTED):
+        if not self.radius in range(MAX_RADIUS_SUPPORTED):
             raise ValueError(
-                f"Bins {self.bins} should be in [2, {MAX_VALUE_SUPPORTED}]. "
+                f"Radius {self.radius} should be [0, {MAX_RADIUS_SUPPORTED})"
+            )
+        if not self.bins in range(2, MAX_VALUE_SUPPORTED):
+            raise ValueError(
+                f"Bins {self.bins} should be [2, {MAX_VALUE_SUPPORTED}]. "
             )
         if not 1 <= self.step_size:
             raise ValueError(
                 f"Step Size {self.step_size} should be >= 1"
-                f"If bins == 256, just use None."
             )
 
         self.glcm_create_kernel = \
@@ -85,25 +65,7 @@ class GLCM:
         self.glcm_feature_kernel_2 = \
             glcm_module.get_function('glcmFeatureKernel2')
 
-        os.environ['CUPY_EXPERIMENTAL_SLICE_COPY'] = '1'
-
-    @staticmethod
-    def binarize(im: np.ndarray, from_bins: int, to_bins: int) -> np.ndarray:
-        """ Binarize an image from a certain bin to another
-
-        Args:
-            im: Image as np.ndarray
-            from_bins: From the Bin of input image
-            to_bins: To the Bin of output image
-
-        Returns:
-            Binarized Image
-
-        """
-        return (im.astype(np.float32) / from_bins * to_bins).astype(np.uint8)
-
-    def from_3dimage(self,
-                     im: np.ndarray) -> np.ndarray:
+    def from_3dimage(self, im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a multi band image
 
         Args:
@@ -115,7 +77,7 @@ class GLCM:
         """
 
         glcm_chs = []
-        for ch in range(im.shape[-1]):
+        for ch in range(im.shape[-1]):  # Channel Loop
             glcm_chs.append(self.from_2dimage(im[..., ch]))
 
         return np.stack(glcm_chs, axis=2)
@@ -125,35 +87,53 @@ class GLCM:
         """ Generates the GLCM from a single band image
 
         Notes:
-            This will actively partition the processing by blocks
-            of PARTITION_SIZE.
-            This allows for a reduction in GLCM creation.
+            Partitions the image into blocks of PARTITION_SIZE,
+            reducing allocated GLCM Memory.
 
         Args:
-            im: Image in np.ndarray. Cannot be in cp.ndarray
+            im: Image in np.ndarray.
 
         Returns:
             The GLCM Array 3dim with shape
                 rows, cols, feature
         """
 
+        if im.ndim != 2:
+            raise ValueError(
+                f"Image must be 2 dimensional. im.ndim={im.ndim}"
+            )
+
+        # Both dims are xy flattened.
+        # windows.shape == [window_ix, cell_ix]
         windows_i, windows_j = \
-            self.make_windows(im, self.diameter, self.step_size)
+            self._make_windows(im, self.diameter, self.step_size)
+
+        windows_count = windows_i.shape[0]
 
         glcm_features = cp.zeros(
-            (windows_i.shape[0], NO_OF_FEATURES),
+            (windows_count, NO_OF_FEATURES),
             dtype=cp.float32
         )
 
-        windows_count = windows_i.shape[0]
-        for partition in tqdm(
-            range(math.ceil(windows_count / PARTITION_SIZE))):
+        # If 45000 windows, 10000 partition size,
+        # We have 5 partitions (10K, 10K, 10K, 10K, 5K)
+        partition_count = math.ceil(windows_count / MAX_PARTITION_SIZE)
+
+        for partition in tqdm(range(partition_count)):
+            # As above, we have an uneven partition
+            # Though [1,2,3][:5] == [1,2,3]
+            # This means windows_part_i will be correctly partitioned.
             windows_part_i = windows_i[
-                             (start := partition * PARTITION_SIZE):
-                             (end := (partition + 1) * PARTITION_SIZE)
+                             (start := partition * MAX_PARTITION_SIZE):
+                             (end := (partition + 1) * MAX_PARTITION_SIZE)
                              ]
             windows_part_j = windows_j[start:end]
-            glcm_features[start:start + windows_part_i.shape[0]] = \
+
+            # We don't need to figure out the leftover partition size
+            # We can simply yield the length of the leftover partition
+            windows_part_count = windows_i.shape[0]
+
+            glcm_features[start:start + windows_part_count] = \
                 self._from_windows(
                     windows_part_i,
                     windows_part_j
@@ -178,33 +158,42 @@ class GLCM:
 
         Notes:
             i must be the same shape as j
+            i.shape, j.shape should be [partition_size, window_size]
+
+            For example, if you want to process 100 windows at once,
+            each window with 25 cells, you should have
+            i.shape == j.shape == (100, 25)
 
         Args:
             i: I Window
             j: J Window
 
         Returns:
-            The GLCM array, of size (8,)
+            The GLCM feature array, of size [partition_size, 8]
 
         """
-        assert i.ndim == 2 and j.ndim == 2, \
-            "The input dimensions must be 2. " \
-            "The 1st Dim is the partitioned windows flattened, " \
-            "The 2nd is the window cells flattened"
+        if i.ndim != 2 or j.ndim != 2:
+            raise ValueError(
+                f"The input dimensions must be 2. "
+                f"i.ndim=={i.ndim}, j.ndim=={j.ndim}. "
+                "The 1st Dim is the partitioned windows flattened, "
+                "The 2nd is the window cells flattened"
+            )
 
-        self.glcm = cp.zeros(
-            (i.shape[0], self.bins, self.bins),
-            dtype=cp.uint8
-        )
-        self.features = cp.zeros(
-            (i.shape[0], 8),
-            dtype=cp.float32
-        )
-        assert i.shape == j.shape, \
-            f"Shape of i {i.shape} != j {j.shape}"
+        if i.shape == j.shape:
+            raise ValueError(f"Shape of i {i.shape} != j {j.shape}")
 
-        i = self.binarize(i, self.bins_from, self.bins)
-        j = self.binarize(j, self.bins_from, self.bins)
+        # partition_size != MAX_PARTITION_SIZE
+        # It may be the leftover partition.
+        partition_size = i.shape[0]
+
+        self.glcm = cp.zeros((partition_size, self.bins, self.bins),
+                             dtype=cp.uint8)
+        self.features = cp.zeros((partition_size, NO_OF_FEATURES),
+                                 dtype=cp.float32)
+
+        i = self._binarize(i, self.bins_from, self.bins)
+        j = self._binarize(j, self.bins_from, self.bins)
 
         no_of_windows = i.shape[0]
 
@@ -213,16 +202,16 @@ class GLCM:
                 f"Image dtype must be np.uint8,"
                 f" i: {i.dtype} j: {j.dtype}"
             )
-        self.i_flat = cp.asarray(i)
-        self.j_flat = cp.asarray(j)
-        grid = self.calculate_grid(i.shape[0], self.bins)
+
+        self.i_gpu = cp.asarray(i)
+        self.j_gpu = cp.asarray(j)
 
         self.glcm_create_kernel(
-            grid=grid,
+            grid=(grid := self._calc_grid_size(i.shape[0], self.bins)),
             block=(MAX_THREADS,),
             args=(
-                self.i_flat,
-                self.j_flat,
+                self.i_gpu,
+                self.j_gpu,
                 self.bins,
                 self.no_of_values,
                 no_of_windows,
@@ -230,17 +219,20 @@ class GLCM:
                 self.features
             )
         )
+
         feature_args = dict(
             grid=grid, block=(MAX_THREADS,),
             args=(self.glcm, self.bins, self.no_of_values, no_of_windows,
                   self.features))
+
         self.glcm_feature_kernel_0(**feature_args)
         self.glcm_feature_kernel_1(**feature_args)
         self.glcm_feature_kernel_2(**feature_args)
+
         return self.features[:no_of_windows]
 
     @staticmethod
-    def calculate_grid(
+    def _calc_grid_size(
         window_count: int,
         glcm_size: int,
         thread_per_block: int = MAX_THREADS
@@ -254,16 +246,25 @@ class GLCM:
             The optimal minimum grid shape for GLCM
 
         """
-        blocks_req_glcm_calc = window_count * glcm_size * glcm_size / thread_per_block
+
         # TODO: Do we need to div by thread_per_block?
+        # Blocks to support features
+        blocks_req_glcm_features = \
+            window_count * glcm_size * glcm_size / thread_per_block
+
+        # Blocks to support glcm populating
         blocks_req_glcm_populate = glcm_size * window_count
-        blocks_req = max(blocks_req_glcm_calc, blocks_req_glcm_populate)
+
+        # Take the maximum
+        blocks_req = max(blocks_req_glcm_features, blocks_req_glcm_populate)
+
+        # We split it to 2 dims: A -> B x B
         return (_ := int(blocks_req ** 0.5) + 1), _
 
     @staticmethod
-    def make_windows(im: np.ndarray,
-                     diameter: int,
-                     step_size: int) -> Tuple[np.ndarray, np.ndarray]:
+    def _make_windows(im: np.ndarray,
+                      diameter: int,
+                      step_size: int) -> Tuple[np.ndarray, np.ndarray]:
         """ From a 2D image np.ndarray, convert it into GLCM IJ windows.
 
         Examples:
@@ -305,9 +306,9 @@ class GLCM:
             the last dimension: xy flat indexes within each window.
 
         """
+
         # This will yield a shape (window_i, window_j, row, col)
         # E.g. 100x100 with 5x5 window -> 96, 96, 5, 5
-
         if im.shape[0] - step_size - diameter + 1 <= 0 or \
             im.shape[1] - step_size - diameter + 1 <= 0:
             raise ValueError(
@@ -330,3 +331,18 @@ class GLCM:
             .reshape((j.shape[0] * j.shape[1], -1))
 
         return i, j
+
+    @staticmethod
+    def _binarize(im: np.ndarray, from_bins: int, to_bins: int) -> np.ndarray:
+        """ Binarize an image from a certain bin to another
+
+        Args:
+            im: Image as np.ndarray
+            from_bins: From the Bin of input image
+            to_bins: To the Bin of output image
+
+        Returns:
+            Binarized Image
+
+        """
+        return (im.astype(np.float32) / from_bins * to_bins).astype(np.uint8)

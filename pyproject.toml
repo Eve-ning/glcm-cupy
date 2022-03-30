@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "glcm_pycuda"
+version = "0.1.0"
+description = "Binned GLCM 5 Features implemented in CuPy"
+authors = ["Evening"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "3.7"
+cupy = "10.2.0"
+scikit-image = "0.18.3"
+
+[tool.poetry.dev-dependencies]
+cupy = "10.2.0"
+scikit-image = "0.18.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

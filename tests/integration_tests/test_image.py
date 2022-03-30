@@ -1,8 +1,8 @@
 import numpy as np
 from PIL import Image
 
-from definitions import ROOT_DIR
-from glcm import GLCM
+from glcm_pycuda.definitions import ROOT_DIR
+from glcm_pycuda import GLCM
 
 
 def test_image():

@@ -1,6 +1,9 @@
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).parent.parent.absolute()
+
 MAX_VALUE_SUPPORTED = 256
 NO_OF_VALUES_SUPPORTED = 256 ** 2
-MAX_RADIUS_SUPPORTED = 127
 
 MAX_THREADS = 512  # Lowest Maximum supported threads.
 

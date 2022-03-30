@@ -1,7 +1,7 @@
 import numpy as np
 from PIL import Image
 
-from glcm_pycuda.definitions import ROOT_DIR
+from glcm_pycuda.conf import ROOT_DIR
 from glcm_pycuda import GLCM
 
 

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from glcm_pycuda.definitions import ROOT_DIR
+from glcm_pycuda.conf import ROOT_DIR
 
 TEST_SIZE = 25
 

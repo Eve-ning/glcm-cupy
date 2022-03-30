@@ -8,8 +8,8 @@ import numpy as np
 from skimage.util import view_as_windows
 from tqdm import tqdm
 
-from conf import *
-from kernel import glcm_module
+from glcm_pycuda.conf import *
+from glcm_pycuda.kernel import glcm_module
 
 
 class GLCM:
@@ -38,20 +38,19 @@ class GLCM:
         self.bin_from = bin_from
         self.bin_to = bin_to
 
-        with cp.cuda.Device():
-            self.i_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
-            self.j_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
+        self.i_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
+        self.j_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
 
-        if not self.radius in range(MAX_RADIUS_SUPPORTED):
+        if self.radius < 0:
             raise ValueError(
-                f"Radius {radius} should be [0, {MAX_RADIUS_SUPPORTED})"
+                f"Radius {radius} should be > 0)"
             )
-        if not bin_to in range(2, MAX_VALUE_SUPPORTED):
+        if not bin_to in range(2, MAX_VALUE_SUPPORTED + 1):
             raise ValueError(
                 f"Target Bins {bin_to} should be "
                 f"[2, {MAX_VALUE_SUPPORTED}]. "
             )
-        if not 1 <= self.step_size:
+        if self.step_size <= 0:
             raise ValueError(
                 f"Step Size {step_size} should be >= 1"
             )
@@ -124,24 +123,26 @@ class GLCM:
         partition_count = math.ceil(windows_count / MAX_PARTITION_SIZE)
 
         for partition in tqdm(range(partition_count)):
-            # As above, we have an uneven partition
-            # Though [1,2,3][:5] == [1,2,3]
-            # This means windows_part_i will be correctly partitioned.
-            windows_part_i = windows_i[
-                             (start := partition * MAX_PARTITION_SIZE):
-                             (end := (partition + 1) * MAX_PARTITION_SIZE)
-                             ]
-            windows_part_j = windows_j[start:end]
+            with cp.cuda.Device() as dev:
+                # As above, we have an uneven partition
+                # Though [1,2,3][:5] == [1,2,3]
+                # This means windows_part_i will be correctly partitioned.
+                windows_part_i = windows_i[
+                                 (start := partition * MAX_PARTITION_SIZE):
+                                 (end := (partition + 1) * MAX_PARTITION_SIZE)
+                                 ]
+                windows_part_j = windows_j[start:end]
 
-            # We don't need to figure out the leftover partition size
-            # We can simply yield the length of the leftover partition
-            windows_part_count = windows_i.shape[0]
+                # We don't need to figure out the leftover partition size
+                # We can simply yield the length of the leftover partition
+                windows_part_count = windows_part_i.shape[0]
 
-            glcm_features[start:start + windows_part_count] = \
-                self._from_windows(
-                    windows_part_i,
-                    windows_part_j
-                )
+                glcm_features[start:start + windows_part_count] = \
+                    self._from_windows(
+                        windows_part_i,
+                        windows_part_j
+                    )
+                dev.synchronize()
 
         return glcm_features.reshape(
             im.shape[0] - self.radius * 2 - self.step_size,
@@ -184,16 +185,14 @@ class GLCM:
                 "The 2nd is the window cells flattened"
             )
 
-        if i.shape == j.shape:
+        if i.shape != j.shape:
             raise ValueError(f"Shape of i {i.shape} != j {j.shape}")
 
         # partition_size != MAX_PARTITION_SIZE
         # It may be the leftover partition.
         partition_size = i.shape[0]
 
-        self.glcm = cp.zeros((partition_size,
-                              self.bin_to,
-                              self.bin_to),
+        self.glcm = cp.zeros((partition_size, self.bin_to, self.bin_to),
                              dtype=cp.uint8)
         self.features = cp.zeros((partition_size, NO_OF_FEATURES),
                                  dtype=cp.float32)
@@ -239,7 +238,7 @@ class GLCM:
         self.glcm_feature_kernel_0(**feature_args)
         self.glcm_feature_kernel_1(**feature_args)
         self.glcm_feature_kernel_2(**feature_args)
-
+        del self.glcm
         return self.features[:no_of_windows]
 
     @staticmethod

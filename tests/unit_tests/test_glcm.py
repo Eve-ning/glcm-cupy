@@ -5,7 +5,8 @@ import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 
-from glcm_pycuda.glcm import GLCM, MAX_PARTITION_SIZE
+from glcm_pycuda import GLCM
+from glcm_pycuda.conf import MAX_PARTITION_SIZE
 from tests.unit_tests import glcm_py
 
 

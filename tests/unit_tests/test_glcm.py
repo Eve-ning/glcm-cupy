@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 
-from glcm_pycuda import GLCM
-from glcm_pycuda.conf import *
+from glcm_cupy import GLCM
+from glcm_cupy.conf import *
 from tests.unit_tests import glcm_py
 
 

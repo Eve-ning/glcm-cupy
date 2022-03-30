@@ -6,7 +6,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from glcm_pycuda import GLCM
-from glcm_pycuda.conf import MAX_PARTITION_SIZE
+from glcm_pycuda.conf import *
 from tests.unit_tests import glcm_py
 
 
@@ -38,14 +38,14 @@ def test_glcm_from_windows(i, j):
 
     # The sum of the values, since tiled, will be scaled by no of windows.
     actual = dict(
-        homogeneity=float(g[..., GLCM.HOMOGENEITY].sum() / windows),
-        contrast=float(g[..., GLCM.CONTRAST].sum() / windows),
-        asm=float(g[..., GLCM.ASM].sum() / windows),
-        mean_i=float(g[..., GLCM.MEAN_I].sum() / windows),
-        mean_j=float(g[..., GLCM.MEAN_J].sum() / windows),
-        var_i=float(g[..., GLCM.VAR_I].sum() / windows),
-        var_j=float(g[..., GLCM.VAR_J].sum() / windows),
-        correlation=float(g[..., GLCM.CORRELATION].sum() / windows)
+        homogeneity=float(g[..., HOMOGENEITY].sum() / windows),
+        contrast=float(g[..., CONTRAST].sum() / windows),
+        asm=float(g[..., ASM].sum() / windows),
+        mean_i=float(g[..., MEAN_I].sum() / windows),
+        mean_j=float(g[..., MEAN_J].sum() / windows),
+        var_i=float(g[..., VAR_I].sum() / windows),
+        var_j=float(g[..., VAR_J].sum() / windows),
+        correlation=float(g[..., CORRELATION].sum() / windows)
     )
 
     expected = glcm_py(i, j)
@@ -134,7 +134,7 @@ def test_glcm_partition(
 
     mocker.patch('cupy.zeros', return_value=MockFeatures())
     mocker.patch.object(
-        glcm_instance, 'make_windows',
+        glcm_instance, '_make_windows',
         return_value=(
             np.zeros((windows, WINDOW_SIZE), dtype=np.uint8),
             np.zeros((windows, WINDOW_SIZE), dtype=np.uint8),

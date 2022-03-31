@@ -142,7 +142,7 @@ def test_glcm_partition(
     )
     mock_from_windows = \
         mocker.patch.object(glcm_instance, '_from_windows', return_value=[])
-    glcm_instance.from_2dimage(np.asarray([[]]))
+    glcm_instance._from_2dimage(np.asarray([[]]))
 
     # The LHS extracts the array size calls to _from_windows
     #  We expect the windows to be split to chunks of PARTITION_SIZE
@@ -174,7 +174,7 @@ def test_glcm_binarize(bins):
     Args:
         bins: The result bins
     """
-    g = GLCM._binarize(np.asarray([0, 1, 2], dtype=np.uint8), 3, bins)
+    g = GLCM._binner(np.asarray([0, 1, 2], dtype=np.uint8), 3, bins)
 
     assert g[0] == 0 // 3
     assert g[1] == bins // 3

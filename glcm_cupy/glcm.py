@@ -12,19 +12,50 @@ from glcm_cupy.kernel import glcm_module
 from glcm_cupy.windowing import make_windows, im_shape_after_glcm, Direction
 
 
-class GLCM:
+def glcm(
+    im: np.ndarray,
+    step_size: int = 1,
+    radius: int = 2,
+    bin_from: int = 256,
+    bin_to: int = 256,
+    directions: Iterable[Direction] = (Direction.EAST,
+                                       Direction.SOUTH_EAST,
+                                       Direction.SOUTH,
+                                       Direction.SOUTH_WEST)):
+    """
+    Examples:
+        To scale down the image from a 128 max value to 32, we use
+        bin_from = 128, bin_to = 32.
 
+        The range will collapse from 128 to 32.
+
+        This thus optimizes the GLCM speed.
+
+    Args:
+        im: Image to Process
+        step_size: Stride Between GLCMs
+        radius: Radius of Window
+        bin_from: Binarize from.
+        bin_to: Binarize to.
+        directions: Directions to pair the windows.
+
+    Returns:
+
+
+    """
+    return GLCM(step_size, radius, bin_from, bin_to, directions).run(im)
+
+
+class GLCM:
     def __init__(self,
                  step_size: int = 1,
                  radius: int = 2,
                  bin_from: int = 256,
                  bin_to: int = 256,
-                 directions: Iterable[Direction] = (
-                     Direction.EAST,
-                     Direction.SOUTH_EAST,
-                     Direction.SOUTH,
-                     Direction.SOUTH_WEST
-                 )
+                 directions: Iterable[Direction] = (Direction.EAST,
+                                                    Direction.SOUTH_EAST,
+                                                    Direction.SOUTH,
+                                                    Direction.SOUTH_WEST)
                  ):
         """ Initialize Settings for GLCM
 
@@ -48,15 +79,16 @@ class GLCM:
         self.bin_from = bin_from
         self.bin_to = bin_to
         self.directions = directions
+        self.progress = None
 
-        self.i_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
-        self.j_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
+        self.i_gpu = cp.zeros((self._diameter ** 2,), dtype=cp.uint8)
+        self.j_gpu = cp.zeros((self._diameter ** 2,), dtype=cp.uint8)
 
         if self.radius < 0:
             raise ValueError(
                 f"Radius {radius} should be > 0)"
             )
-        if not bin_to in range(2, MAX_VALUE_SUPPORTED + 1):
+        if bin_to not in range(2, MAX_VALUE_SUPPORTED + 1):
             raise ValueError(
                 f"Target Bins {bin_to} should be "
                 f"[2, {MAX_VALUE_SUPPORTED}]. "
@@ -76,10 +108,35 @@ class GLCM:
             glcm_module.get_function('glcmFeatureKernel2')
 
     @property
-    def diameter(self):
+    def _diameter(self):
         return self.radius * 2 + 1
 
-    def from_3dimage(self, im: np.ndarray) -> np.ndarray:
+    def run(self, im: np.ndarray):
+        """ Executes running GLCM. Returns the GLCM Feature array
+
+        Args:
+            im: Image to process. Can be 2D or 3D.
+
+        Returns:
+            An np.ndarray of Shape,
+             3D: (rows, cols, channels, features),
+             2D: (rows, cols, features)
+
+        """
+        shape = im_shape_after_glcm(im.shape, self.step_size, self.radius)
+        glcm_cells = np.prod(shape) * len(self.directions)
+        self.progress = tqdm(total=glcm_cells, desc="GLCM Progress",
+                             unit=" Cells",
+                             unit_scale=True)
+
+        if im.ndim == 2:
+            return self._from_2dimage(im)
+        elif im.ndim == 3:
+            return self._from_3dimage(im)
+        else:
+            raise ValueError("Only 2D or 3D images allowed.")
+
+    def _from_3dimage(self, im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a multi band image
 
         Args:
@@ -91,14 +148,13 @@ class GLCM:
         """
 
         glcm_chs = []
-        for ch in tqdm(range(im.shape[-1]),
-                       desc="Channel"):
-            glcm_chs.append(self.from_2dimage(im[..., ch]))
+        for ch in range(im.shape[-1]):
+            glcm_chs.append(self._from_2dimage(im[..., ch]))
 
         return np.stack(glcm_chs, axis=2)
 
-    def from_2dimage(self,
-                     im: np.ndarray) -> np.ndarray:
+    def _from_2dimage(self,
+                      im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a single band image
 
         Notes:
@@ -127,11 +183,7 @@ class GLCM:
         glcm_features_dirs = []
 
         # For each direction
-        for dir, dir_ij in (t := tqdm(zip(self.directions, dirs_ij),
-                                      total=len(dirs_ij),
-                                      desc="Direction",
-                                      leave=False)):
-            t.set_postfix({'Direction': dir.name})
+        for dir, dir_ij in zip(self.directions, dirs_ij):
 
             windows_i, windows_j = dir_ij
 
@@ -145,10 +197,7 @@ class GLCM:
             # We have 5 partitions (10K, 10K, 10K, 10K, 5K)
             partition_count = math.ceil(windows_count / MAX_PARTITION_SIZE)
 
-            for partition in tqdm(range(partition_count),
-                                  desc="Partition",
-                                  leave=False):
-                # postfix={f"Direction": f"{dir.name}"}):
+            for partition in range(partition_count):
                 with cp.cuda.Device() as dev:
                     # As above, we have an uneven partition
                     # Though [1,2,3][:5] == [1,2,3]
@@ -169,6 +218,7 @@ class GLCM:
                             part_j
                         )
                     dev.synchronize()
+                    self.progress.update(windows_part_count)
 
             shape = im_shape_after_glcm(im.shape,
                                         step_size=self.step_size,
@@ -228,11 +278,11 @@ class GLCM:
         self.features = cp.zeros((partition_size, NO_OF_FEATURES),
                                  dtype=cp.float32)
 
-        i = self._binarize(i, self.bin_from, self.bin_to)
-        j = self._binarize(j, self.bin_from, self.bin_to)
+        i = self._binner(i, self.bin_from, self.bin_to)
+        j = self._binner(j, self.bin_from, self.bin_to)
 
         no_of_windows = i.shape[0]
-        no_of_values = self.diameter ** 2
+        no_of_values = self._diameter ** 2
 
         if i.dtype != np.uint8 or j.dtype != np.uint8:
             raise ValueError(
@@ -303,16 +353,16 @@ class GLCM:
         return (_ := int(blocks_req ** 0.5) + 1), _
 
     @staticmethod
-    def _binarize(im: np.ndarray, from_bins: int, to_bins: int) -> np.ndarray:
-        """ Binarize an image from a certain bin to another
+    def _binner(im: np.ndarray, bin_from: int, bin_to: int) -> np.ndarray:
+        """ Bins an image from a certain bin to another
 
         Args:
             im: Image as np.ndarray
-            from_bins: From the Bin of input image
-            to_bins: To the Bin of output image
+            bin_from: From the Bin of input image
+            bin_to: To the Bin of output image
 
         Returns:
-            Binarized Image
+            Binned Image
 
         """
-        return (im.astype(np.float32) / from_bins * to_bins).astype(np.uint8)
+        return (im.astype(np.float32) / bin_from * bin_to).astype(np.uint8)

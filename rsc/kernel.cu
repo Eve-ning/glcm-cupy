@@ -103,7 +103,7 @@ extern "C" {
         TID to respective windows
         =====================================
         TID is 1D, we need to partition them to their windows
-        Each window area is `noOfValues` == diameter ^ 2
+        Each window area is `noOfValues` == _diameter ^ 2
         We have total of `noOfWindows` number of windows
         Thus, we simply take `wid = tid / noOfValues`
         WID: Window ID

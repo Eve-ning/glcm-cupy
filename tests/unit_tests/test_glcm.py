@@ -5,7 +5,8 @@ import numpy as np
 import pytest
 from pytest_mock import MockerFixture
 
-from glcm import GLCM, PARTITION_SIZE
+from glcm_cupy import GLCM
+from glcm_cupy.conf import *
 from tests.unit_tests import glcm_py
 
 
@@ -37,14 +38,14 @@ def test_glcm_from_windows(i, j):
 
     # The sum of the values, since tiled, will be scaled by no of windows.
     actual = dict(
-        homogeneity=float(g[..., GLCM.HOMOGENEITY].sum() / windows),
-        contrast=float(g[..., GLCM.CONTRAST].sum() / windows),
-        asm=float(g[..., GLCM.ASM].sum() / windows),
-        mean_i=float(g[..., GLCM.MEAN_I].sum() / windows),
-        mean_j=float(g[..., GLCM.MEAN_J].sum() / windows),
-        var_i=float(g[..., GLCM.VAR_I].sum() / windows),
-        var_j=float(g[..., GLCM.VAR_J].sum() / windows),
-        correlation=float(g[..., GLCM.CORRELATION].sum() / windows)
+        homogeneity=float(g[..., HOMOGENEITY].sum() / windows),
+        contrast=float(g[..., CONTRAST].sum() / windows),
+        asm=float(g[..., ASM].sum() / windows),
+        mean_i=float(g[..., MEAN_I].sum() / windows),
+        mean_j=float(g[..., MEAN_J].sum() / windows),
+        var_i=float(g[..., VAR_I].sum() / windows),
+        var_j=float(g[..., VAR_J].sum() / windows),
+        correlation=float(g[..., CORRELATION].sum() / windows)
     )
 
     expected = glcm_py(i, j)
@@ -91,20 +92,20 @@ def test_glcm_make_windows(
     if y_windows <= 0 or x_windows <= 0:
         # If the make windows is invalid, we assert that it throws an error
         with pytest.raises(ValueError):
-            GLCM.make_windows(im, radius * 2 + 1, step_size)
+            GLCM._make_windows(im, radius * 2 + 1, step_size)
     else:
         # Else, we assert the correct shape returns
-        windows = GLCM.make_windows(im, radius * 2 + 1, step_size)
+        windows = GLCM._make_windows(im, radius * 2 + 1, step_size)
         assert (x_windows * y_windows, x_cells * y_cells) == windows[0].shape
 
 
 @pytest.mark.parametrize(
     "windows",
     [1,
-     PARTITION_SIZE,
-     PARTITION_SIZE + 1,
-     PARTITION_SIZE * 2,
-     PARTITION_SIZE * 2 + 1]
+     MAX_PARTITION_SIZE,
+     MAX_PARTITION_SIZE + 1,
+     MAX_PARTITION_SIZE * 2,
+     MAX_PARTITION_SIZE * 2 + 1]
 )
 def test_glcm_partition(
     windows: int,
@@ -133,7 +134,7 @@ def test_glcm_partition(
 
     mocker.patch('cupy.zeros', return_value=MockFeatures())
     mocker.patch.object(
-        glcm_instance, 'make_windows',
+        glcm_instance, '_make_windows',
         return_value=(
             np.zeros((windows, WINDOW_SIZE), dtype=np.uint8),
             np.zeros((windows, WINDOW_SIZE), dtype=np.uint8),
@@ -141,7 +142,7 @@ def test_glcm_partition(
     )
     mock_from_windows = \
         mocker.patch.object(glcm_instance, '_from_windows', return_value=[])
-    glcm_instance.from_2dimage(np.asarray([[]]))
+    glcm_instance._from_2dimage(np.asarray([[]]))
 
     # The LHS extracts the array size calls to _from_windows
     #  We expect the windows to be split to chunks of PARTITION_SIZE
@@ -151,8 +152,8 @@ def test_glcm_partition(
     #  The second is the remainder, however 0 will produce a [] as expected.
     assert [call[0][0].shape[0] for call in
             mock_from_windows.call_args_list] == \
-           [PARTITION_SIZE for _ in range(windows // PARTITION_SIZE)] + \
-           ([windows % PARTITION_SIZE] if windows % PARTITION_SIZE else [])
+           [MAX_PARTITION_SIZE for _ in range(windows // MAX_PARTITION_SIZE)] + \
+           ([windows % MAX_PARTITION_SIZE] if windows % MAX_PARTITION_SIZE else [])
 
 
 @pytest.mark.parametrize(
@@ -173,7 +174,7 @@ def test_glcm_binarize(bins):
     Args:
         bins: The result bins
     """
-    g = GLCM.binarize(np.asarray([0, 1, 2], dtype=np.uint8), 3, bins)
+    g = GLCM._binner(np.asarray([0, 1, 2], dtype=np.uint8), 3, bins)
 
     assert g[0] == 0 // 3
     assert g[1] == bins // 3

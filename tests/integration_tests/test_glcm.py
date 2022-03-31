@@ -1,16 +1,16 @@
 import numpy as np
 
-from glcm import GLCM
+from glcm_cupy import GLCM
 
 
 def test_from_3dimage(ar_3d):
     """ Tests using a 3D Image """
-    GLCM().from_3dimage(ar_3d)
+    GLCM()._from_3dimage(ar_3d)
 
 
 def test_from_2dimage(ar_2d):
     """ Tests with a 2D Image (1 Channel) """
-    GLCM().from_2dimage(ar_2d)
+    GLCM()._from_2dimage(ar_2d)
 
 
 def test__from_windows():

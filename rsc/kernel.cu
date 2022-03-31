@@ -37,7 +37,7 @@ extern "C" {
             return (char) (masked_old >> 8 * long_address_modulo);
         }
     }
-    __global__ void glcm_0(
+    __global__ void glcmCreateKernel(
         const unsigned char* windows_i,
         const unsigned char* windows_j,
         const int glcmSize,
@@ -103,7 +103,7 @@ extern "C" {
         TID to respective windows
         =====================================
         TID is 1D, we need to partition them to their windows
-        Each window area is `noOfValues` == diameter ^ 2
+        Each window area is `noOfValues` == _diameter ^ 2
         We have total of `noOfWindows` number of windows
         Thus, we simply take `wid = tid / noOfValues`
         WID: Window ID
@@ -142,7 +142,7 @@ extern "C" {
         }
     }
 
-    __global__ void glcm_1(
+    __global__ void glcmFeatureKernel0(
         const unsigned char* g,
         const int glcmSize,
         const int noOfValues,
@@ -232,7 +232,7 @@ extern "C" {
             p * j
         );
     }
-    __global__ void glcm_2(
+    __global__ void glcmFeatureKernel1(
         const unsigned char* g,
         const int glcmSize,
         const int noOfValues,
@@ -271,7 +271,7 @@ extern "C" {
 
     }
 
-    __global__ void glcm_3(
+    __global__ void glcmFeatureKernel2(
         const unsigned char* g,
         const int glcmSize,
         const int noOfValues,

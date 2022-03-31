@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import Tuple, List
+from typing import Tuple, List, Iterable
 
 import cupy as cp
 import numpy as np
@@ -9,14 +9,23 @@ from tqdm import tqdm
 
 from glcm_cupy.conf import *
 from glcm_cupy.kernel import glcm_module
-from glcm_cupy.windowing import make_windows, im_shape_after_glcm
+from glcm_cupy.windowing import make_windows, im_shape_after_glcm, Direction
 
 
 class GLCM:
 
-    def __init__(self, step_size: int = 1, radius: int = 2,
+    def __init__(self,
+                 step_size: int = 1,
+                 radius: int = 2,
                  bin_from: int = 256,
-                 bin_to: int = 256):
+                 bin_to: int = 256,
+                 directions: Iterable[Direction] = (
+                     Direction.EAST,
+                     Direction.SOUTH_EAST,
+                     Direction.SOUTH,
+                     Direction.SOUTH_WEST
+                 )
+                 ):
         """ Initialize Settings for GLCM
 
         Examples:
@@ -32,11 +41,13 @@ class GLCM:
             radius: Radius of Window
             bin_from: Binarize from.
             bin_to: Binarize to.
+            directions: Directions to pair the windows.
         """
         self.step_size = step_size
         self.radius = radius
         self.bin_from = bin_from
         self.bin_to = bin_to
+        self.directions = directions
 
         self.i_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
         self.j_gpu = cp.zeros((self.diameter ** 2,), dtype=cp.uint8)
@@ -80,7 +91,8 @@ class GLCM:
         """
 
         glcm_chs = []
-        for ch in range(im.shape[-1]):  # Channel Loop
+        for ch in tqdm(range(im.shape[-1]),
+                       desc="Channel"):
             glcm_chs.append(self.from_2dimage(im[..., ch]))
 
         return np.stack(glcm_chs, axis=2)
@@ -107,12 +119,20 @@ class GLCM:
 
         # Both dims are xy flattened.
         # windows.shape == [window_ix, cell_ix]
-        dirs_ij = make_windows(im, self.radius, self.step_size)
+        dirs_ij = make_windows(im,
+                               self.radius,
+                               self.step_size,
+                               self.directions)
         dirs_ij: List[Tuple[np.ndarray, np.ndarray]]
         glcm_features_dirs = []
 
         # For each direction
-        for dir_ij in dirs_ij:
+        for dir, dir_ij in (t := tqdm(zip(self.directions, dirs_ij),
+                                      total=len(dirs_ij),
+                                      desc="Direction",
+                                      leave=False)):
+            t.set_postfix({'Direction': dir.name})
+
             windows_i, windows_j = dir_ij
 
             windows_count = windows_i.shape[0]
@@ -125,7 +145,10 @@ class GLCM:
             # We have 5 partitions (10K, 10K, 10K, 10K, 5K)
             partition_count = math.ceil(windows_count / MAX_PARTITION_SIZE)
 
-            for partition in tqdm(range(partition_count)):
+            for partition in tqdm(range(partition_count),
+                                  desc="Partition",
+                                  leave=False):
+                # postfix={f"Direction": f"{dir.name}"}):
                 with cp.cuda.Device() as dev:
                     # As above, we have an uneven partition
                     # Though [1,2,3][:5] == [1,2,3]

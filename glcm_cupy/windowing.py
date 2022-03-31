@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import Tuple, List, Iterable
 
 import numpy as np
 from skimage.util import view_as_windows
 
 
-class Direction:
+class Direction(Enum):
     EAST = 0
     SOUTH_EAST = 1
     SOUTH = 2

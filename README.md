@@ -55,6 +55,27 @@ To retrieve a specific GLCM Feature:
 (1074, 1914, 3)
 ```
 
+You may also consider simply `glcm` if you're not reusing `GLCM()`
+```pycon
+>>> from glcm_cupy import glcm
+>>> g = glcm(ar, ...)
+```
+
+## Features
+
+These are the features implemented.
+
+- `HOMOGENEITY = 0`
+- `CONTRAST = 1`
+- `ASM = 2`
+- `MEAN_I = 3`
+- `MEAN_J = 4`
+- `VAR_I = 5`
+- `VAR_J = 6`
+- `CORRELATION = 7`
+
+Don't see one you need? Raise an issue, I'll (hopefully) add it.
+
 ## Radius & Step Size
 
 - The radius defines the window radius for each GLCM window.

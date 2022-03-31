@@ -12,8 +12,41 @@ from glcm_cupy.kernel import glcm_module
 from glcm_cupy.windowing import make_windows, im_shape_after_glcm, Direction
 
 
-class GLCM:
+def glcm(
+    im: np.ndarray,
+    step_size: int = 1,
+    radius: int = 2,
+    bin_from: int = 256,
+    bin_to: int = 256,
+    directions: Iterable[Direction] = (Direction.EAST,
+                                       Direction.SOUTH_EAST,
+                                       Direction.SOUTH,
+                                       Direction.SOUTH_WEST)):
+    """
+    Examples:
+        To scale down the image from a 128 max value to 32, we use
+        bin_from = 128, bin_to = 32.
 
+        The range will collapse from 128 to 32.
+
+        This thus optimizes the GLCM speed.
+
+    Args:
+        im: Image to Process
+        step_size: Stride Between GLCMs
+        radius: Radius of Window
+        bin_from: Binarize from.
+        bin_to: Binarize to.
+        directions: Directions to pair the windows.
+
+    Returns:
+
+
+    """
+    return GLCM(step_size, radius, bin_from, bin_to, directions).run(im)
+
+
+class GLCM:
     def __init__(self,
                  step_size: int = 1,
                  radius: int = 2,
@@ -79,6 +112,17 @@ class GLCM:
         return self.radius * 2 + 1
 
     def run(self, im: np.ndarray):
+        """ Executes running GLCM. Returns the GLCM Feature array
+
+        Args:
+            im: Image to process. Can be 2D or 3D.
+
+        Returns:
+            An np.ndarray of Shape,
+             3D: (rows, cols, channels, features),
+             2D: (rows, cols, features)
+
+        """
         shape = im_shape_after_glcm(im.shape, self.step_size, self.radius)
         glcm_cells = np.prod(shape) * len(self.directions)
         self.progress = tqdm(total=glcm_cells, desc="GLCM Progress",

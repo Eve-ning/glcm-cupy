@@ -18,11 +18,12 @@ as it's dependent on the version of CUDA you have.
 
 I recommend using `conda-forge` as it worked for me :)
 
+For CUDA `11.6`, we use
 ```shell
-conda install -c conda-forge cupy cudatoolkit=__._
+conda install -c conda-forge cupy cudatoolkit=11.6
 ```
 
-E.g. my CUDA is `11.6`, thus
+Replace the version you have on the arg.
 
 ```shell
 conda install -c conda-forge cupy cudatoolkit=11.6
@@ -31,22 +32,90 @@ conda install -c conda-forge cupy cudatoolkit=11.6
 # Usage
 
 The usage is simple:
-```py
-from glcm_cupy import GLCM
-ar: np.ndarray = ...
-g = GLCM(...).from_3dimage(ar)
-g = GLCM(...).from_2dimage(ar)
+
+```pycon
+>>> from glcm_cupy import GLCM
+>>> import numpy as np
+>>> from PIL import Image
+>>> ar = np.asarray(Image.open("image.jpg"))
+>>> ar.shape
+(1080, 1920, 3)
+>>> g = GLCM(...).run(ar)
+>>> g.shape
+(1074, 1914, 3, 8)
 ```
 
-```py
-import numpy as np
-from glcm_cupy import GLCM
-from PIL import Image
+The last dimension of `g` is the GLCM Features.
 
-ar = np.asarray(Image.open("image.jpg"))
-g = GLCM(bin_from=256, bin_to=16).from_3dimage(ar)
+To retrieve a specific GLCM Feature:
+
+```pycon
+>>> from glcm_cupy import CONTRAST
+>>> g[..., CONTRAST].shape
+(1074, 1914, 3)
 ```
 
+## Radius & Step Size
+
+- The radius defines the window radius for each GLCM window.
+- The step size defines the distance between each window.
+  - If it's diagonal, it treats a diagonal step as 1. It's not the euclidean distance.
+
+## Binning
+
+To reduce GLCM processing time, you can specify `bin_from` & `bin_to`.
+
+This will bin the image from a range to another.
+
+I highly recommend using this to reduce time taken before raising it.
+
+E.g.
+
+> I have an RGB image with a max value of 255.
+> 
+> I limit the max value to 31. This reduces the processing time.
+> 
+> `GLCM(..., bin_from=256, bin_to=32).run(ar)`
+
+The lower the max value, the smaller the GLCM required. Thus allowing for
+more GLCMs to run concurrently.
+
+## Direction
+
+By default we have the following directions to run GLCM on.
+
+- East: `Direction.EAST`
+- South East: `Direction.SOUTH_EAST`
+- South: `Direction.SOUTH`
+- South West: `Direction.SOUTH_WEST`
+
+For each direction, the GLCM will be bi-directional.
+
+We can specify only certain directions here.
+
+```pycon
+>>> from glcm_cupy import GLCM
+>>> GLCM()
+>>> g = GLCM(directions=(Direction.SOUTH_WEST, Direction.SOUTH))
+```
+
+The result of these directions will be averaged together.
+
+# Notes
+
+> Q: Why did my image shrink?
+> 
+> The image shrunk due to `step_size` & `radius`.
+> 
+> The amount of shrink per XY Dimension is
+> `size - 2 * step_size - 2 * radius`
+
+> Q: What's the difference between this and `glcmbin5`?
+> 
+> This is the faster one, and easier to use.
+> I highly recommend avoiding `glcmbin5` as it has C++, which means you need to compile manually.
+> 
+> It's the first version of GLCM I made.
 
 ## CUDA Notes
 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "glcm_cupy"
-version = "0.1.0"
+version = "0.1.1"
 description = "Binned GLCM 5 Features implemented in CuPy"
 authors = ["Evening"]
 license = "MIT"
@@ -13,9 +13,11 @@ classifiers = [
 [tool.poetry.dependencies]
 python = ">=3.8"
 scikit-image = "~=0.18.3"
+tqdm = "~=4.63.0"
 
 [tool.poetry.dev-dependencies]
 scikit-image = "~=0.18.3"
+tqdm = "~=4.63.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

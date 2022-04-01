@@ -1,14 +1,18 @@
 [tool.poetry]
 name = "glcm_cupy"
-version = "0.1.1"
+version = "0.1.2"
 description = "Binned GLCM 5 Features implemented in CuPy"
 authors = ["Evening"]
 license = "MIT"
+homepage = "https://github.com/Eve-ning/glcmbin5_cupy"
+repository = "https://github.com/Eve-ning/glcmbin5_cupy"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: GPU :: NVIDIA CUDA",
     "Programming Language :: Python :: 3.8"
 ]
+readme="README.md"
+exclude = ["tests/*"]
 
 [tool.poetry.dependencies]
 python = ">=3.8"

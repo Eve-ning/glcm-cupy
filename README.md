@@ -61,6 +61,8 @@ You may also consider simply `glcm` if you're not reusing `GLCM()`
 >>> g = glcm(ar, ...)
 ```
 
+## **[Example: Processing an Image](examples/process_an_image/main.py)**
+
 ## Features
 
 These are the features implemented.

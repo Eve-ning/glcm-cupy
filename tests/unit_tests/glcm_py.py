@@ -33,6 +33,7 @@ def glcm_py(i: np.ndarray,
     # Populate the GLCM
     for i_, j_ in zip(i_flat, j_flat):
         glcm[i_, j_] += 1
+        glcm[j_, i_] += 1
 
     # Convert to probability
     glcm /= len(i_flat)

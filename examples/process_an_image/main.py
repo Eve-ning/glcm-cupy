@@ -4,7 +4,8 @@ import numpy as np
 from PIL import Image
 
 # Here, we load in the array
-ar = np.asarray(Image.open("image.jpg"))[::4,::4]
+# We divide the image by / 16 as it'll take too long
+ar = np.asarray(Image.open("../../data/image.jpg"))[::4,::4]
 
 #%%
 # We may use the class variant to run GLCM
@@ -22,12 +23,12 @@ g = glcm(ar, bin_from=256, bin_to=16)
 # We yield the features using constants defined in conf
 from glcm_cupy.conf import CONTRAST, CORRELATION, ASM
 
-g[..., CONTRAST]
-g[..., CORRELATION]
-g[..., ASM]
+print(g[..., CONTRAST])
+print(g[..., CORRELATION])
+print(g[..., ASM])
 #%%
 # Alternatively, since these constants are simply integers
-g[..., 0]
-g[..., 1]
-g[..., 2]
+print(g[..., 0])
+print(g[..., 1])
+print(g[..., 2])
 

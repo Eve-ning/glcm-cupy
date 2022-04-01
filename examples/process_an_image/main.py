@@ -3,15 +3,19 @@
 import numpy as np
 from PIL import Image
 
+
 # Here, we load in the array
 # We divide the image by / 16 as it'll take too long
+
 ar = np.asarray(Image.open("../../data/image.jpg"))[::4,::4]
 
 #%%
 # We may use the class variant to run GLCM
-from glcm_cupy import GLCM
+from glcm_cupy import GLCM, Direction
 
-g = GLCM(bin_from=256, bin_to=16).run(ar)
+g = GLCM(
+    directions=(Direction.EAST, Direction.SOUTH_EAST),
+    bin_from=256, bin_to=16).run(ar)
 
 #%%
 # Alternatively, use the function variant
@@ -31,4 +35,3 @@ print(g[..., ASM])
 print(g[..., 0])
 print(g[..., 1])
 print(g[..., 2])
-

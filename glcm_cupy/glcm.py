@@ -213,7 +213,7 @@ class GLCM:
                     windows_part_count = part_i.shape[0]
 
                     glcm_features_dir[start:start + windows_part_count] = \
-                        self._from_windows(
+                        self.run_ij(
                             part_i,
                             part_j
                         )
@@ -231,16 +231,16 @@ class GLCM:
 
         return np.stack(glcm_features_dirs).mean(axis=0)
 
-    def _from_windows(self,
-                      i: np.ndarray,
-                      j: np.ndarray):
+    def run_ij(self,
+               i: np.ndarray,
+               j: np.ndarray):
         """ Generate the GLCM from the I J Window
 
         Examples:
 
             >>> ar_0 = np.random.randint(0, 100, 10, dtype=np.uint8)
             >>> ar_1 = np.random.randint(0, 100, 10, dtype=np.uint8)
-            >>> g = GLCM()._from_windows(ar_0[...,np.newaxis], ar_1[...,np.newaxis])
+            >>> g = GLCM().run_ij(ar_0[...,np.newaxis], ar_1[...,np.newaxis])
 
         Notes:
             i must be the same shape as j
@@ -251,8 +251,8 @@ class GLCM:
             i.shape == j.shape == (100, 25)
 
         Args:
-            i: I Window
-            j: J Window
+            i: 1st np.ndarray
+            j: 2nd np.ndarray
 
         Returns:
             The GLCM feature array, of size [partition_size, 8]

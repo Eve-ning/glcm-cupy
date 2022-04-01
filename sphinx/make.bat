@@ -26,6 +26,7 @@ if "%1" == "" goto help
 
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 robocopy build/html ../docs /purge /E
+echo. 2>../docs/.nojekyll
 goto end
 
 :help

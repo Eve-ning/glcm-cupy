@@ -4,7 +4,8 @@ import numpy as np
 
 
 def glcm_py(i: np.ndarray,
-            j: np.ndarray) -> Dict[str, float]:
+            j: np.ndarray,
+            bin_to: int) -> Dict[str, float]:
     """ Calculate the expected GLCM features using Python
 
     Notes:
@@ -27,7 +28,7 @@ def glcm_py(i: np.ndarray,
     assert len(i_flat) == len(j_flat), \
         f"The shapes for i {i.shape} != j {j.shape}."
 
-    glcm_size = max(max(i_flat) + 1, max(j_flat) + 1)
+    glcm_size = bin_to
     glcm = np.zeros((glcm_size, glcm_size), dtype=float)
 
     # Populate the GLCM
@@ -36,7 +37,7 @@ def glcm_py(i: np.ndarray,
         glcm[j_, i_] += 1
 
     # Convert to probability
-    glcm /= len(i_flat)
+    glcm /= len(i_flat) * 2
 
     homogeneity = 0.0
     contrast = 0.0
@@ -70,6 +71,14 @@ def glcm_py(i: np.ndarray,
                     * (j - mean_j) \
                     / ((var_i * var_j) ** 0.5)
 
+    contrast /= (glcm_size - 1) ** 2
+    mean_i /= (glcm_size - 1)
+    mean_j /= (glcm_size - 1)
+    var_i /= (glcm_size - 1) ** 2
+    var_j /= (glcm_size - 1) ** 2
+    correlation += 1
+    correlation /= 2
+
     return dict(
         homogeneity=homogeneity,
         contrast=contrast,
@@ -80,3 +89,4 @@ def glcm_py(i: np.ndarray,
         var_j=var_j,
         correlation=correlation
     )
+

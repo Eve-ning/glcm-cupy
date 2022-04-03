@@ -21,7 +21,8 @@ def glcm(
     directions: Iterable[Direction] = (Direction.EAST,
                                        Direction.SOUTH_EAST,
                                        Direction.SOUTH,
-                                       Direction.SOUTH_WEST)):
+                                       Direction.SOUTH_WEST),
+    max_partition_size: int = MAX_PARTITION_SIZE):
     """
     Examples:
         To scale down the image from a 128 max value to 32, we use
@@ -38,12 +39,14 @@ def glcm(
         bin_from: Binarize from.
         bin_to: Binarize to.
         directions: Directions to pair the windows.
+            max_partition_size: Maximum number of windows to parse at once
 
     Returns:
 
 
     """
-    return GLCM(step_size, radius, bin_from, bin_to, directions).run(im)
+    return GLCM(step_size, radius, bin_from, bin_to,
+                directions, max_partition_size).run(im)
 
 
 class GLCM:
@@ -55,7 +58,9 @@ class GLCM:
                  directions: Iterable[Direction] = (Direction.EAST,
                                                     Direction.SOUTH_EAST,
                                                     Direction.SOUTH,
-                                                    Direction.SOUTH_WEST)
+                                                    Direction.SOUTH_WEST),
+                 max_partition_size: int = MAX_PARTITION_SIZE,
+                 max_threads: int = MAX_THREADS,
                  ):
         """ Initialize Settings for GLCM
 
@@ -73,12 +78,16 @@ class GLCM:
             bin_from: Binarize from.
             bin_to: Binarize to.
             directions: Directions to pair the windows.
+            max_partition_size: Maximum number of windows to parse at once
+            max_threads: Maximum number of threads to use per block
         """
         self.step_size = step_size
         self.radius = radius
         self.bin_from = bin_from
         self.bin_to = bin_to
         self.directions = directions
+        self.max_partition_size = max_partition_size
+        self.max_threads = max_threads
         self.progress = None
 
         self.i_gpu = cp.zeros((self._diameter ** 2,), dtype=cp.uint8)
@@ -195,7 +204,7 @@ class GLCM:
 
             # If 45000 windows, 10000 partition size,
             # We have 5 partitions (10K, 10K, 10K, 10K, 5K)
-            partition_count = math.ceil(windows_count / MAX_PARTITION_SIZE)
+            partition_count = math.ceil(windows_count / self.max_partition_size)
 
             for partition in range(partition_count):
                 with cp.cuda.Device() as dev:
@@ -203,8 +212,8 @@ class GLCM:
                     # Though [1,2,3][:5] == [1,2,3]
                     # This means windows_part_i will be correctly partitioned.
                     part_i = windows_i[
-                             (start := partition * MAX_PARTITION_SIZE):
-                             (end := (partition + 1) * MAX_PARTITION_SIZE)
+                             (start := partition * self.max_partition_size):
+                             (end := (partition + 1) * self.max_partition_size)
                              ]
                     part_j = windows_j[start:end]
 
@@ -269,7 +278,7 @@ class GLCM:
         if i.shape != j.shape:
             raise ValueError(f"Shape of i {i.shape} != j {j.shape}")
 
-        # partition_size != MAX_PARTITION_SIZE
+        # partition_size != self.max_partition_size
         # It may be the leftover partition.
         partition_size = i.shape[0]
 
@@ -294,8 +303,10 @@ class GLCM:
         self.j_gpu = cp.asarray(j)
 
         self.glcm_create_kernel(
-            grid=(grid := self._calc_grid_size(no_of_windows, self.bin_to)),
-            block=(MAX_THREADS,),
+            grid=(grid := self._calc_grid_size(no_of_windows,
+                                               self.bin_to,
+                                               self.max_threads)),
+            block=(self.max_threads,),
             args=(
                 self.i_gpu,
                 self.j_gpu,
@@ -308,7 +319,7 @@ class GLCM:
         )
 
         feature_args = dict(
-            grid=grid, block=(MAX_THREADS,),
+            grid=grid, block=(self.max_threads,),
             args=(self.glcm,
                   self.bin_to,
                   no_of_values,

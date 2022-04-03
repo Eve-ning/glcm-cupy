@@ -22,7 +22,8 @@ def glcm(
                                        Direction.SOUTH_EAST,
                                        Direction.SOUTH,
                                        Direction.SOUTH_WEST),
-    max_partition_size: int = MAX_PARTITION_SIZE):
+    max_partition_size: int = MAX_PARTITION_SIZE,
+    normalize_features: bool = True) -> np.ndarray:
     """
     Examples:
         To scale down the image from a 128 max value to 32, we use
@@ -39,17 +40,15 @@ def glcm(
         bin_from: Binarize from.
         bin_to: Binarize to.
         directions: Directions to pair the windows.
-            max_partition_size: Maximum number of windows to parse at once
+        max_partition_size: Maximum number of windows to parse at once
+        normalize_features: Whether to normalize features to [0, 1]
 
     Returns:
 
 
     """
     return GLCM(step_size, radius, bin_from, bin_to,
-                directions, max_partition_size).run(im)
-
-
-from line_profiler_pycharm import profile
+                directions, max_partition_size, normalize_features).run(im)
 
 
 class GLCM:
@@ -127,7 +126,6 @@ class GLCM:
     def _diameter(self):
         return self.radius * 2 + 1
 
-    @profile
     def run(self, im: np.ndarray):
         """ Executes running GLCM. Returns the GLCM Feature array
 
@@ -170,7 +168,6 @@ class GLCM:
 
         return np.stack(glcm_chs, axis=2)
 
-    @profile
     def _from_2dimage(self,
                       im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a single band image
@@ -251,7 +248,6 @@ class GLCM:
 
         return np.stack(glcm_features_dirs).mean(axis=0)
 
-    @profile
     def run_ij(self,
                i: np.ndarray,
                j: np.ndarray):
@@ -332,14 +328,15 @@ class GLCM:
         self.glcm_feature_kernel_1(**feature_args)
         self.glcm_feature_kernel_2(**feature_args)
 
-        # This scales the glcm features to [0, 1]
-        self.features[..., CONTRAST] /= (self.bin_to - 1) ** 2
-        self.features[..., MEAN_I] /= (self.bin_to - 1)
-        self.features[..., MEAN_J] /= (self.bin_to - 1)
-        self.features[..., VAR_I] /= (self.bin_to - 1) ** 2
-        self.features[..., VAR_J] /= (self.bin_to - 1) ** 2
-        self.features[..., CORRELATION] += 1
-        self.features[..., CORRELATION] /= 2
+        if self.normalize_features:
+            # This scales the glcm features to [0, 1]
+            self.features[..., CONTRAST] /= (self.bin_to - 1) ** 2
+            self.features[..., MEAN_I] /= (self.bin_to - 1)
+            self.features[..., MEAN_J] /= (self.bin_to - 1)
+            self.features[..., VAR_I] /= (self.bin_to - 1) ** 2
+            self.features[..., VAR_J] /= (self.bin_to - 1) ** 2
+            self.features[..., CORRELATION] += 1
+            self.features[..., CORRELATION] /= 2
 
         return self.features[:no_of_windows]
 

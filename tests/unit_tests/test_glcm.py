@@ -49,7 +49,7 @@ def test_glcm_from_windows(i, j):
         correlation=float(g[..., CORRELATION].sum() / windows)
     )
 
-    expected = glcm_py(i, j)
+    expected = glcm_py(i, j, 256)
     assert actual == pytest.approx(expected)
 
 

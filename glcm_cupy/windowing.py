@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Tuple, List, Iterable
 
 import numpy as np
+import cupy as cp
 from skimage.util import view_as_windows
 
 
@@ -83,7 +84,7 @@ def make_windows(im: np.ndarray,
         )
 
     diameter = radius * 2 + 1
-    ij = view_as_windows(im, (diameter , diameter))
+    ij = cp.asarray(view_as_windows(im, (diameter , diameter)))
 
     ijs: List[Tuple[np.ndarray, np.ndarray]] = []
 

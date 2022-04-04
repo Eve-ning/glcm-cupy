@@ -103,7 +103,7 @@ extern "C" {
         TID to respective windows
         =====================================
         TID is 1D, we need to partition them to their windows
-        Each window area is `noOfValues` == _diameter ^ 2
+        Each window area is `noOfValues` == diameter ^ 2
         We have total of `noOfWindows` number of windows
         Thus, we simply take `wid = tid / noOfValues`
         WID: Window ID
@@ -137,6 +137,12 @@ extern "C" {
                 g[
                 col +
                 row * glcmSize +
+                wid_image * glcmArea
+                ]), x);
+            atomicAdd(&(
+                g[
+                row +
+                col * glcmSize +
                 wid_image * glcmArea
                 ]), x);
         }
@@ -182,7 +188,7 @@ extern "C" {
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / noOfValues;
+        float p = (float)(g[tid]) / (noOfValues * 2);
 
         /**
         =====================================
@@ -257,7 +263,7 @@ extern "C" {
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / noOfValues;
+        float p = (float)(g[tid]) / (noOfValues * 2);
 
         atomicAdd(
             &features[VAR_I + wid * NO_OF_FEATURES],
@@ -300,7 +306,7 @@ extern "C" {
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / noOfValues;
+        float p = (float)(g[tid]) / (noOfValues * 2);
 
         atomicAdd(
             &features[CORRELATION + wid * NO_OF_FEATURES],

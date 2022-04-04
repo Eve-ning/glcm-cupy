@@ -6,6 +6,8 @@ This directly utilizes CUDA to speed up the processing of GLCM.
 
 # Installation
 
+**Python >= 3.7**
+
 First, you need to install this
 
 ```shell
@@ -26,7 +28,7 @@ conda install -c conda-forge cupy cudatoolkit=11.6
 Replace the version you have on the arg.
 
 ```shell
-conda install -c conda-forge cupy cudatoolkit=11.6
+conda install -c conda-forge cupy cudatoolkit=__._
 ```
 
 # Usage

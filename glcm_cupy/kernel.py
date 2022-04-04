@@ -192,7 +192,7 @@ extern "C" {
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / noOfValues;
+        float p = (float)(g[tid]) / (noOfValues * 2);
 
         /**
         =====================================
@@ -267,7 +267,7 @@ extern "C" {
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / noOfValues;
+        float p = (float)(g[tid]) / (noOfValues * 2);
 
         atomicAdd(
             &features[VAR_I + wid * NO_OF_FEATURES],
@@ -310,7 +310,7 @@ extern "C" {
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / noOfValues;
+        float p = (float)(g[tid]) / (noOfValues * 2);
 
         atomicAdd(
             &features[CORRELATION + wid * NO_OF_FEATURES],

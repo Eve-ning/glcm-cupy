@@ -22,7 +22,8 @@ def glcm(
                                        Direction.SOUTH_EAST,
                                        Direction.SOUTH,
                                        Direction.SOUTH_WEST),
-    max_partition_size: int = MAX_PARTITION_SIZE):
+    max_partition_size: int = MAX_PARTITION_SIZE,
+    normalize_features: bool = True) -> np.ndarray:
     """
     Examples:
         To scale down the image from a 128 max value to 32, we use
@@ -39,14 +40,15 @@ def glcm(
         bin_from: Binarize from.
         bin_to: Binarize to.
         directions: Directions to pair the windows.
-            max_partition_size: Maximum number of windows to parse at once
+        max_partition_size: Maximum number of windows to parse at once
+        normalize_features: Whether to normalize features to [0, 1]
 
     Returns:
 
 
     """
     return GLCM(step_size, radius, bin_from, bin_to,
-                directions, max_partition_size).run(im)
+                directions, max_partition_size, normalize_features).run(im)
 
 
 class GLCM:
@@ -61,6 +63,7 @@ class GLCM:
                                                     Direction.SOUTH_WEST),
                  max_partition_size: int = MAX_PARTITION_SIZE,
                  max_threads: int = MAX_THREADS,
+                 normalize_features: bool = True
                  ):
         """ Initialize Settings for GLCM
 
@@ -80,6 +83,7 @@ class GLCM:
             directions: Directions to pair the windows.
             max_partition_size: Maximum number of windows to parse at once
             max_threads: Maximum number of threads to use per block
+            normalize_features: Whether to normalize features to [0, 1]
         """
         self.step_size = step_size
         self.radius = radius
@@ -88,11 +92,13 @@ class GLCM:
         self.directions = directions
         self.max_partition_size = max_partition_size
         self.max_threads = max_threads
+        self.normalize_features = normalize_features
         self.progress = None
 
-        self.i_gpu = cp.zeros((self._diameter ** 2,), dtype=cp.uint8)
-        self.j_gpu = cp.zeros((self._diameter ** 2,), dtype=cp.uint8)
-
+        self.glcm = cp.zeros((self.max_partition_size, self.bin_to, self.bin_to),
+                             dtype=cp.uint8)
+        self.features = cp.zeros((self.max_partition_size, NO_OF_FEATURES),
+                                 dtype=cp.float32)
         if self.radius < 0:
             raise ValueError(
                 f"Radius {radius} should be > 0)"
@@ -182,6 +188,8 @@ class GLCM:
             raise ValueError(f"Image must be 2 dimensional. "
                              f"im.ndim={im.ndim}")
 
+        im = self._binner(im, self.bin_from, self.bin_to)
+
         # Both dims are xy flattened.
         # windows.shape == [window_ix, cell_ix]
         dirs_ij = make_windows(im,
@@ -195,7 +203,6 @@ class GLCM:
         for dir, dir_ij in zip(self.directions, dirs_ij):
 
             windows_i, windows_j = dir_ij
-
             windows_count = windows_i.shape[0]
             glcm_features_dir = cp.zeros(
                 (windows_count, NO_OF_FEATURES),
@@ -204,17 +211,17 @@ class GLCM:
 
             # If 45000 windows, 10000 partition size,
             # We have 5 partitions (10K, 10K, 10K, 10K, 5K)
-            partition_count = math.ceil(windows_count / self.max_partition_size)
+            partition_count = math.ceil(
+                windows_count / self.max_partition_size)
 
             for partition in range(partition_count):
                 with cp.cuda.Device() as dev:
                     # As above, we have an uneven partition
                     # Though [1,2,3][:5] == [1,2,3]
                     # This means windows_part_i will be correctly partitioned.
-                    part_i = windows_i[
-                             (start := partition * self.max_partition_size):
-                             (end := (partition + 1) * self.max_partition_size)
-                             ]
+                    start = partition * self.max_partition_size
+                    end = (partition + 1) * self.max_partition_size
+                    part_i = windows_i[start:end]
                     part_j = windows_j[start:end]
 
                     # We don't need to figure out the leftover partition size
@@ -239,7 +246,19 @@ class GLCM:
                     .get()
             )
 
-        return np.stack(glcm_features_dirs).mean(axis=0)
+        ar = np.stack(glcm_features_dirs).mean(axis=0)
+
+        if self.normalize_features:
+            # This scales the glcm features to [0, 1]
+            ar[..., CONTRAST] /= (self.bin_to - 1) ** 2
+            ar[..., MEAN_I] /= (self.bin_to - 1)
+            ar[..., MEAN_J] /= (self.bin_to - 1)
+            ar[..., VAR_I] /= (self.bin_to - 1) ** 2
+            ar[..., VAR_J] /= (self.bin_to - 1) ** 2
+            ar[..., CORRELATION] += 1
+            ar[..., CORRELATION] /= 2
+        return ar
+
 
     def run_ij(self,
                i: np.ndarray,
@@ -280,6 +299,7 @@ class GLCM:
             raise ValueError(f"Shape of i {i.shape} != j {j.shape}")
 
         # Reset data
+        self.glcm[:] = 0
         self.features[:] = 0
 
         no_of_windows = i.shape[0]
@@ -291,17 +311,15 @@ class GLCM:
                 f" i: {i.dtype} j: {j.dtype}"
             )
 
-        self.i_gpu = cp.asarray(i)
-        self.j_gpu = cp.asarray(j)
-
+        grid = self._calc_grid_size(no_of_windows,
+                                     self.bin_to,
+                                     self.max_threads)
         self.glcm_create_kernel(
-            grid=(grid := self._calc_grid_size(no_of_windows,
-                                               self.bin_to,
-                                               self.max_threads)),
+            grid=grid,
             block=(self.max_threads,),
             args=(
-                self.i_gpu,
-                self.j_gpu,
+                i,
+                j,
                 self.bin_to,
                 no_of_values,
                 no_of_windows,
@@ -318,11 +336,10 @@ class GLCM:
                   no_of_windows,
                   self.features)
         )
-
         self.glcm_feature_kernel_0(**feature_args)
         self.glcm_feature_kernel_1(**feature_args)
         self.glcm_feature_kernel_2(**feature_args)
-        del self.glcm
+
         return self.features[:no_of_windows]
 
     @staticmethod
@@ -353,7 +370,8 @@ class GLCM:
         blocks_req = max(blocks_req_glcm_features, blocks_req_glcm_populate)
 
         # We split it to 2 dims: A -> B x B
-        return (_ := int(blocks_req ** 0.5) + 1), _
+        b = int(blocks_req ** 0.5) + 1
+        return b, b
 
     @staticmethod
     def _binner(im: np.ndarray, bin_from: int, bin_to: int) -> np.ndarray:

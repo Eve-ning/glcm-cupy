@@ -221,6 +221,7 @@ class GLCM:
                     # We can simply yield the length of the leftover partition
                     windows_part_count = part_i.shape[0]
 
+                    self.glcm[:] = 0
                     glcm_features_dir[start:start + windows_part_count] = \
                         self.run_ij(
                             part_i,
@@ -278,17 +279,8 @@ class GLCM:
         if i.shape != j.shape:
             raise ValueError(f"Shape of i {i.shape} != j {j.shape}")
 
-        # partition_size != self.max_partition_size
-        # It may be the leftover partition.
-        partition_size = i.shape[0]
-
-        self.glcm = cp.zeros((partition_size, self.bin_to, self.bin_to),
-                             dtype=cp.uint8)
-        self.features = cp.zeros((partition_size, NO_OF_FEATURES),
-                                 dtype=cp.float32)
-
-        i = self._binner(i, self.bin_from, self.bin_to)
-        j = self._binner(j, self.bin_from, self.bin_to)
+        # Reset data
+        self.features[:] = 0
 
         no_of_windows = i.shape[0]
         no_of_values = self._diameter ** 2

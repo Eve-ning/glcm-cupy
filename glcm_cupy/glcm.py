@@ -95,9 +95,9 @@ class GLCM:
         self.normalize_features = normalize_features
         self.progress = None
 
-        self.glcm = cp.zeros((MAX_PARTITION_SIZE, self.bin_to, self.bin_to),
+        self.glcm = cp.zeros((self.max_partition_size, self.bin_to, self.bin_to),
                              dtype=cp.uint8)
-        self.features = cp.zeros((MAX_PARTITION_SIZE, NO_OF_FEATURES),
+        self.features = cp.zeros((self.max_partition_size, NO_OF_FEATURES),
                                  dtype=cp.float32)
         if self.radius < 0:
             raise ValueError(
@@ -219,10 +219,9 @@ class GLCM:
                     # As above, we have an uneven partition
                     # Though [1,2,3][:5] == [1,2,3]
                     # This means windows_part_i will be correctly partitioned.
-                    part_i = windows_i[
-                             (start := partition * self.max_partition_size):
-                             (end := (partition + 1) * self.max_partition_size)
-                             ]
+                    start = partition * self.max_partition_size
+                    end = (partition + 1) * self.max_partition_size
+                    part_i = windows_i[start:end]
                     part_j = windows_j[start:end]
 
                     # We don't need to figure out the leftover partition size
@@ -234,7 +233,7 @@ class GLCM:
                             part_i,
                             part_j
                         )
-                    # dev.synchronize()
+                    dev.synchronize()
                     self.progress.update(windows_part_count)
 
             shape = im_shape_after_glcm(im.shape,
@@ -246,7 +245,19 @@ class GLCM:
                     .get()
             )
 
-        return np.stack(glcm_features_dirs).mean(axis=0)
+        ar = np.stack(glcm_features_dirs).mean(axis=0)
+
+        if self.normalize_features:
+            # This scales the glcm features to [0, 1]
+            ar[..., CONTRAST] /= (self.bin_to - 1) ** 2
+            ar[..., MEAN_I] /= (self.bin_to - 1)
+            ar[..., MEAN_J] /= (self.bin_to - 1)
+            ar[..., VAR_I] /= (self.bin_to - 1) ** 2
+            ar[..., VAR_J] /= (self.bin_to - 1) ** 2
+            ar[..., CORRELATION] += 1
+            ar[..., CORRELATION] /= 2
+        return ar
+
 
     def run_ij(self,
                i: np.ndarray,
@@ -299,10 +310,11 @@ class GLCM:
                 f" i: {i.dtype} j: {j.dtype}"
             )
 
+        grid = self._calc_grid_size(no_of_windows,
+                                     self.bin_to,
+                                     self.max_threads)
         self.glcm_create_kernel(
-            grid=(grid := self._calc_grid_size(no_of_windows,
-                                               self.bin_to,
-                                               self.max_threads)),
+            grid=grid,
             block=(self.max_threads,),
             args=(
                 i,
@@ -323,20 +335,9 @@ class GLCM:
                   no_of_windows,
                   self.features)
         )
-
         self.glcm_feature_kernel_0(**feature_args)
         self.glcm_feature_kernel_1(**feature_args)
         self.glcm_feature_kernel_2(**feature_args)
-
-        if self.normalize_features:
-            # This scales the glcm features to [0, 1]
-            self.features[..., CONTRAST] /= (self.bin_to - 1) ** 2
-            self.features[..., MEAN_I] /= (self.bin_to - 1)
-            self.features[..., MEAN_J] /= (self.bin_to - 1)
-            self.features[..., VAR_I] /= (self.bin_to - 1) ** 2
-            self.features[..., VAR_J] /= (self.bin_to - 1) ** 2
-            self.features[..., CORRELATION] += 1
-            self.features[..., CORRELATION] /= 2
 
         return self.features[:no_of_windows]
 
@@ -368,7 +369,8 @@ class GLCM:
         blocks_req = max(blocks_req_glcm_features, blocks_req_glcm_populate)
 
         # We split it to 2 dims: A -> B x B
-        return (_ := int(blocks_req ** 0.5) + 1), _
+        b = int(blocks_req ** 0.5) + 1
+        return b, b
 
     @staticmethod
     def _binner(im: np.ndarray, bin_from: int, bin_to: int) -> np.ndarray:

@@ -71,14 +71,6 @@ def glcm_py(i: np.ndarray,
                     * (j - mean_j) \
                     / ((var_i * var_j) ** 0.5)
 
-    contrast /= (glcm_size - 1) ** 2
-    mean_i /= (glcm_size - 1)
-    mean_j /= (glcm_size - 1)
-    var_i /= (glcm_size - 1) ** 2
-    var_j /= (glcm_size - 1) ** 2
-    correlation += 1
-    correlation /= 2
-
     return dict(
         homogeneity=homogeneity,
         contrast=contrast,
@@ -89,4 +81,3 @@ def glcm_py(i: np.ndarray,
         var_j=var_j,
         correlation=correlation
     )
-

@@ -6,11 +6,9 @@ glcm_module = cp.RawModule(
 #define CONTRAST 1
 #define ASM 2
 #define MEAN_I 3
-#define MEAN_J 4
-#define VAR_I 5
-#define VAR_J 6
-#define CORRELATION 7
-#define NO_OF_FEATURES 8
+#define VAR_I 4
+#define CORRELATION 5
+#define NO_OF_FEATURES 6
 
 extern "C" {
     __device__ static inline char atomicAdd(
@@ -207,9 +205,7 @@ extern "C" {
         | CONTRAST       | | CONTRAST       | | CONTRAST       |
         | ASM            | | ASM            | | ASM            |
         | MEAN_I         | | MEAN_I         | | MEAN_I         |
-        | MEAN_J         | | MEAN_J         | | MEAN_J         |
         | VAR_I          | | VAR_I          | | VAR_I          |
-        | VAR_J          | | VAR_J          | | VAR_J          |
         | CORRELATION    | | CORRELATION    | | CORRELATION    |
         +----------------+ +----------------+ +----------------+
         Window 0           Window 1           Window 2           ...
@@ -237,10 +233,6 @@ extern "C" {
             p * i
         );
 
-        atomicAdd(
-            &features[MEAN_J + wid * NO_OF_FEATURES],
-            p * j
-        );
     }
     __global__ void glcmFeatureKernel1(
         const unsigned char* g,
@@ -274,11 +266,6 @@ extern "C" {
             p * powf((i - features[MEAN_I + wid * NO_OF_FEATURES]), 2.0f)
         );
 
-        atomicAdd(
-            &features[VAR_J + wid * NO_OF_FEATURES],
-            p * powf((j - features[MEAN_J + wid * NO_OF_FEATURES]), 2.0f)
-        );
-
     }
 
     __global__ void glcmFeatureKernel2(
@@ -304,8 +291,7 @@ extern "C" {
         if (wid >= noOfWindows) return;
 
         // As we invert Variance, they should never be 0.
-        if (features[VAR_I + wid * NO_OF_FEATURES] == 0 ||
-            features[VAR_J + wid * NO_OF_FEATURES] == 0) return;
+        if (features[VAR_I + wid * NO_OF_FEATURES] == 0) return;
 
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
@@ -314,10 +300,8 @@ extern "C" {
 
         atomicAdd(
             &features[CORRELATION + wid * NO_OF_FEATURES],
-            p * (i - features[MEAN_I + wid * NO_OF_FEATURES])
-              * (j - features[MEAN_J + wid * NO_OF_FEATURES])
-              * rsqrtf(features[VAR_I + wid * NO_OF_FEATURES]
-                     * features[VAR_J + wid * NO_OF_FEATURES])
+            p * powf((i - features[MEAN_I + wid * NO_OF_FEATURES]), 2.0f)
+              / features[VAR_I + wid * NO_OF_FEATURES]
         );
     }
 }

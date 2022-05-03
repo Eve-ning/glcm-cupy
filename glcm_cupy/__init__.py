@@ -1,4 +1,4 @@
-from .conf import HOMOGENEITY, CONTRAST, ASM, MEAN_I, MEAN_J, VAR_I, VAR_J, CORRELATION
+from .conf import HOMOGENEITY, CONTRAST, ASM, MEAN_I, VAR_I, CORRELATION
 from .glcm import GLCM, glcm
 from .windowing import Direction, im_shape_after_glcm
 
@@ -9,9 +9,7 @@ __all__ = [
     "CONTRAST",
     "ASM",
     "MEAN_I",
-    "MEAN_J",
     "VAR_I",
-    "VAR_J",
     "CORRELATION",
     "Direction",
     "im_shape_after_glcm"

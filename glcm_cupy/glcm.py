@@ -95,8 +95,9 @@ class GLCM:
         self.normalize_features = normalize_features
         self.progress = None
 
-        self.glcm = cp.zeros((self.max_partition_size, self.bin_to, self.bin_to),
-                             dtype=cp.uint8)
+        self.glcm = cp.zeros(
+            (self.max_partition_size, self.bin_to, self.bin_to),
+            dtype=cp.uint8)
         self.features = cp.zeros((self.max_partition_size, NO_OF_FEATURES),
                                  dtype=cp.float32)
         if self.radius < 0:
@@ -252,13 +253,10 @@ class GLCM:
             # This scales the glcm features to [0, 1]
             ar[..., CONTRAST] /= (self.bin_to - 1) ** 2
             ar[..., MEAN_I] /= (self.bin_to - 1)
-            ar[..., MEAN_J] /= (self.bin_to - 1)
             ar[..., VAR_I] /= (self.bin_to - 1) ** 2
-            ar[..., VAR_J] /= (self.bin_to - 1) ** 2
             ar[..., CORRELATION] += 1
             ar[..., CORRELATION] /= 2
         return ar
-
 
     def run_ij(self,
                i: np.ndarray,
@@ -312,8 +310,8 @@ class GLCM:
             )
 
         grid = self._calc_grid_size(no_of_windows,
-                                     self.bin_to,
-                                     self.max_threads)
+                                    self.bin_to,
+                                    self.max_threads)
         self.glcm_create_kernel(
             grid=grid,
             block=(self.max_threads,),

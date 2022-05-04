@@ -19,10 +19,8 @@ In total, we have 6 features.
 - ASM
 - Contrast
 - Correlation
-- Mean I
-- Variance I
-
-There's little difference between I and J, they are affect the orientation GLCM was done. See the tutorial.
+- Mean
+- Variance
 
 .. math::
 

@@ -5,8 +5,8 @@ glcm_module = cp.RawModule(
    #define HOMOGENEITY 0
 #define CONTRAST 1
 #define ASM 2
-#define MEAN_I 3
-#define VAR_I 4
+#define MEAN 3
+#define VAR 4
 #define CORRELATION 5
 #define NO_OF_FEATURES 6
 
@@ -204,8 +204,8 @@ extern "C" {
         | HOMOGENEITY    | | HOMOGENEITY    | | HOMOGENEITY    |
         | CONTRAST       | | CONTRAST       | | CONTRAST       |
         | ASM            | | ASM            | | ASM            |
-        | MEAN_I         | | MEAN_I         | | MEAN_I         |
-        | VAR_I          | | VAR_I          | | VAR_I          |
+        | MEAN           | | MEAN           | | MEAN           |
+        | VAR            | | VAR            | | VAR            |
         | CORRELATION    | | CORRELATION    | | CORRELATION    |
         +----------------+ +----------------+ +----------------+
         Window 0           Window 1           Window 2           ...
@@ -229,7 +229,7 @@ extern "C" {
         );
 
         atomicAdd(
-            &features[MEAN_I + wid * NO_OF_FEATURES],
+            &features[MEAN + wid * NO_OF_FEATURES],
             p * i
         );
 
@@ -262,8 +262,8 @@ extern "C" {
         float p = (float)(g[tid]) / (noOfValues * 2);
 
         atomicAdd(
-            &features[VAR_I + wid * NO_OF_FEATURES],
-            p * powf((i - features[MEAN_I + wid * NO_OF_FEATURES]), 2.0f)
+            &features[VAR + wid * NO_OF_FEATURES],
+            p * powf((i - features[MEAN + wid * NO_OF_FEATURES]), 2.0f)
         );
 
     }
@@ -291,7 +291,7 @@ extern "C" {
         if (wid >= noOfWindows) return;
 
         // As we invert Variance, they should never be 0.
-        if (features[VAR_I + wid * NO_OF_FEATURES] == 0) return;
+        if (features[VAR + wid * NO_OF_FEATURES] == 0) return;
 
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
@@ -300,8 +300,9 @@ extern "C" {
 
         atomicAdd(
             &features[CORRELATION + wid * NO_OF_FEATURES],
-            p * powf((i - features[MEAN_I + wid * NO_OF_FEATURES]), 2.0f)
-              / features[VAR_I + wid * NO_OF_FEATURES]
+            p * (i - features[MEAN + wid * NO_OF_FEATURES])
+              * (j - features[MEAN + wid * NO_OF_FEATURES])
+              / features[VAR + wid * NO_OF_FEATURES]
         );
     }
 }

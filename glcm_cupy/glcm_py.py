@@ -6,6 +6,7 @@ from skimage.util import view_as_windows
 from tqdm import tqdm
 
 from glcm_cupy import *
+from glcm_cupy.conf import NO_OF_FEATURES
 
 
 def glcm_py_3d(ar: np.ndarray, bin_from: int, bin_to: int,
@@ -61,7 +62,7 @@ class GLCMPy:
 
         Returns:
             List of these features [
-                homogeneity, contrast, asm, mean_i, mean_j,
+                homogeneity, contrast, asm, mean, mean_j,
                 var_i, var_j, correlation
             ].
             Values as float.
@@ -82,33 +83,25 @@ class GLCMPy:
         # Convert to probability
         glcm /= len(i_flat) * 2
 
-        homogeneity = contrast = asm = mean_i = mean_j = var_i = var_j \
-            = correlation = 0
+        homogeneity = contrast = asm = mean = var = correlation = 0
         for i in range(glcm.shape[0]):
             for j in range(glcm.shape[1]):
                 homogeneity += glcm[i, j] / (1 + (i - j) ** 2)
                 contrast += glcm[i, j] * (i - j) ** 2
                 asm += glcm[i, j] ** 2
-                mean_i += glcm[i, j] * i
-                mean_j += glcm[i, j] * j
+                mean += glcm[i, j] * i
 
         for i in range(glcm.shape[0]):
             for j in range(glcm.shape[1]):
-                var_i += glcm[i, j] * (i - mean_i) ** 2
-                var_j += glcm[i, j] * (j - mean_j) ** 2
+                var += glcm[i, j] * (i - mean) ** 2
 
         # Variances cannot be 0 else ZeroDivisionError
-        if var_i != 0 and var_j != 0:
+        if var != 0:
             for i in range(glcm.shape[0]):
                 for j in range(glcm.shape[1]):
-                    correlation += \
-                        glcm[i, j] \
-                        * (i - mean_i) \
-                        * (j - mean_j) \
-                        / ((var_i * var_j) ** 0.5)
+                    correlation += glcm[i, j] * (i - mean) * (j - mean) / var
 
-        return [homogeneity, contrast, asm, mean_i, mean_j, var_i, var_j,
-                correlation]
+        return [homogeneity, contrast, asm, mean, var, correlation]
 
     def glcm_2d(self, ar: np.ndarray):
         ar = (ar / self.bin_from * self.bin_to).astype(np.uint8)
@@ -124,7 +117,7 @@ class GLCMPy:
         ar_w_j_se = flat(ar_w[self.step * 2:, self.step * 2:])
         ar_w_j_e = flat(ar_w[self.step:-self.step, self.step * 2:])
 
-        feature_ar = np.zeros((ar_w_i.shape[0], 4, 8))
+        feature_ar = np.zeros((ar_w_i.shape[0], 4, NO_OF_FEATURES))
 
         for j_e, ar_w_j in enumerate(
             (ar_w_j_sw, ar_w_j_s, ar_w_j_se, ar_w_j_e)):
@@ -136,12 +129,10 @@ class GLCMPy:
         feature_ar = feature_ar.mean(axis=1)
 
         feature_ar = feature_ar.reshape(
-            (h - self.step * 2, w - self.step * 2, 8))
+            (h - self.step * 2, w - self.step * 2, NO_OF_FEATURES))
         feature_ar[..., CONTRAST] /= (self.bin_to - 1) ** 2
-        feature_ar[..., MEAN_I] /= (self.bin_to - 1)
-        feature_ar[..., MEAN_J] /= (self.bin_to - 1)
-        feature_ar[..., VAR_I] /= (self.bin_to - 1) ** 2
-        feature_ar[..., VAR_J] /= (self.bin_to - 1) ** 2
+        feature_ar[..., MEAN] /= (self.bin_to - 1)
+        feature_ar[..., VAR] /= (self.bin_to - 1) ** 2
         feature_ar[..., CORRELATION] += 1
         feature_ar[..., CORRELATION] /= 2
 

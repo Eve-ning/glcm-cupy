@@ -23,7 +23,7 @@ def glcm(
                                        Direction.SOUTH,
                                        Direction.SOUTH_WEST),
     max_partition_size: int = MAX_PARTITION_SIZE,
-    normalize_features: bool = True) -> np.ndarray:
+    normalize_features: bool = True) -> Tuple[List[str] ,np.ndarray]:
     """
     Examples:
         To scale down the image from a 128 max value to 32, we use
@@ -252,8 +252,8 @@ class GLCM:
         if self.normalize_features:
             # This scales the glcm features to [0, 1]
             ar[..., CONTRAST] /= (self.bin_to - 1) ** 2
-            ar[..., MEAN_I] /= (self.bin_to - 1)
-            ar[..., VAR_I] /= (self.bin_to - 1) ** 2
+            ar[..., MEAN] /= (self.bin_to - 1)
+            ar[..., VAR] /= (self.bin_to - 1) ** 2
             ar[..., CORRELATION] += 1
             ar[..., CORRELATION] /= 2
         return ar

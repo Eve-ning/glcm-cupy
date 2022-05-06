@@ -45,7 +45,7 @@ extern "C" {
         const int glcmSize,
         const int noOfValues,
         const int noOfWindows,
-        unsigned char* g,
+        float* g,
         float* features)
     {
         /**
@@ -129,7 +129,6 @@ extern "C" {
         const int glcmArea = glcmSize * glcmSize;
 
         int wid_image = tid / noOfValues;
-        const static unsigned char x = 1;
         if (tid < noOfValues * noOfWindows)
         {
             unsigned char row = windows_i[tid];
@@ -140,18 +139,18 @@ extern "C" {
                 col +
                 row * glcmSize +
                 wid_image * glcmArea
-                ]), x);
+                ]), 1);
             atomicAdd(&(
                 g[
                 row +
                 col * glcmSize +
                 wid_image * glcmArea
-                ]), x);
+                ]), 1);
         }
     }
 
     __global__ void glcmFeatureKernel0(
-        const unsigned char* g,
+        const float* g,
         const int glcmSize,
         const int noOfValues,
         const int noOfWindows,
@@ -235,7 +234,7 @@ extern "C" {
 
     }
     __global__ void glcmFeatureKernel1(
-        const unsigned char* g,
+        const float* g,
         const int glcmSize,
         const int noOfValues,
         const int noOfWindows,
@@ -269,7 +268,7 @@ extern "C" {
     }
 
     __global__ void glcmFeatureKernel2(
-        const unsigned char* g,
+        const float* g,
         const int glcmSize,
         const int noOfValues,
         const int noOfWindows,

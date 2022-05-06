@@ -23,6 +23,7 @@ def glcm(
                                        Direction.SOUTH,
                                        Direction.SOUTH_WEST),
     max_partition_size: int = MAX_PARTITION_SIZE,
+    max_threads: int = MAX_THREADS,
     normalize_features: bool = True) -> Tuple[List[str] ,np.ndarray]:
     """
     Examples:
@@ -48,7 +49,7 @@ def glcm(
 
     """
     return GLCM(step_size, radius, bin_from, bin_to,
-                directions, max_partition_size, normalize_features).run(im)
+                directions, max_partition_size, max_threads, normalize_features).run(im)
 
 
 class GLCM:

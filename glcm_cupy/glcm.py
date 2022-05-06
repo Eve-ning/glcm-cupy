@@ -98,7 +98,7 @@ class GLCM:
 
         self.glcm = cp.zeros(
             (self.max_partition_size, self.bin_to, self.bin_to),
-            dtype=cp.float16)
+            dtype=cp.float32)
         self.features = cp.zeros((self.max_partition_size, NO_OF_FEATURES),
                                  dtype=cp.float32)
         if self.radius < 0:

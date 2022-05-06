@@ -84,7 +84,7 @@ extern "C" {
 
         g = Empty initialized GLCM array. Shape of (glcmSize, glcmSize, noOfWindows)
 
-        features = Empty initialized feature array. Shape of (8, noOfWindows)
+        features = Empty initialized feature array. Shape of (6, noOfWindows)
 
         **/
 
@@ -199,7 +199,7 @@ extern "C" {
 
         For each feature, we require a wid * NO_OF_FEATURES offset.
 
-        8 x 1 for each GLCM
+        6 x 1 for each GLCM
         +----------------+ +----------------+ +----------------+
         | HOMOGENEITY    | | HOMOGENEITY    | | HOMOGENEITY    |
         | CONTRAST       | | CONTRAST       | | CONTRAST       |

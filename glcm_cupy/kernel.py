@@ -11,34 +11,6 @@ glcm_module = cp.RawModule(
 #define NO_OF_FEATURES 6
 
 extern "C" {
-    __device__ static inline char atomicAdd(
-        unsigned char* address,
-        unsigned char val
-        )
-    {
-        // https://stackoverflow.com/questions/5447570/cuda-atomic-operations-on-unsigned-chars
-        size_t long_address_modulo = (size_t) address & 3;
-        unsigned int* base_address = (unsigned int*) ((char*) address - long_address_modulo);
-        unsigned int long_val = (unsigned int) val << (8 * long_address_modulo);
-        unsigned int long_old = atomicAdd(base_address, long_val);
-
-        if (long_address_modulo == 3) {
-            // the first 8 bits of long_val represent the char value,
-            // hence the first 8 bits of long_old represent its previous value.
-            return (char) (long_old >> 24);
-        } else {
-            // bits that represent the char value within long_val
-            unsigned int mask = 0x000000ff << (8 * long_address_modulo);
-            unsigned int masked_old = long_old & mask;
-            // isolate the bits that represent the char value within long_old, add the long_val to that,
-            // then re-isolate by excluding bits that represent the char value
-            unsigned int overflow = (masked_old + long_val) & ~mask;
-            if (overflow) {
-                atomicSub(base_address, overflow);
-            }
-            return (char) (masked_old >> 8 * long_address_modulo);
-        }
-    }
     __global__ void glcmCreateKernel(
         const unsigned char* windows_i,
         const unsigned char* windows_j,

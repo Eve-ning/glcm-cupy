@@ -72,11 +72,9 @@ These are the features implemented.
 - `HOMOGENEITY = 0`
 - `CONTRAST = 1`
 - `ASM = 2`
-- `MEAN_I = 3`
-- `MEAN_J = 4`
-- `VAR_I = 5`
-- `VAR_J = 6`
-- `CORRELATION = 7`
+- `MEAN = 3`
+- `VAR = 4`
+- `CORRELATION = 5`
 
 Don't see one you need? Raise an issue, I'll (hopefully) add it.
 
@@ -175,6 +173,8 @@ Functions**](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#at
 > ... it is guaranteed to be performed without interference from other threads
 
 ### Custom Atomic Add
+
+`Deprecated >=1.7`
 
 Currently `atomicAdd()` doesn't have the signature to support `uint8` or `unsigned char`. We get this implementation
 from this [**StackOverflow

@@ -3,8 +3,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import Tuple, List, Iterable
 
-import numpy as np
 import cupy as cp
+import numpy as np
 from skimage.util import view_as_windows
 
 
@@ -18,11 +18,11 @@ class Direction(Enum):
 def make_windows(im: np.ndarray,
                  radius: int,
                  step_size: int,
-                 directions: Iterable[Direction] = \
-                     (Direction.EAST,
-                      Direction.SOUTH_EAST,
-                      Direction.SOUTH,
-                      Direction.SOUTH_WEST)
+                 directions: Iterable[Direction] =
+                 (Direction.EAST,
+                  Direction.SOUTH_EAST,
+                  Direction.SOUTH,
+                  Direction.SOUTH_WEST)
                  ) -> List[Tuple[np.ndarray, np.ndarray]]:
     """ From a 2D image np.ndarray, convert it into GLCM IJ windows.
 
@@ -84,7 +84,7 @@ def make_windows(im: np.ndarray,
         )
 
     diameter = radius * 2 + 1
-    ij = cp.asarray(view_as_windows(im, (diameter , diameter)))
+    ij = cp.asarray(view_as_windows(im, (diameter, diameter)))
 
     ijs: List[Tuple[np.ndarray, np.ndarray]] = []
 

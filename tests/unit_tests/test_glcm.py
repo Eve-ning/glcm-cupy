@@ -1,14 +1,10 @@
-from typing import Tuple
-
 import cupy as cp
 import numpy as np
 import pytest
-from pytest_mock import MockerFixture
 
 from glcm_cupy import GLCM
 from glcm_cupy.conf import *
-from glcm_cupy.windowing import make_windows, im_shape_after_glcm
-from tests.unit_tests import glcm_py
+from glcm_cupy.glcm_py import glcm_py_ij
 from tests.unit_tests.glcm_py_skimage import glcm_py_skimage
 
 
@@ -39,18 +35,16 @@ def test_glcm_from_windows(i, j):
     )
 
     # The sum of the values, since tiled, will be scaled by no of windows.
-    actual = dict(
-        homogeneity=float(g[..., HOMOGENEITY].sum() / windows),
-        contrast=float(g[..., CONTRAST].sum() / windows),
-        asm=float(g[..., ASM].sum() / windows),
-        mean_i=float(g[..., MEAN_I].sum() / windows),
-        mean_j=float(g[..., MEAN_J].sum() / windows),
-        var_i=float(g[..., VAR_I].sum() / windows),
-        var_j=float(g[..., VAR_J].sum() / windows),
-        correlation=float(g[..., CORRELATION].sum() / windows)
-    )
+    actual = [
+        float(g[..., HOMOGENEITY].sum() / windows),
+        float(g[..., CONTRAST].sum() / windows),
+        float(g[..., ASM].sum() / windows),
+        float(g[..., MEAN].sum() / windows),
+        float(g[..., VAR].sum() / windows),
+        float(g[..., CORRELATION].sum() / windows)
+    ]
 
-    expected = glcm_py(i, j, 256)
+    expected = glcm_py_ij(i, j, 256, 256)
     assert actual == pytest.approx(expected)
 
     # The sum of the values, since tiled, will be scaled by no of windows.

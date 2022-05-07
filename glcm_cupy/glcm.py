@@ -23,7 +23,8 @@ def glcm(
                                        Direction.SOUTH,
                                        Direction.SOUTH_WEST),
     max_partition_size: int = MAX_PARTITION_SIZE,
-    normalize_features: bool = True) -> np.ndarray:
+    max_threads: int = MAX_THREADS,
+    normalize_features: bool = True) -> Tuple[List[str] ,np.ndarray]:
     """
     Examples:
         To scale down the image from a 128 max value to 32, we use
@@ -48,7 +49,7 @@ def glcm(
 
     """
     return GLCM(step_size, radius, bin_from, bin_to,
-                directions, max_partition_size, normalize_features).run(im)
+                directions, max_partition_size, max_threads, normalize_features).run(im)
 
 
 class GLCM:
@@ -95,8 +96,9 @@ class GLCM:
         self.normalize_features = normalize_features
         self.progress = None
 
-        self.glcm = cp.zeros((self.max_partition_size, self.bin_to, self.bin_to),
-                             dtype=cp.uint8)
+        self.glcm = cp.zeros(
+            (self.max_partition_size, self.bin_to, self.bin_to),
+            dtype=cp.float32)
         self.features = cp.zeros((self.max_partition_size, NO_OF_FEATURES),
                                  dtype=cp.float32)
         if self.radius < 0:
@@ -251,14 +253,11 @@ class GLCM:
         if self.normalize_features:
             # This scales the glcm features to [0, 1]
             ar[..., CONTRAST] /= (self.bin_to - 1) ** 2
-            ar[..., MEAN_I] /= (self.bin_to - 1)
-            ar[..., MEAN_J] /= (self.bin_to - 1)
-            ar[..., VAR_I] /= (self.bin_to - 1) ** 2
-            ar[..., VAR_J] /= (self.bin_to - 1) ** 2
+            ar[..., MEAN] /= (self.bin_to - 1)
+            ar[..., VAR] /= (self.bin_to - 1) ** 2
             ar[..., CORRELATION] += 1
             ar[..., CORRELATION] /= 2
         return ar
-
 
     def run_ij(self,
                i: np.ndarray,
@@ -312,8 +311,8 @@ class GLCM:
             )
 
         grid = self._calc_grid_size(no_of_windows,
-                                     self.bin_to,
-                                     self.max_threads)
+                                    self.bin_to,
+                                    self.max_threads)
         self.glcm_create_kernel(
             grid=grid,
             block=(self.max_threads,),

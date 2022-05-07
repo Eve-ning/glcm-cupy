@@ -5,49 +5,19 @@ glcm_module = cp.RawModule(
    #define HOMOGENEITY 0
 #define CONTRAST 1
 #define ASM 2
-#define MEAN_I 3
-#define MEAN_J 4
-#define VAR_I 5
-#define VAR_J 6
-#define CORRELATION 7
-#define NO_OF_FEATURES 8
+#define MEAN 3
+#define VAR 4
+#define CORRELATION 5
+#define NO_OF_FEATURES 6
 
 extern "C" {
-    __device__ static inline char atomicAdd(
-        unsigned char* address,
-        unsigned char val
-        )
-    {
-        // https://stackoverflow.com/questions/5447570/cuda-atomic-operations-on-unsigned-chars
-        size_t long_address_modulo = (size_t) address & 3;
-        unsigned int* base_address = (unsigned int*) ((char*) address - long_address_modulo);
-        unsigned int long_val = (unsigned int) val << (8 * long_address_modulo);
-        unsigned int long_old = atomicAdd(base_address, long_val);
-
-        if (long_address_modulo == 3) {
-            // the first 8 bits of long_val represent the char value,
-            // hence the first 8 bits of long_old represent its previous value.
-            return (char) (long_old >> 24);
-        } else {
-            // bits that represent the char value within long_val
-            unsigned int mask = 0x000000ff << (8 * long_address_modulo);
-            unsigned int masked_old = long_old & mask;
-            // isolate the bits that represent the char value within long_old, add the long_val to that,
-            // then re-isolate by excluding bits that represent the char value
-            unsigned int overflow = (masked_old + long_val) & ~mask;
-            if (overflow) {
-                atomicSub(base_address, overflow);
-            }
-            return (char) (masked_old >> 8 * long_address_modulo);
-        }
-    }
     __global__ void glcmCreateKernel(
         const unsigned char* windows_i,
         const unsigned char* windows_j,
         const int glcmSize,
         const int noOfValues,
         const int noOfWindows,
-        unsigned char* g,
+        float* g,
         float* features)
     {
         /**
@@ -86,7 +56,7 @@ extern "C" {
 
         g = Empty initialized GLCM array. Shape of (glcmSize, glcmSize, noOfWindows)
 
-        features = Empty initialized feature array. Shape of (8, noOfWindows)
+        features = Empty initialized feature array. Shape of (6, noOfWindows)
 
         **/
 
@@ -131,7 +101,6 @@ extern "C" {
         const int glcmArea = glcmSize * glcmSize;
 
         int wid_image = tid / noOfValues;
-        const static unsigned char x = 1;
         if (tid < noOfValues * noOfWindows)
         {
             unsigned char row = windows_i[tid];
@@ -142,18 +111,18 @@ extern "C" {
                 col +
                 row * glcmSize +
                 wid_image * glcmArea
-                ]), x);
+                ]), 1);
             atomicAdd(&(
                 g[
                 row +
                 col * glcmSize +
                 wid_image * glcmArea
-                ]), x);
+                ]), 1);
         }
     }
 
     __global__ void glcmFeatureKernel0(
-        const unsigned char* g,
+        const float* g,
         const int glcmSize,
         const int noOfValues,
         const int noOfWindows,
@@ -201,15 +170,13 @@ extern "C" {
 
         For each feature, we require a wid * NO_OF_FEATURES offset.
 
-        8 x 1 for each GLCM
+        6 x 1 for each GLCM
         +----------------+ +----------------+ +----------------+
         | HOMOGENEITY    | | HOMOGENEITY    | | HOMOGENEITY    |
         | CONTRAST       | | CONTRAST       | | CONTRAST       |
         | ASM            | | ASM            | | ASM            |
-        | MEAN_I         | | MEAN_I         | | MEAN_I         |
-        | MEAN_J         | | MEAN_J         | | MEAN_J         |
-        | VAR_I          | | VAR_I          | | VAR_I          |
-        | VAR_J          | | VAR_J          | | VAR_J          |
+        | MEAN           | | MEAN           | | MEAN           |
+        | VAR            | | VAR            | | VAR            |
         | CORRELATION    | | CORRELATION    | | CORRELATION    |
         +----------------+ +----------------+ +----------------+
         Window 0           Window 1           Window 2           ...
@@ -233,17 +200,13 @@ extern "C" {
         );
 
         atomicAdd(
-            &features[MEAN_I + wid * NO_OF_FEATURES],
+            &features[MEAN + wid * NO_OF_FEATURES],
             p * i
         );
 
-        atomicAdd(
-            &features[MEAN_J + wid * NO_OF_FEATURES],
-            p * j
-        );
     }
     __global__ void glcmFeatureKernel1(
-        const unsigned char* g,
+        const float* g,
         const int glcmSize,
         const int noOfValues,
         const int noOfWindows,
@@ -270,19 +233,14 @@ extern "C" {
         float p = (float)(g[tid]) / (noOfValues * 2);
 
         atomicAdd(
-            &features[VAR_I + wid * NO_OF_FEATURES],
-            p * powf((i - features[MEAN_I + wid * NO_OF_FEATURES]), 2.0f)
-        );
-
-        atomicAdd(
-            &features[VAR_J + wid * NO_OF_FEATURES],
-            p * powf((j - features[MEAN_J + wid * NO_OF_FEATURES]), 2.0f)
+            &features[VAR + wid * NO_OF_FEATURES],
+            p * powf((i - features[MEAN + wid * NO_OF_FEATURES]), 2.0f)
         );
 
     }
 
     __global__ void glcmFeatureKernel2(
-        const unsigned char* g,
+        const float* g,
         const int glcmSize,
         const int noOfValues,
         const int noOfWindows,
@@ -304,8 +262,7 @@ extern "C" {
         if (wid >= noOfWindows) return;
 
         // As we invert Variance, they should never be 0.
-        if (features[VAR_I + wid * NO_OF_FEATURES] == 0 ||
-            features[VAR_J + wid * NO_OF_FEATURES] == 0) return;
+        if (features[VAR + wid * NO_OF_FEATURES] == 0) return;
 
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
@@ -314,10 +271,9 @@ extern "C" {
 
         atomicAdd(
             &features[CORRELATION + wid * NO_OF_FEATURES],
-            p * (i - features[MEAN_I + wid * NO_OF_FEATURES])
-              * (j - features[MEAN_J + wid * NO_OF_FEATURES])
-              * rsqrtf(features[VAR_I + wid * NO_OF_FEATURES]
-                     * features[VAR_J + wid * NO_OF_FEATURES])
+            p * (i - features[MEAN + wid * NO_OF_FEATURES])
+              * (j - features[MEAN + wid * NO_OF_FEATURES])
+              / features[VAR + wid * NO_OF_FEATURES]
         );
     }
 }

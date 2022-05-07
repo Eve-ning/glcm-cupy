@@ -57,7 +57,7 @@ Use GLCM on an image like so.
     (1080, 1920, 3)
     >>> g = GLCM(...).run(ar)
     >>> g.shape
-    (1074, 1914, 3, 8)
+    (1074, 1914, 3, 6)
 
 The last dimension of `g` is the GLCM Features.
 

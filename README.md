@@ -180,3 +180,12 @@ Currently `atomicAdd()` doesn't have the signature to support `uint8` or `unsign
 from this [**StackOverflow
 Answer**](https://stackoverflow.com/questions/5447570/cuda-atomic-operations-on-unsigned-chars)
 
+# Change Log
+
+## 1.6
+
+Dropped dependency on J variables as I & J are always the same
+
+## 1.7
+
+Fix issue with GLCM overflowing by making it `float32`

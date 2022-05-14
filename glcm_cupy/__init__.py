@@ -1,9 +1,9 @@
-from .conf import HOMOGENEITY, CONTRAST, ASM, MEAN, VAR, CORRELATION
-from .inter.glcm_inter import GLCMInter, glcm_inter, Direction
+from glcm_cupy.conf import HOMOGENEITY, CONTRAST, ASM, MEAN, VAR, CORRELATION
+from glcm_cupy.glcm import glcm, GLCM, Direction
 
 __all__ = [
-    "glcm_inter",
-    "GLCMInter",
+    "glcm",
+    "GLCM",
     "HOMOGENEITY",
     "CONTRAST",
     "ASM",

@@ -106,13 +106,13 @@ class GLCMBase:
              3D: (rows, cols, channels, features),
 
         """
-        self.progress = tqdm(total=self.glcm_cells,
+        self.progress = tqdm(total=self.glcm_cells(im),
                              desc="GLCM Progress",
                              unit=" Cells",
                              unit_scale=True)
 
         im = self._binner(im, self.bin_from, self.bin_to)
-        if im.ndim == 3:
+        if im.ndim != 3:
             raise ValueError("Only 3D images allowed.")
         return self._from_3dimage(im)
 
@@ -148,9 +148,6 @@ class GLCMBase:
         Returns:
             The GLCM Array 3dim with shape rows, cols, feature
         """
-
-        if im.ndim != 2:
-            raise ValueError(f"Image must be 2 dimensional. im.ndim={im.ndim}")
 
         glcm_h, glcm_w, *_ = self.glcm_shape(im)
 

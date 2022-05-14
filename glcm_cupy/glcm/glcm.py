@@ -19,7 +19,7 @@ class Direction(Enum):
     SOUTH_WEST = 3
 
 
-def glcm_inter(
+def glcm(
     im: np.ndarray,
     step_size: int = 1,
     radius: int = 2,
@@ -56,13 +56,13 @@ def glcm_inter(
     Returns:
         GLCM Features
     """
-    return GLCMInter(step_size, radius, bin_from, bin_to,
-                     max_partition_size, max_threads,
-                     normalize_features, directions).run(im)
+    return GLCM(step_size, radius, bin_from, bin_to,
+                max_partition_size, max_threads,
+                normalize_features, directions).run(im)
 
 
 @dataclass
-class GLCMInter(GLCMBase):
+class GLCM(GLCMBase):
     directions: List[Direction] = (
         Direction.EAST,
         Direction.SOUTH_EAST,
@@ -74,20 +74,15 @@ class GLCMInter(GLCMBase):
         shape = self.glcm_shape(im)
         return np.prod(shape) * len(self.directions)
 
-    def glcm_shape(self, im: np.ndarray):
+    def glcm_shape(self, im: np.ndarray) -> Tuple[int, int]:
         """ Calculate the image shape after GLCM
 
         Returns:
-            Shape of Image after GLCM
+            2D Shape of Image after GLCM
         """
 
-        shape = im.shape
-        if len(shape) < 2:
-            raise ValueError(f"Image must be at least 2 dims.")
-
-        return (shape[0] - 2 * self.step_size - 2 * self.radius,
-                shape[1] - 2 * self.step_size - 2 * self.radius,
-                *shape[2:])
+        return (im.shape[0] - 2 * self.step_size - 2 * self.radius,
+                im.shape[1] - 2 * self.step_size - 2 * self.radius)
 
     def _from_3dimage(self, im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a multi band image
@@ -100,11 +95,9 @@ class GLCMInter(GLCMBase):
                 rows, cols, channel, feature
         """
 
-        glcm_chs = [
+        return np.stack([
             self._from_2dimage(im[..., ch]) for ch in range(im.shape[-1])
-        ]
-
-        return np.stack(glcm_chs, axis=2)
+        ], axis=2)
 
     def make_windows(self, im: np.ndarray) -> \
         List[Tuple[np.ndarray, np.ndarray]]:
@@ -149,6 +142,9 @@ class GLCMInter(GLCMBase):
                 the last dimension: xy flat indexes within each window.
 
         """
+
+        if im.ndim != 2:
+            raise ValueError(f"Image must be 2 dimensional. im.ndim={im.ndim}")
 
         glcm_h, glcm_w, *_ = self.glcm_shape(im)
         if glcm_h <= 0 or glcm_w <= 0:

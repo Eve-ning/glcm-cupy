@@ -2,3 +2,7 @@
 *.pyc
 .scratch/*
 .run/*
+*.tif
+*.pclprof
+*.csv
+*.npy

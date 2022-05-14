@@ -36,12 +36,12 @@ class GLCMBase:
         max_threads: Maximum number of threads to use per block
         normalize_features: Whether to normalize features to [0, 1]
     """
-    step_size: int = 1,
-    radius: int = 2,
-    bin_from: int = 256,
-    bin_to: int = 256,
-    max_partition_size: int = MAX_PARTITION_SIZE,
-    max_threads: int = MAX_THREADS,
+    step_size: int = 1
+    radius: int = 2
+    bin_from: int = 256
+    bin_to: int = 256
+    max_partition_size: int = MAX_PARTITION_SIZE
+    max_threads: int = MAX_THREADS
     normalized_features: bool = True
 
     glcm_create_kernel: RawKernel = field(

@@ -10,7 +10,7 @@ MAX_THREADS = 512  # Lowest Maximum supported threads.
 NO_OF_FEATURES = 6
 
 # For a 10000 x 256 x 256 GLCM, you need ~ 600MB of memory.
-MAX_PARTITION_SIZE = 10000
+MAX_PARTITION_SIZE = 1000
 
 HOMOGENEITY = 0
 CONTRAST = 1

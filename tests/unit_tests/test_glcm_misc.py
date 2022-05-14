@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from glcm_cupy import GLCM
-from glcm_cupy.windowing import make_windows, im_shape_after_glcm
+from glcm_cupy.windowing import make_windows, glcm_shape
 
 
 @pytest.mark.parametrize(
@@ -39,7 +39,7 @@ def test_glcm_make_windows(
     """
     im = np.zeros(im_shape, dtype=np.uint8)
 
-    im_shape_after = im_shape_after_glcm(im_shape, step_size, radius)
+    im_shape_after = glcm_shape(im_shape, step_size, radius)
 
     if im_shape_after[0] <= 0 or im_shape_after[1] <= 0:
         # If the make windows is invalid, we assert that it throws an error

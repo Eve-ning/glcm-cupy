@@ -2,9 +2,9 @@ import cupy as cp
 import numpy as np
 import pytest
 
-from glcm_cupy import GLCM
 from glcm_cupy.conf import *
 from glcm_cupy.glcm_py import glcm_py_ij
+from glcm_cupy import GLCMInter
 from tests.unit_tests.glcm_py_skimage import glcm_py_skimage
 
 
@@ -29,7 +29,7 @@ from tests.unit_tests.glcm_py_skimage import glcm_py_skimage
 def test_glcm_from_windows(i, j):
     # We only test with 2 windows to reduce time taken.
     windows = 2
-    g = GLCM(radius=1).run_ij(
+    g = GLCMInter(radius=1).glcm_ij(
         cp.asarray(np.tile(i, (windows, 1))),
         cp.asarray(np.tile(j, (windows, 1)))
     )

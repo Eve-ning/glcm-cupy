@@ -54,8 +54,7 @@ def glcm_inter(
         normalize_features: Whether to normalize features to [0, 1]
 
     Returns:
-
-
+        GLCM Features
     """
     return GLCMInter(step_size, radius, bin_from, bin_to,
                      max_partition_size, max_threads,

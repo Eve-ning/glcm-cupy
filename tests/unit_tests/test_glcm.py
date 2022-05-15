@@ -1,62 +1,26 @@
-import cupy as cp
 import numpy as np
 import pytest
 
-from glcm_cupy.conf import *
-from glcm_cupy.glcm.glcm_py import glcm_py_ij
-from glcm_cupy import GLCM
-from tests.unit_tests.glcm_py_skimage import glcm_py_skimage
+from glcm_cupy import GLCM, glcm
+from glcm_cupy.glcm.glcm_py import glcm_py_3d
 
 
 @pytest.mark.parametrize(
-    "i",
-    [
-        np.asarray([0, ] * 9, dtype=np.uint8),
-        np.asarray([1, ] * 9, dtype=np.uint8),
-        np.asarray([255, ] * 9, dtype=np.uint8),
-        np.asarray([0, 1, 2, 3, 4, 252, 253, 254, 255], dtype=np.uint8),
-    ]
+    "size",
+    [15, ]
 )
 @pytest.mark.parametrize(
-    "j",
-    [
-        np.asarray([0, ] * 9, dtype=np.uint8),
-        np.asarray([1, ] * 9, dtype=np.uint8),
-        np.asarray([255, ] * 9, dtype=np.uint8),
-        np.asarray([0, 1, 2, 3, 4, 252, 253, 254, 255], dtype=np.uint8),
-    ]
+    "bins",
+    [4, 16]
 )
-def test_glcm_from_windows(i, j):
-    # We only test with 2 windows to reduce time taken.
-    windows = 2
-    g = GLCM(radius=1).glcm_ij(
-        cp.asarray(np.tile(i, (windows, 1))),
-        cp.asarray(np.tile(j, (windows, 1)))
-    )
-
-    # The sum of the values, since tiled, will be scaled by no of windows.
-    actual = [
-        float(g[..., HOMOGENEITY].sum() / windows),
-        float(g[..., CONTRAST].sum() / windows),
-        float(g[..., ASM].sum() / windows),
-        float(g[..., MEAN].sum() / windows),
-        float(g[..., VAR].sum() / windows),
-        float(g[..., CORRELATION].sum() / windows)
-    ]
-
-    expected = glcm_py_ij(i, j, 256, 256)
-    assert actual == pytest.approx(expected)
-
-    # The sum of the values, since tiled, will be scaled by no of windows.
-    actual_skimage = dict(
-        homogeneity=float(g[..., HOMOGENEITY].sum() / windows),
-        contrast=float(g[..., CONTRAST].sum() / windows),
-        asm=float(g[..., ASM].sum() / windows),
-        correlation=float(g[..., CORRELATION].sum() / windows)
-    )
-
-    if (i == j).all():
-        actual_skimage['correlation'] = 1
-
-    expected_skimage = glcm_py_skimage(i, j)
-    assert actual_skimage == pytest.approx(expected_skimage, abs=0.01)
+@pytest.mark.parametrize(
+    "radius",
+    [1, 2, 4]
+)
+def test_glcm(size, bins, radius):
+    ar = np.random.randint(0, bins, [size, size, 1])
+    g = GLCM(radius=radius, bin_from=bins, bin_to=bins).run(ar)
+    g_fn = glcm(ar, radius=radius, bin_from=bins, bin_to=bins)
+    expected = glcm_py_3d(ar, radius=radius, bin_from=bins, bin_to=bins)
+    assert g == pytest.approx(expected, abs=0.001)
+    assert g_fn == pytest.approx(expected, abs=0.001)

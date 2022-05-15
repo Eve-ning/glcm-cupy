@@ -1,12 +1,11 @@
 from dataclasses import dataclass
-from typing import List
 
 import numpy as np
 from skimage.util import view_as_windows
 from tqdm import tqdm
 
-from glcm_cupy import *
 from glcm_cupy.conf import NO_OF_FEATURES
+from glcm_cupy.glcm_py_base import GLCMPyBase
 
 
 def glcm_py_3d(ar: np.ndarray, bin_from: int, bin_to: int,
@@ -37,71 +36,8 @@ def glcm_py_ij(i: np.ndarray,
 
 
 @dataclass
-class GLCMPy:
-    bin_from: int
-    bin_to: int
-    radius: int = 2
+class GLCMPy(GLCMPyBase):
     step: int = 1
-
-    @property
-    def diameter(self) -> int:
-        return self.radius * 2 + 1
-
-    def glcm_ij(self,
-                i: np.ndarray,
-                j: np.ndarray) -> List[float]:
-        """ Get GLCM features using Python
-
-        Notes:
-            This is to assert the actual values in the tests.
-            Technically can be used in production though very slow.
-
-        Args:
-            i: Window I, may be ndim
-            j: Window J, may be ndim
-
-        Returns:
-            List of these features [
-                homogeneity, contrast, asm, mean, mean_j,
-                var_i, var_j, correlation
-            ].
-            Values as float.
-        """
-
-        i_flat = i.flatten()
-        j_flat = j.flatten()
-        assert len(i_flat) == len(j_flat), \
-            f"The shapes for i {i.shape} != j {j.shape}."
-
-        glcm = np.zeros((self.bin_to, self.bin_to), dtype=float)
-
-        # Populate the GLCM
-        for i_, j_ in zip(i_flat, j_flat):
-            glcm[i_, j_] += 1
-            glcm[j_, i_] += 1
-
-        # Convert to probability
-        glcm /= len(i_flat) * 2
-
-        homogeneity = contrast = asm = mean = var = correlation = 0
-        for i in range(glcm.shape[0]):
-            for j in range(glcm.shape[1]):
-                homogeneity += glcm[i, j] / (1 + (i - j) ** 2)
-                contrast += glcm[i, j] * (i - j) ** 2
-                asm += glcm[i, j] ** 2
-                mean += glcm[i, j] * i
-
-        for i in range(glcm.shape[0]):
-            for j in range(glcm.shape[1]):
-                var += glcm[i, j] * (i - mean) ** 2
-
-        # Variances cannot be 0 else ZeroDivisionError
-        if var != 0:
-            for i in range(glcm.shape[0]):
-                for j in range(glcm.shape[1]):
-                    correlation += glcm[i, j] * (i - mean) * (j - mean) / var
-
-        return [homogeneity, contrast, asm, mean, var, correlation]
 
     def glcm_2d(self, ar: np.ndarray):
         ar = (ar / self.bin_from * self.bin_to).astype(np.uint8)
@@ -130,13 +66,8 @@ class GLCMPy:
 
         feature_ar = feature_ar.reshape(
             (h - self.step * 2, w - self.step * 2, NO_OF_FEATURES))
-        feature_ar[..., CONTRAST] /= (self.bin_to - 1) ** 2
-        feature_ar[..., MEAN] /= (self.bin_to - 1)
-        feature_ar[..., VAR] /= (self.bin_to - 1) ** 2
-        feature_ar[..., CORRELATION] += 1
-        feature_ar[..., CORRELATION] /= 2
 
-        return feature_ar
+        return self.normalize_features(feature_ar)
 
     def glcm_3d(self, ar: np.ndarray):
 

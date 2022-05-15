@@ -21,7 +21,11 @@ def glcm_cross(
     max_threads: int = MAX_THREADS,
     normalize_features: bool = True
 ) -> np.ndarray:
-    """
+    """ Runs the Cross GLCM algorithm
+
+    Notes:
+        This will do a combinatorix of image channels to yield GLCMs
+
     Examples:
         To scale down the image from a 128 max value to 32, we use
         bin_from = 128, bin_to = 32.
@@ -52,11 +56,13 @@ class GLCMCross(GLCMBase):
 
     @staticmethod
     def ch_combos(im: np.ndarray) -> List[np.ndarray]:
+        """ Get Image Channel Combinations """
         return [im[..., combo]
                 for combo
                 in combinations(range(im.shape[-1]), 2)]
 
     def glcm_cells(self, im: np.ndarray) -> float:
+        """ Total number of GLCM cells to process """
         shape = self.glcm_shape(im[..., 0])
         return np.prod(shape) * len(self.ch_combos(im))
 
@@ -67,14 +73,13 @@ class GLCMCross(GLCMBase):
                im_chn.shape[1] - 2 * self.radius
 
     def _from_im(self, im: np.ndarray) -> np.ndarray:
-        """ Generates the GLCM from a multi band image
+        """ Generates the GLCM from a multichannel image
 
         Args:
-            im: A 3 dim image as an ndarray
+            im: A (H, W, C) image as ndarray
 
         Returns:
-            The GLCM Array 4dim with shape
-                rows, cols, channel, feature
+            The GLCM Array with shape (H, W, C, F)
         """
 
         ch_combos = self.ch_combos(im)
@@ -86,19 +91,39 @@ class GLCMCross(GLCMBase):
 
     def make_windows(self, im_chn: np.ndarray) -> List[Tuple[np.ndarray,
                                                              np.ndarray]]:
-        """ Convert 3D image np.ndarray with 2 channels to IJ windows.
+        """ Convert a image dual channel np.ndarray, to GLCM IJ windows.
+
+        Examples:
+
+            Input 4 x 4 image. Radius = 1
+              1-2-+-+-+         1-+-+-+    2-+-+-+
+             /3 4    /|         |     |    |     |    3-+-+-+    4-+-+-+
+            1-2-+-+-+ |       1-+-+-+ |  2-+-+-+ |    |     |    |     |
+            4 3     | |       |     | |  |     | |  3-+-+-+ |  4-+-+-+ |
+            |       | | ----> |     | |  |     | |  |     | |  |     | |
+            |       | +       |     |-+  |     |-+  |     | |  |     | |
+            |       |/        +-+-+-+    +-+-+-+    |     |-+  |     |-+
+            +-+-+-+-+                               +-+-+-+    +-+-+-+
+            4 x 4 x 2                  2 x 2 x 3 x 3  ----> 4 x 9
+                                       +---+   +---+  flat
+                                       flat    flat
+
+            The output will be flattened on the x, y,
+
+        Notes:
+            This is returned as a List to be similar to GLCM
 
         Args:
-            im_chn: Input Image. Must be of shape (h, w, 2)
+            im_chn: Input Image
 
         Returns:
-            A List of I, J windows based on the directions.
-
-            For each window:
-                The first dimension: xy flat window indexes,
-                the last dimension: xy flat indexes within each window.
-
+            A 1 item List of IJ windows as a Tuple[I, J]
+            Each with shape (Windows, Cells)
+            [
+                I: (Window Ix, Cell Ix), J: (Window Ix, Cell Ix)
+            ]
         """
+
         if im_chn.ndim != 3:
             raise ValueError(
                 f"Image must be 3 dimensional. (H, W, 2)"

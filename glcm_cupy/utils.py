@@ -22,15 +22,7 @@ def calc_grid_size(
     glcm_size: int,
     thread_per_block: int = MAX_THREADS
 ) -> Tuple[int, int]:
-    """ Calculates the required grid size
-
-    Notes:
-        There's 2 points where the number of threads
-
-    Returns:
-        The optimal minimum grid shape for GLCM
-
-    """
+    """ Calculates the min. required grid size for CUDA """
 
     # Blocks to support features
     blocks_req_glcm_features = \
@@ -56,7 +48,7 @@ def binner(im: np.ndarray, bin_from: int, bin_to: int) -> np.ndarray:
         bin_to: To the Bin of output image
 
     Returns:
-        Binned Image
+        Binned Image as np.uint8
 
     """
     return (im.astype(np.float32) / bin_from * bin_to).astype(np.uint8)

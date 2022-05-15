@@ -35,12 +35,12 @@ def glcm(
 ) -> np.ndarray:
     """
     Examples:
-        To scale down the image from a 128 max value to 32, we use
+        To scale image values from a 128 max value to 32, we use
         bin_from = 128, bin_to = 32.
 
         The range will collapse from 128 to 32.
 
-        This thus optimizes the GLCM speed.
+        This optimizes GLCM speed.
 
     Args:
         im: Image to Process
@@ -78,7 +78,7 @@ class GLCM(GLCMBase):
             raise ValueError(f"Step Size {step_size} should be >= 1")
 
     def glcm_cells(self, im: np.ndarray) -> float:
-
+        """ Total number of GLCM cells to process """
         return np.prod(self.glcm_shape(im[..., 0])) * \
                len(self.directions) * \
                im.shape[-1]
@@ -90,14 +90,13 @@ class GLCM(GLCMBase):
                 im_chn.shape[1] - 2 * self.step_size - 2 * self.radius)
 
     def _from_im(self, im: np.ndarray) -> np.ndarray:
-        """ Generates the GLCM from a multi band image
+        """ Generates the GLCM from a multichannel image
 
         Args:
-            im: A 3 dim image as an ndarray
+            im: A (H, W, C) image as ndarray
 
         Returns:
-            The GLCM Array 4dim with shape
-                rows, cols, channel, feature
+            The GLCM Array with shape (H, W, C, F)
         """
 
         return np.stack([
@@ -106,7 +105,7 @@ class GLCM(GLCMBase):
 
     def make_windows(self, im_chn: np.ndarray) -> List[Tuple[np.ndarray,
                                                              np.ndarray]]:
-        """ From a 2D image np.ndarray, convert it into GLCM IJ windows.
+        """ Convert a image channel np.ndarray, to GLCM IJ windows.
 
         Examples:
 
@@ -122,7 +121,7 @@ class GLCM(GLCMBase):
                               +---+   +---+
                               flat    flat
 
-            The output will be flattened on the x,y,
+            The output will be flattened on the x, y,
 
             Input 5 x 5 image. Radius = 1. Step Size = 1.
 
@@ -140,12 +139,13 @@ class GLCM(GLCMBase):
             im_chn: Input Image
 
         Returns:
-            A List of I, J windows based on the directions.
-
-            For each window:
-                The first dimension: xy flat window indexes,
-                the last dimension: xy flat indexes within each window.
-
+            A List of IJ windows as a Tuple[I, J]
+            Each with shape (Windows, Cells)
+            [
+                I: (Window Ix, Cell Ix), J: (Window Ix, Cell Ix) # Direction 1
+                ... # Direction 2
+                ... # Direction ...
+            ]
         """
 
         if im_chn.ndim != 2:
@@ -165,7 +165,8 @@ class GLCM(GLCMBase):
             )
 
         ij = cp.asarray(
-            view_as_windows(im_chn, (self._diameter, self._diameter)))
+            view_as_windows(im_chn, (self._diameter, self._diameter))
+        )
 
         ijs: List[Tuple[np.ndarray, np.ndarray]] = []
 
@@ -186,19 +187,27 @@ class GLCM(GLCMBase):
         Notes:
 
             For an image:
+                                          East
+                           +-----------+  +-----------+
+                           |           |  |           |
+                           |   +---+   |  |   +---+---+
+                           |   |   |   |  |   | I | J |
+                           |   +---+   |  |   +---+---+
+                           |           |  |           |
+                           +-----------+  +-----------+
+            South West     South          South East
+            +-----------+  +-----------+  +-----------+
+            |           |  |           |  |           |
+            |   +---+   |  |   +---+   |  |   +---+   |
+            |   | I |   |  |   | I |   |  |   | I |   |
+            +---+---+   |  |   +---+   |  |   +---+---+
+            | J |       |  |   | J |   |  |       | J |
+            +---+-------+  +---+---+---+  +-------+---+
 
-            +-----------+
-            |           |
-            |  +-----+  |
-            |  |     |  |
-            |  |     |  |
-            |  +-----+  |
-            |           |
-            +-----------+
-                      <-> Distance = Step Size
+            i window will be the one in the middle
+            j window will be the outer skirts
 
-            The i window will always be the one in the middle
-            We move j window around the outer skirts to define the pair.
+            Top left few pixels will be discarded.
 
         Args:
             ij: The ij output from make_windows

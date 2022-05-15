@@ -5,12 +5,13 @@ ROOT_DIR = Path(__file__).parent.parent.absolute()
 MAX_VALUE_SUPPORTED = 256
 NO_OF_VALUES_SUPPORTED = 256 ** 2
 
-MAX_THREADS = 512  # Lowest Maximum supported threads.
+MAX_THREADS = 512  # Min. Maximum supported threads.
+
+# For a 1000 x 256 x 256 GLCM, you need ~ 262MB of memory.
+# Each cell is 4 bytes (float32)
+MAX_PARTITION_SIZE = 1000
 
 NO_OF_FEATURES = 6
-
-# For a 10000 x 256 x 256 GLCM, you need ~ 600MB of memory.
-MAX_PARTITION_SIZE = 1000
 
 HOMOGENEITY = 0
 CONTRAST = 1

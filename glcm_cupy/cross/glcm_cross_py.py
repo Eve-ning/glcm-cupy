@@ -10,20 +10,20 @@ from glcm_cupy import *
 from glcm_cupy.conf import NO_OF_FEATURES
 
 
-def glcm_cross_py_3d(ar: np.ndarray, bin_from: int, bin_to: int,
+def glcm_cross_py_3d(im: np.ndarray, bin_from: int, bin_to: int,
                      radius: int = 2):
     return GLCMCrossPy(bin_from=bin_from,
                        bin_to=bin_to,
-                       radius=radius).glcm_3d(ar)
+                       radius=radius).glcm_3d(im)
 
 
-def glcm_cross_py_2d(ar: np.ndarray,
+def glcm_cross_py_2d(im_chn: np.ndarray,
                      bin_from: int,
                      bin_to: int,
                      radius: int = 2):
     return GLCMCrossPy(bin_from=bin_from,
                        bin_to=bin_to,
-                       radius=radius).glcm_2d(ar)
+                       radius=radius).glcm_2d(im_chn)
 
 
 def glcm_cross_py_ij(i: np.ndarray,
@@ -46,7 +46,7 @@ class GLCMCrossPy:
     def glcm_ij(self,
                 i: np.ndarray,
                 j: np.ndarray) -> List[float]:
-        """ Calculate the expected GLCM features using Python
+        """ Get Cross GLCM features using Python
 
         Notes:
             This is to assert the actual values in the tests.
@@ -133,4 +133,5 @@ class GLCMCrossPy:
 
     def glcm_3d(self, ar: np.ndarray):
         combos = list(itertools.combinations(range(ar.shape[-1]), 2))
-        return np.stack([self.glcm_2d(ar[..., combo]) for combo in combos])
+        return np.stack([self.glcm_2d(ar[..., combo]) for combo in combos],
+                        axis=2)

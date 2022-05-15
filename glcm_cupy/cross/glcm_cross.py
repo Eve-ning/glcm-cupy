@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import itertools
 from dataclasses import dataclass
-from enum import Enum
+from itertools import combinations
 from typing import Tuple, List
 
 import cupy as cp
@@ -11,13 +10,6 @@ from skimage.util import view_as_windows
 
 from glcm_cupy.conf import *
 from glcm_cupy.glcm_base import GLCMBase
-
-
-class Direction(Enum):
-    EAST = 0
-    SOUTH_EAST = 1
-    SOUTH = 2
-    SOUTH_WEST = 3
 
 
 def glcm_cross(
@@ -50,7 +42,7 @@ def glcm_cross(
     Returns:
         GLCM Features
     """
-    return GLCMCross(step_size, radius, bin_from, bin_to,
+    return GLCMCross(radius, bin_from, bin_to,
                      max_partition_size, max_threads,
                      normalize_features).run(im)
 
@@ -58,25 +50,23 @@ def glcm_cross(
 @dataclass
 class GLCMCross(GLCMBase):
 
+    @staticmethod
+    def ch_combos(im: np.ndarray) -> List[np.ndarray]:
+        return [im[..., combo]
+                for combo
+                in combinations(range(im.shape[-1]), 2)]
+
     def glcm_cells(self, im: np.ndarray) -> float:
-        shape = self.glcm_shape(im)
-        # TODO: * by number of combinations
-        return np.prod(shape) * 1
+        shape = self.glcm_shape(im[..., 0])
+        return np.prod(shape) * len(self.ch_combos(im))
 
-    def glcm_shape(self, im: np.ndarray):
-        """ Calculate the image shape after GLCM
+    def glcm_shape(self, im_chn: np.ndarray) -> Tuple[int, int]:
+        """ Get per-channel shape after GLCM """
 
-        Returns:
-            Shape of Image after GLCM
-        """
+        return im_chn.shape[0] - 2 * self.radius, \
+               im_chn.shape[1] - 2 * self.radius
 
-        shape = im.shape[:2]
-
-        return (shape[0] - 2 * self.radius,
-                shape[1] - 2 * self.radius,
-                *shape[2:])
-
-    def _from_3dimage(self, im: np.ndarray) -> np.ndarray:
+    def _from_im(self, im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a multi band image
 
         Args:
@@ -87,19 +77,19 @@ class GLCMCross(GLCMBase):
                 rows, cols, channel, feature
         """
 
-        combos = list(itertools.combinations(range(im.shape[-1]), 2))
-        glcm_chs = [
-            self._from_2dimage(im[..., combo]) for combo in combos
-        ]
+        ch_combos = self.ch_combos(im)
+        if len(ch_combos) == 0:
+            raise ValueError(f"Cross GLCM needs >= 2 channels to combine")
+        glcm_chs = [self._from_channel(ch_combo) for ch_combo in ch_combos]
 
         return np.stack(glcm_chs, axis=2)
 
-    def make_windows(self, im: np.ndarray) -> \
-        List[Tuple[np.ndarray, np.ndarray]]:
+    def make_windows(self, im_chn: np.ndarray) -> List[Tuple[np.ndarray,
+                                                             np.ndarray]]:
         """ Convert 3D image np.ndarray with 2 channels to IJ windows.
 
         Args:
-            im: Input Image. Must be of shape (h, w, 2)
+            im_chn: Input Image. Must be of shape (h, w, 2)
 
         Returns:
             A List of I, J windows based on the directions.
@@ -109,29 +99,32 @@ class GLCMCross(GLCMBase):
                 the last dimension: xy flat indexes within each window.
 
         """
-        if im.ndim != 3:
-            raise ValueError(f"Image must be 3 dimensional. im.ndim={im.ndim}")
+        if im_chn.ndim != 3:
+            raise ValueError(
+                f"Image must be 3 dimensional. (H, W, 2)"
+                f"shape={im_chn.shape}"
+            )
 
-        glcm_h, glcm_w, *_ = self.glcm_shape(im)
+        glcm_h, glcm_w, *_ = self.glcm_shape(im_chn)
         if glcm_h <= 0 or glcm_w <= 0:
             raise ValueError(
                 f"Step Size & Diameter exceeds size for windowing. "
-                f"im.shape[0] {im.shape[0]} "
-                f"- 2 * step_size {step_size} "
-                f"- 2 * radius {radius} <= 0 or"
-                f"im.shape[1] {im.shape[1]} "
-                f"- 2 * step_size {step_size} "
-                f"- 2 * radius {radius} + 1 <= 0 was not satisfied."
+                f"shape[0] {im_chn.shape[0]} "
+                f"- 2 * step_size {self.step_size} "
+                f"- 2 * radius {self.radius} <= 0 or"
+                f"shape[1] {im_chn.shape[1]} "
+                f"- 2 * step_size {self.step_size} "
+                f"- 2 * radius {self.radius} + 1 <= 0 was not satisfied."
             )
 
         i = cp.asarray(
-            view_as_windows(im[..., 0], (self._diameter, self._diameter)))
+            view_as_windows(im_chn[..., 0], (self._diameter, self._diameter)))
         j = cp.asarray(
-            view_as_windows(im[..., 1], (self._diameter, self._diameter)))
+            view_as_windows(im_chn[..., 1], (self._diameter, self._diameter)))
 
-        i = i.reshape((-1, *i.shape[-2:]))\
+        i = i.reshape((-1, *i.shape[-2:])) \
             .reshape((i.shape[0] * i.shape[1], -1))
-        j = j.reshape((-1, *j.shape[-2:]))\
+        j = j.reshape((-1, *j.shape[-2:])) \
             .reshape((j.shape[0] * j.shape[1], -1))
 
         return [(i, j)]

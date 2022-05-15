@@ -36,7 +36,6 @@ class GLCMBase:
         max_threads: Maximum number of threads to use per block
         normalize_features: Whether to normalize features to [0, 1]
     """
-    step_size: int = 1
     radius: int = 2
     bin_from: int = 256
     bin_to: int = 256
@@ -83,15 +82,14 @@ class GLCMBase:
                 f"Target Bins {self.bin_to} must be "
                 f"[2, {MAX_VALUE_SUPPORTED}]. "
             )
-        if self.step_size <= 0:
-            raise ValueError(f"Step Size {step_size} should be >= 1")
+
 
     @property
     def _diameter(self):
         return self.radius * 2 + 1
 
     @abstractmethod
-    def glcm_cells(self, im:np.ndarray) -> float:
+    def glcm_cells(self, im: np.ndarray) -> float:
         """ Total number of GLCM Cells"""
         ...
 
@@ -99,7 +97,7 @@ class GLCMBase:
         """ Executes running GLCM. Returns the GLCM Feature array
 
         Args:
-            im: 3D Image to process
+            im: 3D Image to process. Must be of (Height, Width, Channels)
 
         Returns:
             An np.ndarray of Shape,
@@ -112,12 +110,17 @@ class GLCMBase:
                              unit_scale=True)
 
         im = self._binner(im, self.bin_from, self.bin_to)
+        if im.ndim == 2:
+            raise ValueError(
+                "Must be 3D, if shape == (Height, Width), "
+                "add another axis for channel."
+            )
         if im.ndim != 3:
             raise ValueError("Only 3D images allowed.")
-        return self._from_3dimage(im)
+        return self._from_im(im)
 
     @abstractmethod
-    def _from_3dimage(self, im: np.ndarray) -> np.ndarray:
+    def _from_im(self, im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a multi band image
 
         Args:
@@ -131,30 +134,27 @@ class GLCMBase:
         ...
 
     @abstractmethod
-    def make_windows(self, im: np.ndarray) -> \
+    def make_windows(self, im_chn: np.ndarray) -> \
         List[Tuple[np.ndarray, np.ndarray]]:
         ...
 
     @abstractmethod
-    def glcm_shape(self, im: np.ndarray) -> Tuple:
+    def glcm_shape(self, im_chn: np.ndarray) -> Tuple:
         ...
 
-    def _from_2dimage(self, im: np.ndarray) -> np.ndarray:
-        """ Generates the GLCM from a single band image
-
-        Args:
-            im: Image in np.ndarray.
+    def _from_channel(self, im_chn: np.ndarray) -> np.ndarray:
+        """ Generates the GLCM from an image channel
 
         Returns:
             The GLCM Array 3dim with shape rows, cols, feature
         """
 
-        glcm_h, glcm_w, *_ = self.glcm_shape(im)
+        glcm_h, glcm_w, *_ = self.glcm_shape(im_chn)
 
         glcm_features = [
             self.glcm_window_ij(i, j)
                 .reshape(glcm_h, glcm_w, NO_OF_FEATURES)
-                .get() for i, j in self.make_windows(im)
+                .get() for i, j in self.make_windows(im_chn)
         ]
 
         ar = np.stack(glcm_features).mean(axis=0)

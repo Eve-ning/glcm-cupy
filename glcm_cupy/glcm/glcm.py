@@ -56,13 +56,15 @@ def glcm(
     Returns:
         GLCM Features
     """
-    return GLCM(step_size, radius, bin_from, bin_to,
+    return GLCM(radius, bin_from, bin_to,
                 max_partition_size, max_threads,
-                normalize_features, directions).run(im)
+                normalize_features,
+                step_size, directions).run(im)
 
 
 @dataclass
 class GLCM(GLCMBase):
+    step_size: int = 1
     directions: List[Direction] = (
         Direction.EAST,
         Direction.SOUTH_EAST,
@@ -70,21 +72,24 @@ class GLCM(GLCMBase):
         Direction.SOUTH_WEST
     )
 
+    def __post_init__(self):
+        super().__post_init__()
+        if self.step_size <= 0:
+            raise ValueError(f"Step Size {step_size} should be >= 1")
+
     def glcm_cells(self, im: np.ndarray) -> float:
-        shape = self.glcm_shape(im)
-        return np.prod(shape) * len(self.directions)
 
-    def glcm_shape(self, im: np.ndarray) -> Tuple[int, int]:
-        """ Calculate the image shape after GLCM
+        return np.prod(self.glcm_shape(im[..., 0])) * \
+               len(self.directions) * \
+               im.shape[-1]
 
-        Returns:
-            2D Shape of Image after GLCM
-        """
+    def glcm_shape(self, im_chn: np.ndarray) -> Tuple[int, int]:
+        """ Get per-channel shape after GLCM """
 
-        return (im.shape[0] - 2 * self.step_size - 2 * self.radius,
-                im.shape[1] - 2 * self.step_size - 2 * self.radius)
+        return (im_chn.shape[0] - 2 * self.step_size - 2 * self.radius,
+                im_chn.shape[1] - 2 * self.step_size - 2 * self.radius)
 
-    def _from_3dimage(self, im: np.ndarray) -> np.ndarray:
+    def _from_im(self, im: np.ndarray) -> np.ndarray:
         """ Generates the GLCM from a multi band image
 
         Args:
@@ -96,10 +101,10 @@ class GLCM(GLCMBase):
         """
 
         return np.stack([
-            self._from_2dimage(im[..., ch]) for ch in range(im.shape[-1])
+            self._from_channel(im[..., ch]) for ch in range(im.shape[-1])
         ], axis=2)
 
-    def make_windows(self, im: np.ndarray) -> \
+    def make_windows(self, im_chn: np.ndarray) -> \
         List[Tuple[np.ndarray, np.ndarray]]:
         """ From a 2D image np.ndarray, convert it into GLCM IJ windows.
 
@@ -132,7 +137,7 @@ class GLCM(GLCMBase):
                                             +---+   +---+ flat
                                             flat    flat
         Args:
-            im: Input Image
+            im_chn: Input Image
 
         Returns:
             A List of I, J windows based on the directions.
@@ -143,22 +148,24 @@ class GLCM(GLCMBase):
 
         """
 
-        if im.ndim != 2:
-            raise ValueError(f"Image must be 2 dimensional. im.ndim={im.ndim}")
+        if im_chn.ndim != 2:
+            raise ValueError(f"Image must be 2 dimensional. "
+                             f"im.ndim={im_chn.ndim}")
 
-        glcm_h, glcm_w, *_ = self.glcm_shape(im)
+        glcm_h, glcm_w, *_ = self.glcm_shape(im_chn)
         if glcm_h <= 0 or glcm_w <= 0:
             raise ValueError(
                 f"Step Size & Diameter exceeds size for windowing. "
-                f"im.shape[0] {im.shape[0]} "
-                f"- 2 * step_size {step_size} "
-                f"- 2 * radius {radius} <= 0 or"
-                f"im.shape[1] {im.shape[1]} "
-                f"- 2 * step_size {step_size} "
-                f"- 2 * radius {radius} + 1 <= 0 was not satisfied."
+                f"im.shape[0] {im_chn.shape[0]} "
+                f"- 2 * step_size {self.step_size} "
+                f"- 2 * radius {self.radius} <= 0 or"
+                f"im.shape[1] {im_chn.shape[1]} "
+                f"- 2 * step_size {self.step_size} "
+                f"- 2 * radius {self.radius} + 1 <= 0 was not satisfied."
             )
 
-        ij = cp.asarray(view_as_windows(im, (self._diameter, self._diameter)))
+        ij = cp.asarray(
+            view_as_windows(im_chn, (self._diameter, self._diameter)))
 
         ijs: List[Tuple[np.ndarray, np.ndarray]] = []
 

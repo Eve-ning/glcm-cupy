@@ -139,4 +139,7 @@ class GLCMPy:
         return feature_ar
 
     def glcm_3d(self, ar: np.ndarray):
-        return np.stack([self.glcm_2d(ch) for ch in ar])
+
+        return np.stack([self.glcm_2d(ar[...,ch])
+                         for ch
+                         in range(ar.shape[-1])], axis=2)

@@ -9,7 +9,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Binning &mdash; glcm_cupy 0.1.8 documentation</title>
+  <title>Cross GLCM &mdash; glcm_cupy 0.1.8 documentation</title>
   
 
   
@@ -37,8 +37,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Direction" href="direction.html" />
-    <link rel="prev" title="GLCM Features" href="features.html" /> 
+    <link rel="next" title="GLCM Features" href="features.html" />
+    <link rel="prev" title="GLCM Implemented in CuPy" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -84,15 +84,10 @@
             
               <p><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html#usage">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Cross GLCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#usage">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Binning</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#caution">Caution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#time-scale">Time Scale</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#recommendations">Recommendations</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="direction.html">Direction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
 <li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
@@ -141,13 +136,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Binning</li>
+      <li>Cross GLCM</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/binning.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/glcm_cross.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -160,36 +155,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="binning">
-<h1>Binning<a class="headerlink" href="#binning" title="Permalink to this headline">¶</a></h1>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span>
+  <section id="cross-glcm">
+<h1>Cross GLCM<a class="headerlink" href="#cross-glcm" title="Permalink to this headline">¶</a></h1>
+<p>Cross GLCM is when I &amp; J for GLCM is taken from separate images.</p>
+<p>Thus, you’re yielding statistical relationships between images</p>
+</section>
+<section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<p>Use Cross GLCM on an image like so.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCMCross</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">bin_from</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">bin_to</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(1080, 1920, 3)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCMCross</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(1080, 1920, 3, 6)</span>
 </pre></div>
 </div>
-<p>To reduce the time taken for GLCM, we shrink GLCM size by limiting the maximum value of the input.</p>
-<p>E.g. an image of maximum value 255 will require a <span class="math notranslate nohighlight">\(256\times 256\)</span> sized GLCM.
-Shrinking it to 15 will drastically reduce to <span class="math notranslate nohighlight">\(16\times 16\)</span>.</p>
-<p>The arguments are thus <code class="docutils literal notranslate"><span class="pre">bin_from=256</span></code> and <code class="docutils literal notranslate"><span class="pre">bin_to=16</span></code>.</p>
-<section id="caution">
-<h2>Caution<a class="headerlink" href="#caution" title="Permalink to this headline">¶</a></h2>
-<p>As we include 0, if an image’s max value is 255, we use <code class="docutils literal notranslate"><span class="pre">bin_from=256</span></code> .</p>
-</section>
-<section id="time-scale">
-<h2>Time Scale<a class="headerlink" href="#time-scale" title="Permalink to this headline">¶</a></h2>
-<p>The time complexity is <span class="math notranslate nohighlight">\(O(n^2)\)</span></p>
-<p>E.g. <cite>bin_to==a</cite> -&gt; <cite>bin_to==a * 2</cite>, the time needed scales by 4</p>
-</section>
-<section id="recommendations">
-<h2>Recommendations<a class="headerlink" href="#recommendations" title="Permalink to this headline">¶</a></h2>
-<p>Try <code class="docutils literal notranslate"><span class="pre">bin_to&lt;=16</span></code> for testing purposes, then increase when ready to use higher bins.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span><span class="p">,</span> <span class="n">Direction</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="n">bin_from</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">bin_to</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<p>Last dimension of <cite>g</cite> is the GLCM Features.</p>
+<p>To retrieve a GLCM Feature:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">CONTRAST</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
-</section>
+<p>Consider <cite>glcm_cross</cite> if not reusing <cite>GLCMCross()</cite></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">glcm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">glcm</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 
 
@@ -200,10 +195,10 @@ Shrinking it to 15 will drastically reduce to <span class="math notranslate nohi
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="direction.html" class="btn btn-neutral float-right" title="Direction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="features.html" class="btn btn-neutral float-right" title="GLCM Features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="features.html" class="btn btn-neutral float-left" title="GLCM Features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="GLCM Implemented in CuPy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

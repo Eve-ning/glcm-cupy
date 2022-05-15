@@ -9,7 +9,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Binning &mdash; glcm_cupy 0.1.7 documentation</title>
+  <title>Binning &mdash; glcm_cupy 0.1.8 documentation</title>
   
 
   
@@ -84,9 +84,12 @@
             
               <p><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html#usage">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Binning</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#caution">Caution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time-scale">Time Scale</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#recommendations">Recommendations</a></li>
 </ul>
 </li>
@@ -172,12 +175,16 @@ Shrinking it to 15 will drastically reduce to <span class="math notranslate nohi
 <p>The arguments are thus <code class="docutils literal notranslate"><span class="pre">bin_from=256</span></code> and <code class="docutils literal notranslate"><span class="pre">bin_to=16</span></code>.</p>
 <section id="caution">
 <h2>Caution<a class="headerlink" href="#caution" title="Permalink to this headline">¶</a></h2>
-<p>If an image has a max value of 255, we use <code class="docutils literal notranslate"><span class="pre">bin_from=256</span></code>.
-This is due to the 0 included in binning, and simplicity.</p>
+<p>As we include 0, if an image’s max value is 255, we use <code class="docutils literal notranslate"><span class="pre">bin_from=256</span></code> .</p>
+</section>
+<section id="time-scale">
+<h2>Time Scale<a class="headerlink" href="#time-scale" title="Permalink to this headline">¶</a></h2>
+<p>The time complexity is <span class="math notranslate nohighlight">\(O(n^2)\)</span></p>
+<p>E.g. <cite>bin_to==a</cite> -&gt; <cite>bin_to==a * 2</cite>, the time needed scales by 4</p>
 </section>
 <section id="recommendations">
 <h2>Recommendations<a class="headerlink" href="#recommendations" title="Permalink to this headline">¶</a></h2>
-<p>I recommend using <code class="docutils literal notranslate"><span class="pre">bin_to&lt;=16</span></code> for testing purposes, then upscaling when you’re ready to use higher bins.</p>
+<p>Try <code class="docutils literal notranslate"><span class="pre">bin_to&lt;=16</span></code> for testing purposes, then increase when ready to use higher bins.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span><span class="p">,</span> <span class="n">Direction</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="n">bin_from</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">bin_to</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
 </pre></div>

@@ -9,7 +9,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Radius &amp; Step Size &mdash; glcm_cupy 0.1.7 documentation</title>
+  <title>Radius &amp; Step Size &mdash; glcm_cupy 0.1.8 documentation</title>
   
 
   
@@ -84,6 +84,8 @@
             
               <p><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html#usage">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="direction.html">Direction</a></li>
@@ -181,16 +183,16 @@
 <h2>Checking Suitability<a class="headerlink" href="#checking-suitability" title="Permalink to this headline">¶</a></h2>
 <p>If the image is too small for the radius &amp; step size it will be rejected.</p>
 <p>You may check the resulting shape ahead of time by</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">,</span> <span class="n">CORRELATION</span><span class="p">,</span> <span class="n">im_shape_after_glcm</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">,</span> <span class="n">CORRELATION</span><span class="p">,</span> <span class="n">glcm_shape</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">shape_after</span> <span class="o">=</span> <span class="n">im_shape_after_glcm</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=...</span><span class="p">,</span> <span class="n">radius</span><span class="o">=...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shape_after</span> <span class="o">=</span> <span class="n">glcm_shape</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=...</span><span class="p">,</span> <span class="n">radius</span><span class="o">=...</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If <code class="docutils literal notranslate"><span class="pre">shape_after</span></code> has any values <code class="docutils literal notranslate"><span class="pre">&lt;=0</span></code>, you know that it’ll fail.</p>
 <p>This is the signature of that helper function</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">im_shape_after_glcm</span><span class="p">(</span><span class="n">im_shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">step_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">glcm_shape</span><span class="p">(</span><span class="n">im_shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">step_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
     <span class="o">...</span>
 </pre></div>
 </div>

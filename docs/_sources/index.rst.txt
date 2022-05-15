@@ -5,6 +5,7 @@ GLCM Implemented in CuPy
     :maxdepth: 2
     :caption: Contents:
 
+    glcm_cross
     features
     binning
     direction
@@ -59,7 +60,7 @@ Use GLCM on an image like so.
     >>> g.shape
     (1074, 1914, 3, 6)
 
-The last dimension of `g` is the GLCM Features.
+Last dimension of `g` is the GLCM Features.
 
 To retrieve a GLCM Feature:
 
@@ -68,7 +69,7 @@ To retrieve a GLCM Feature:
     >>> from glcm_cupy import CONTRAST
     >>> g[..., CONTRAST].shape
 
-You may also consider simply `glcm` if you're not reusing `GLCM()`
+Consider `glcm` if not reusing `GLCM()`
 
 .. code-block:: python
 

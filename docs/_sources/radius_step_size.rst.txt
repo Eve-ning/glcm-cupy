@@ -30,11 +30,11 @@ You may check the resulting shape ahead of time by
 
 .. code-block:: python
 
-    >>> from glcm_cupy import GLCM, CONTRAST, CORRELATION, im_shape_after_glcm
+    >>> from glcm_cupy import GLCM, CONTRAST, CORRELATION, glcm_shape
     >>> import numpy as np
     >>> from PIL import Image
     >>> ar = np.asarray(Image.open("image.jpg"))
-    >>> shape_after = im_shape_after_glcm(ar, step_size=..., radius=...)
+    >>> shape_after = glcm_shape(ar, step_size=..., radius=...)
 
 If ``shape_after`` has any values ``<=0``, you know that it'll fail.
 
@@ -42,5 +42,5 @@ This is the signature of that helper function
 
 .. code-block:: python
 
-    def im_shape_after_glcm(im_shape: Tuple, step_size: int, radius: int):
+    def glcm_shape(im_shape: Tuple, step_size: int, radius: int):
         ...

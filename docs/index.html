@@ -9,7 +9,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>GLCM Implemented in CuPy &mdash; glcm_cupy 0.1.7 documentation</title>
+  <title>GLCM Implemented in CuPy &mdash; glcm_cupy 0.1.8 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="GLCM Features" href="features.html" /> 
+    <link rel="next" title="Cross GLCM" href="glcm_cross.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -83,6 +83,8 @@
             
               <p><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html#usage">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="direction.html">Direction</a></li>
@@ -157,9 +159,12 @@
 <div class="toctree-wrapper compound">
 <p><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html#usage">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="binning.html#caution">Caution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binning.html#time-scale">Time Scale</a></li>
 <li class="toctree-l2"><a class="reference internal" href="binning.html#recommendations">Recommendations</a></li>
 </ul>
 </li>
@@ -214,13 +219,13 @@ as it’s dependent on the version of CUDA you have.</p>
 <span class="go">(1074, 1914, 3, 6)</span>
 </pre></div>
 </div>
-<p>The last dimension of <cite>g</cite> is the GLCM Features.</p>
+<p>Last dimension of <cite>g</cite> is the GLCM Features.</p>
 <p>To retrieve a GLCM Feature:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">CONTRAST</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
-<p>You may also consider simply <cite>glcm</cite> if you’re not reusing <cite>GLCM()</cite></p>
+<p>Consider <cite>glcm</cite> if not reusing <cite>GLCM()</cite></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">glcm</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">glcm</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </pre></div>
@@ -242,7 +247,7 @@ as it’s dependent on the version of CUDA you have.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="features.html" class="btn btn-neutral float-right" title="GLCM Features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="glcm_cross.html" class="btn btn-neutral float-right" title="Cross GLCM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

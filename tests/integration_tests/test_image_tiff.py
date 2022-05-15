@@ -1,8 +1,8 @@
 import numpy as np
 from PIL import Image
 
-from glcm_cupy.conf import ROOT_DIR
 from glcm_cupy import GLCM
+from glcm_cupy.conf import ROOT_DIR
 
 
 def test_image():

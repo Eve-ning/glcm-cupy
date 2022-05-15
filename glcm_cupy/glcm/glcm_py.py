@@ -50,7 +50,7 @@ class GLCMPy:
     def glcm_ij(self,
                 i: np.ndarray,
                 j: np.ndarray) -> List[float]:
-        """ Calculate the expected GLCM features using Python
+        """ Get GLCM features using Python
 
         Notes:
             This is to assert the actual values in the tests.
@@ -140,6 +140,6 @@ class GLCMPy:
 
     def glcm_3d(self, ar: np.ndarray):
 
-        return np.stack([self.glcm_2d(ar[...,ch])
+        return np.stack([self.glcm_2d(ar[..., ch])
                          for ch
                          in range(ar.shape[-1])], axis=2)

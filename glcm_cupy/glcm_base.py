@@ -83,7 +83,6 @@ class GLCMBase:
                 f"[2, {MAX_VALUE_SUPPORTED}]. "
             )
 
-
     @property
     def _diameter(self):
         return self.radius * 2 + 1

@@ -104,8 +104,8 @@ class GLCM(GLCMBase):
             self._from_channel(im[..., ch]) for ch in range(im.shape[-1])
         ], axis=2)
 
-    def make_windows(self, im_chn: np.ndarray) -> \
-        List[Tuple[np.ndarray, np.ndarray]]:
+    def make_windows(self, im_chn: np.ndarray) -> List[Tuple[np.ndarray,
+                                                             np.ndarray]]:
         """ From a 2D image np.ndarray, convert it into GLCM IJ windows.
 
         Examples:

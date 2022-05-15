@@ -2,9 +2,9 @@ import cupy as cp
 import numpy as np
 import pytest
 
+from glcm_cupy import GLCM
 from glcm_cupy.conf import *
 from glcm_cupy.glcm.glcm_py import glcm_py_ij
-from glcm_cupy import GLCM
 from tests.unit_tests.util.glcm_py_skimage import glcm_py_skimage
 
 

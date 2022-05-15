@@ -12,6 +12,7 @@ from tqdm import tqdm
 
 from glcm_cupy.conf import *
 from glcm_cupy.kernel import glcm_module
+from glcm_cupy.utils import calc_grid_size, normalize_features, binner
 
 
 @dataclass
@@ -108,7 +109,7 @@ class GLCMBase:
                              unit=" Cells",
                              unit_scale=True)
 
-        im = self._binner(im, self.bin_from, self.bin_to)
+        im = binner(im, self.bin_from, self.bin_to)
         if im.ndim == 2:
             raise ValueError(
                 "Must be 3D, if shape == (Height, Width), "
@@ -133,8 +134,8 @@ class GLCMBase:
         ...
 
     @abstractmethod
-    def make_windows(self, im_chn: np.ndarray) -> \
-        List[Tuple[np.ndarray, np.ndarray]]:
+    def make_windows(self, im_chn: np.ndarray) -> List[Tuple[np.ndarray,
+                                                             np.ndarray]]:
         ...
 
     @abstractmethod
@@ -158,7 +159,8 @@ class GLCMBase:
 
         ar = np.stack(glcm_features).mean(axis=0)
 
-        return self.normalize_features(ar) if self.normalized_features else ar
+        return normalize_features(ar, self.bin_to) \
+            if self.normalized_features else ar
 
     def glcm_window_ij(self, windows_i: np.ndarray, windows_j: np.ndarray):
         windows_count = windows_i.shape[0]
@@ -195,13 +197,14 @@ class GLCMBase:
     def glcm_ij(self,
                 i: np.ndarray,
                 j: np.ndarray):
-        """ Generate the GLCM from the I J Window
+        """ GLCM from I J
 
         Examples:
 
             >>> ar_0 = np.random.randint(0, 100, 10, dtype=np.uint8)
             >>> ar_1 = np.random.randint(0, 100, 10, dtype=np.uint8)
-            >>> g = GLCM().glcm_ij(ar_0[...,np.newaxis], ar_1[...,np.newaxis])
+            >>> g = GLCMBase().glcm_ij(ar_0[...,np.newaxis],
+            ...                        ar_1[...,np.newaxis])
 
         Notes:
             i must be the same shape as j
@@ -243,9 +246,9 @@ class GLCMBase:
                 f" i: {i.dtype} j: {j.dtype}"
             )
 
-        grid = self._calc_grid_size(no_of_windows,
-                                    self.bin_to,
-                                    self.max_threads)
+        grid = calc_grid_size(no_of_windows,
+                              self.bin_to,
+                              self.max_threads)
         self.glcm_create_kernel(
             grid=grid,
             block=(self.max_threads,),
@@ -273,57 +276,3 @@ class GLCMBase:
         self.glcm_feature_kernel_2(**feature_args)
 
         return self.features[:no_of_windows]
-
-    def normalize_features(self, ar: np.ndarray):
-        """ This scales the glcm features to [0, 1] """
-        ar[..., CONTRAST] /= (self.bin_to - 1) ** 2
-        ar[..., MEAN] /= (self.bin_to - 1)
-        ar[..., VAR] /= (self.bin_to - 1) ** 2
-        ar[..., CORRELATION] += 1
-        ar[..., CORRELATION] /= 2
-        return ar
-
-    @staticmethod
-    def _calc_grid_size(
-        window_count: int,
-        glcm_size: int,
-        thread_per_block: int = MAX_THREADS
-    ) -> Tuple[int, int]:
-        """ Calculates the required grid size
-
-        Notes:
-            There's 2 points where the number of threads
-
-        Returns:
-            The optimal minimum grid shape for GLCM
-
-        """
-
-        # Blocks to support features
-        blocks_req_glcm_features = \
-            window_count * glcm_size * glcm_size / thread_per_block
-
-        # Blocks to support glcm populating
-        blocks_req_glcm_populate = glcm_size * window_count
-
-        # Take the maximum
-        blocks_req = max(blocks_req_glcm_features, blocks_req_glcm_populate)
-
-        # We split it to 2 dims: A -> B x B
-        b = int(blocks_req ** 0.5) + 1
-        return b, b
-
-    @staticmethod
-    def _binner(im: np.ndarray, bin_from: int, bin_to: int) -> np.ndarray:
-        """ Bins an image from a certain bin to another
-
-        Args:
-            im: Image as np.ndarray
-            bin_from: From the Bin of input image
-            bin_to: To the Bin of output image
-
-        Returns:
-            Binned Image
-
-        """
-        return (im.astype(np.float32) / bin_from * bin_to).astype(np.uint8)

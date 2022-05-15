@@ -3,8 +3,6 @@ from typing import List
 
 import numpy as np
 
-from glcm_cupy import *
-
 
 @dataclass
 class GLCMPyBase:
@@ -71,11 +69,3 @@ class GLCMPyBase:
                     correlation += glcm[i, j] * (i - mean) * (j - mean) / var
 
         return [homogeneity, contrast, asm, mean, var, correlation]
-
-    def normalize_features(self, ar: np.ndarray):
-        ar[..., CONTRAST] /= (self.bin_to - 1) ** 2
-        ar[..., MEAN] /= (self.bin_to - 1)
-        ar[..., VAR] /= (self.bin_to - 1) ** 2
-        ar[..., CORRELATION] += 1
-        ar[..., CORRELATION] /= 2
-        return ar

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from glcm_cupy.cross.glcm_cross import GLCMCross, glcm_cross
-from glcm_cupy.cross.glcm_cross_py import glcm_cross_py_3d
+from glcm_cupy.cross.glcm_cross_py import glcm_cross_py_im
 
 
 @pytest.mark.parametrize(
@@ -22,6 +22,6 @@ def test_cross_glcm(size, bins, radius):
     ar = np.random.randint(0, bins, [size, size, 2])
     g = GLCMCross(radius=radius, bin_from=bins, bin_to=bins).run(ar)
     g_fn = glcm_cross(ar, radius=radius, bin_from=bins, bin_to=bins)
-    expected = glcm_cross_py_3d(ar, radius=radius, bin_from=bins, bin_to=bins)
+    expected = glcm_cross_py_im(ar, radius=radius, bin_from=bins, bin_to=bins)
     assert g == pytest.approx(expected, abs=0.001)
     assert g_fn == pytest.approx(expected, abs=0.001)

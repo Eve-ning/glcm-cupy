@@ -6,26 +6,27 @@ from tqdm import tqdm
 
 from glcm_cupy.conf import NO_OF_FEATURES
 from glcm_cupy.glcm_py_base import GLCMPyBase
+from glcm_cupy.utils import normalize_features
 
 
-def glcm_py_3d(ar: np.ndarray, bin_from: int, bin_to: int,
+def glcm_py_im(ar: np.ndarray, bin_from: int, bin_to: int,
                radius: int = 2,
                step: int = 1):
     return GLCMPy(bin_from=bin_from,
                   bin_to=bin_to,
                   radius=radius,
-                  step=step).glcm_3d(ar)
+                  step=step).glcm_im(ar)
 
 
-def glcm_py_2d(ar: np.ndarray,
-               bin_from: int,
-               bin_to: int,
-               radius: int = 2,
-               step: int = 1):
+def glcm_py_chn(ar: np.ndarray,
+                bin_from: int,
+                bin_to: int,
+                radius: int = 2,
+                step: int = 1):
     return GLCMPy(bin_from=bin_from,
                   bin_to=bin_to,
                   radius=radius,
-                  step=step).glcm_2d(ar)
+                  step=step).glcm_chn(ar)
 
 
 def glcm_py_ij(i: np.ndarray,
@@ -39,7 +40,8 @@ def glcm_py_ij(i: np.ndarray,
 class GLCMPy(GLCMPyBase):
     step: int = 1
 
-    def glcm_2d(self, ar: np.ndarray):
+    def glcm_chn(self, ar: np.ndarray):
+
         ar = (ar / self.bin_from * self.bin_to).astype(np.uint8)
         ar_w = view_as_windows(ar, (self.diameter, self.diameter))
 
@@ -67,10 +69,10 @@ class GLCMPy(GLCMPyBase):
         feature_ar = feature_ar.reshape(
             (h - self.step * 2, w - self.step * 2, NO_OF_FEATURES))
 
-        return self.normalize_features(feature_ar)
+        return normalize_features(feature_ar, self.bin_to)
 
-    def glcm_3d(self, ar: np.ndarray):
+    def glcm_im(self, ar: np.ndarray):
 
-        return np.stack([self.glcm_2d(ar[..., ch])
+        return np.stack([self.glcm_chn(ar[..., ch])
                          for ch
                          in range(ar.shape[-1])], axis=2)

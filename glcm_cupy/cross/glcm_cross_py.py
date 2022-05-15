@@ -7,22 +7,23 @@ from tqdm import tqdm
 
 from glcm_cupy.conf import NO_OF_FEATURES
 from glcm_cupy.glcm_py_base import GLCMPyBase
+from glcm_cupy.utils import normalize_features
 
 
-def glcm_cross_py_3d(im: np.ndarray, bin_from: int, bin_to: int,
+def glcm_cross_py_im(im: np.ndarray, bin_from: int, bin_to: int,
                      radius: int = 2):
     return GLCMCrossPy(bin_from=bin_from,
                        bin_to=bin_to,
-                       radius=radius).glcm_3d(im)
+                       radius=radius).glcm_im(im)
 
 
-def glcm_cross_py_2d(im_chn: np.ndarray,
-                     bin_from: int,
-                     bin_to: int,
-                     radius: int = 2):
+def glcm_cross_py_chn(im_chn: np.ndarray,
+                      bin_from: int,
+                      bin_to: int,
+                      radius: int = 2):
     return GLCMCrossPy(bin_from=bin_from,
                        bin_to=bin_to,
-                       radius=radius).glcm_2d(im_chn)
+                       radius=radius).glcm_chn(im_chn)
 
 
 def glcm_cross_py_ij(i: np.ndarray,
@@ -35,7 +36,7 @@ def glcm_cross_py_ij(i: np.ndarray,
 @dataclass
 class GLCMCrossPy(GLCMPyBase):
 
-    def glcm_2d(self, ar: np.ndarray):
+    def glcm_chn(self, ar: np.ndarray):
         ar = (ar / self.bin_from * self.bin_to).astype(np.uint8)
 
         def flat(ar_: np.ndarray):
@@ -60,9 +61,9 @@ class GLCMCrossPy(GLCMPyBase):
              NO_OF_FEATURES)
         )
 
-        return self.normalize_features(feature_ar)
+        return normalize_features(feature_ar, self.bin_to)
 
-    def glcm_3d(self, ar: np.ndarray):
+    def glcm_im(self, ar: np.ndarray):
         combos = list(itertools.combinations(range(ar.shape[-1]), 2))
-        return np.stack([self.glcm_2d(ar[..., combo]) for combo in combos],
+        return np.stack([self.glcm_chn(ar[..., combo]) for combo in combos],
                         axis=2)

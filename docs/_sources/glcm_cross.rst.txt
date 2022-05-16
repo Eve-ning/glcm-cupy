@@ -52,6 +52,11 @@ In a 3 channel image, the following will only cross indices, 0 with 1, 1 with 2,
     >>> g.shape
     (1080, 1920, 2, 6)
 
+``g[:,:,0,:]`` retrieves 0 cross 1, ``g[:,:,1,:]`` retrieves 1 cross 2.
+
+Default Combinations
+--------------------
+
 By default, ``ix_combos is None``, using all possible combinations.
 
 After ``run(...)``, ``ix_combos`` will be populated with combinations used.

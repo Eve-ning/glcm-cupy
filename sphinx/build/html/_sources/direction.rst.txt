@@ -37,6 +37,5 @@ We can thus specify them as such.
 .. code-block:: python
 
     >>> from glcm_cupy import GLCM, Direction
-    >>> GLCM()
     >>> g = GLCM(directions=(Direction.SOUTH_WEST, Direction.SOUTH))
 

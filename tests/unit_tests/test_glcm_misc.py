@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 
 from glcm_cupy import GLCM
-from glcm_cupy.windowing import make_windows, im_shape_after_glcm
 
 
 @pytest.mark.parametrize(
@@ -37,18 +36,19 @@ def test_glcm_make_windows(
         radius: Radius of each window
         step_size: Step Size distance between windows
     """
-    im = np.zeros(im_shape, dtype=np.uint8)
+    im_chn = np.zeros(im_shape, dtype=np.uint8)
 
-    im_shape_after = im_shape_after_glcm(im_shape, step_size, radius)
+    g = GLCM(step_size=step_size, radius=radius)
+    glcm_shape = g.glcm_shape(im_chn)
 
-    if im_shape_after[0] <= 0 or im_shape_after[1] <= 0:
+    if glcm_shape[0] <= 0 or glcm_shape[1] <= 0:
         # If the make windows is invalid, we assert that it throws an error
         with pytest.raises(ValueError):
-            make_windows(im, radius, step_size)
+            g.make_windows(im_chn)
     else:
         # Else, we assert the correct shape returns
-        windows = make_windows(im, radius, step_size)
-        assert (np.prod(im_shape_after),
+        windows = g.make_windows(im_chn)
+        assert (np.prod(glcm_shape),
                 (radius * 2 + 1) ** 2) == windows[0][0].shape
 
 

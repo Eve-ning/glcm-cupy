@@ -15,13 +15,6 @@ I recommend referencing `this tutorial <https://prism.ucalgary.ca/handle/1880/51
 
 In total, we have 6 features.
 
-- Homogeneity
-- ASM
-- Contrast
-- Correlation
-- Mean
-- Variance
-
 .. math::
 
     \text{Homogeneity} = \sum_{i,j=0}^{N-1}\frac{P_{i,j}}{1+(i-j)^2}\\

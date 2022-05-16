@@ -1,6 +1,7 @@
 import numpy as np
 from skimage.feature import graycoprops, graycomatrix
 
+
 def glcm_py_skimage(i, j):
     ar_ij = np.stack([i, j], axis=-1)
     ar_ji = np.stack([j, i], axis=-1)

@@ -19,13 +19,19 @@ The arguments are thus ``bin_from=256`` and ``bin_to=16``.
 Caution
 -------
 
-If an image has a max value of 255, we use ``bin_from=256``.
-This is due to the 0 included in binning, and simplicity.
+As we include 0, if an image's max value is 255, we use ``bin_from=256`` .
+
+Time Scale
+----------
+
+The time complexity is :math:`O(n^2)`
+
+E.g. ``bin_to==a`` -> ``bin_to==a * 2``, the time needed scales by 4
 
 Recommendations
 ---------------
 
-I recommend using ``bin_to<=16`` for testing purposes, then upscaling when you're ready to use higher bins.
+Try ``bin_to<=16`` for testing purposes, then increase when ready to use higher bins.
 
 .. code-block:: python
 

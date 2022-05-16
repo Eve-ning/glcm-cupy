@@ -15,7 +15,7 @@ GLCM Implemented in CuPy
 Quick Start
 ===========
 
-You need Python >= 3.8
+You need Python >= 3.7
 
 First, you need to install this
 

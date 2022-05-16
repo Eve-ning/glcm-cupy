@@ -19,7 +19,8 @@ def glcm_cross(
     bin_to: int = 256,
     max_partition_size: int = MAX_PARTITION_SIZE,
     max_threads: int = MAX_THREADS,
-    normalize_features: bool = True
+    normalize_features: bool = True,
+    ix_combos: List[Tuple[int, int]] = None
 ) -> np.ndarray:
     """ Runs the Cross GLCM algorithm
 
@@ -48,18 +49,20 @@ def glcm_cross(
     """
     return GLCMCross(radius, bin_from, bin_to,
                      max_partition_size, max_threads,
-                     normalize_features).run(im)
+                     normalize_features,
+                     ix_combos).run(im)
 
 
 @dataclass
 class GLCMCross(GLCMBase):
+    ix_combos: List[Tuple[int, int]] | None = None
 
-    @staticmethod
-    def ch_combos(im: np.ndarray) -> List[np.ndarray]:
+    def ch_combos(self, im: np.ndarray) -> List[np.ndarray]:
         """ Get Image Channel Combinations """
-        return [im[..., combo]
-                for combo
-                in combinations(range(im.shape[-1]), 2)]
+        if self.ix_combos is None:
+            # noinspection PyTypeChecker
+            self.ix_combos = list(combinations(range(im.shape[-1]), 2))
+        return [im[...,  ix_combo] for ix_combo in self.ix_combos]
 
     def glcm_cells(self, im: np.ndarray) -> float:
         """ Total number of GLCM cells to process """

@@ -17,11 +17,23 @@ from glcm_cupy.cross.glcm_cross_py import glcm_cross_py_im
     "radius",
     [1, 2, 4]
 )
-def test_cross_glcm(size, bins, radius):
-    # We only test with 2 windows to reduce time taken.
-    ar = np.random.randint(0, bins, [size, size, 2])
-    g = GLCMCross(radius=radius, bin_from=bins, bin_to=bins).run(ar)
-    g_fn = glcm_cross(ar, radius=radius, bin_from=bins, bin_to=bins)
-    expected = glcm_cross_py_im(ar, radius=radius, bin_from=bins, bin_to=bins)
+@pytest.mark.parametrize(
+    "ix_combos",
+    [
+        [[0, 1]],
+        [[1, 2]],
+        [[0, 1], [1, 2]],
+        None
+    ]
+)
+def test_cross_glcm(size, bins, radius, ix_combos):
+    ar = np.random.randint(0, bins, [size, size, 3])
+    g = GLCMCross(radius=radius, bin_from=bins, bin_to=bins,
+                  ix_combos=ix_combos).run(ar)
+    g_fn = glcm_cross(ar, radius=radius, bin_from=bins, bin_to=bins,
+                      ix_combos=ix_combos)
+    expected = glcm_cross_py_im(ar, radius=radius,
+                                bin_from=bins, bin_to=bins,
+                                ix_combos=ix_combos)
     assert g == pytest.approx(expected, abs=0.001)
     assert g_fn == pytest.approx(expected, abs=0.001)

@@ -1,5 +1,6 @@
 import itertools
 from dataclasses import dataclass
+from typing import List, Tuple
 
 import numpy as np
 from skimage.util import view_as_windows
@@ -11,30 +12,16 @@ from glcm_cupy.utils import normalize_features
 
 
 def glcm_cross_py_im(im: np.ndarray, bin_from: int, bin_to: int,
-                     radius: int = 2):
+                     radius: int = 2, ix_combos: List[Tuple[int, int]] = None):
     return GLCMCrossPy(bin_from=bin_from,
                        bin_to=bin_to,
-                       radius=radius).glcm_im(im)
-
-
-def glcm_cross_py_chn(im_chn: np.ndarray,
-                      bin_from: int,
-                      bin_to: int,
-                      radius: int = 2):
-    return GLCMCrossPy(bin_from=bin_from,
-                       bin_to=bin_to,
-                       radius=radius).glcm_chn(im_chn)
-
-
-def glcm_cross_py_ij(i: np.ndarray,
-                     j: np.ndarray,
-                     bin_from: int, bin_to: int):
-    return GLCMCrossPy(bin_from=bin_from,
-                       bin_to=bin_to).glcm_ij(i, j)
+                       radius=radius,
+                       ix_combos=ix_combos).glcm_im(im)
 
 
 @dataclass
 class GLCMCrossPy(GLCMPyBase):
+    ix_combos: List[Tuple[int, int]] = None
 
     def glcm_chn(self, ar: np.ndarray):
         ar = (ar / self.bin_from * self.bin_to).astype(np.uint8)
@@ -64,6 +51,9 @@ class GLCMCrossPy(GLCMPyBase):
         return normalize_features(feature_ar, self.bin_to)
 
     def glcm_im(self, ar: np.ndarray):
-        combos = list(itertools.combinations(range(ar.shape[-1]), 2))
-        return np.stack([self.glcm_chn(ar[..., combo]) for combo in combos],
-                        axis=2)
+        if self.ix_combos is None:
+            self.ix_combos = list(itertools.combinations(range(ar.shape[-1]), 2))
+        return np.stack(
+            [self.glcm_chn(ar[..., ix_combo]) for ix_combo in self.ix_combos],
+            axis=2
+        )

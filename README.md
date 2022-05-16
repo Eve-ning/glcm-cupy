@@ -1,3 +1,5 @@
+# 📖[Wiki](https://eve-ning.github.io/glcmbin5_cupy/)
+
 # GLCM Bin 5 on CuPy
 
 This is a CuPy reimplementation of my `glcmbin5` [**on my other repository**](https://github.com/Eve-ning/glcmbin5).

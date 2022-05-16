@@ -26,7 +26,7 @@ Time Scale
 
 The time complexity is :math:`O(n^2)`
 
-E.g. `bin_to==a` -> `bin_to==a * 2`, the time needed scales by 4
+E.g. ``bin_to==a`` -> ``bin_to==a * 2``, the time needed scales by 4
 
 Recommendations
 ---------------

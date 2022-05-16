@@ -60,7 +60,7 @@ Use GLCM on an image like so.
     >>> g.shape
     (1074, 1914, 3, 6)
 
-Last dimension of `g` is the GLCM Features.
+Last dimension of ``g`` is the GLCM Features.
 
 To retrieve a GLCM Feature:
 
@@ -69,7 +69,7 @@ To retrieve a GLCM Feature:
     >>> from glcm_cupy import CONTRAST
     >>> g[..., CONTRAST].shape
 
-Consider `glcm` if not reusing `GLCM()`
+Consider ``glcm`` if not reusing ``GLCM()``
 
 .. code-block:: python
 

@@ -5,8 +5,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Cross GLCM &mdash; glcm_cupy 0.1.8 documentation</title>
@@ -22,11 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -35,6 +33,8 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="GLCM Features" href="features.html" />
@@ -82,10 +82,13 @@
               
             
             
-              <p><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Cross GLCM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Cross GLCM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#selecting-and-retrieving-combinations">Selecting and Retrieving Combinations</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="direction.html">Direction</a></li>
@@ -155,13 +158,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="cross-glcm">
+  <div class="section" id="cross-glcm">
 <h1>Cross GLCM<a class="headerlink" href="#cross-glcm" title="Permalink to this headline">¶</a></h1>
 <p>Cross GLCM is when I &amp; J for GLCM is taken from separate images.</p>
 <p>Thus, you’re yielding statistical relationships between images</p>
-</section>
-<section id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <p>Use Cross GLCM on an image like so.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCMCross</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -174,18 +176,36 @@
 <span class="go">(1080, 1920, 3, 6)</span>
 </pre></div>
 </div>
-<p>Last dimension of <cite>g</cite> is the GLCM Features.</p>
+<p>Last dimension of <code class="docutils literal notranslate"><span class="pre">g</span></code> is the GLCM Features.</p>
 <p>To retrieve a GLCM Feature:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">CONTRAST</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
-<p>Consider <cite>glcm_cross</cite> if not reusing <cite>GLCMCross()</cite></p>
+<p>Consider <code class="docutils literal notranslate"><span class="pre">glcm_cross</span></code> if not reusing <code class="docutils literal notranslate"><span class="pre">GLCMCross()</span></code></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">glcm</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">glcm</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">glcm_cross</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </pre></div>
 </div>
-</section>
+</div>
+<div class="section" id="selecting-and-retrieving-combinations">
+<h2>Selecting and Retrieving Combinations<a class="headerlink" href="#selecting-and-retrieving-combinations" title="Permalink to this headline">¶</a></h2>
+<p>In each <code class="docutils literal notranslate"><span class="pre">GLCMCross()</span></code> instance, is a <code class="docutils literal notranslate"><span class="pre">ix_combos</span></code> property to specify combinations</p>
+<p>In a 3 channel image, the following will only cross indices, 0 with 1, 1 with 2, <strong>skipping</strong> 0 with 2</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">glcm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCMCross</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">ix_combos</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(1080, 1920, 2, 6)</span>
+</pre></div>
+</div>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">ix_combos</span> <span class="pre">is</span> <span class="pre">None</span></code>, using all possible combinations.</p>
+<p>After <code class="docutils literal notranslate"><span class="pre">run(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ix_combos</span></code> will be populated with combinations used.</p>
+<p>Thus, you can retrieve the default ordering of the 3rd dimension.</p>
+<p>The combinations is in the order of <code class="docutils literal notranslate"><span class="pre">itertools.combinations(range(CHANNELS),</span> <span class="pre">2)</span></code>.</p>
+<p><strong>Caveat:</strong> When using <code class="docutils literal notranslate"><span class="pre">glcm_cross</span></code>, you can’t retrieve the generated order.
+However, you may use <code class="docutils literal notranslate"><span class="pre">itertools.combinations</span></code> to indirectly yield it.</p>
+</div>
+</div>
 
 
            </div>

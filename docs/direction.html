@@ -5,8 +5,7 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>Direction &mdash; glcm_cupy 0.1.8 documentation</title>
@@ -22,11 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -35,6 +33,8 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Radius &amp; Step Size" href="radius_step_size.html" />
@@ -82,10 +82,9 @@
               
             
             
-              <p><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html#usage">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Direction</a><ul>
@@ -159,7 +158,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="direction">
+  <div class="section" id="direction">
 <h1>Direction<a class="headerlink" href="#direction" title="Permalink to this headline">¶</a></h1>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span><span class="p">,</span> <span class="n">Direction</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -169,13 +168,13 @@
 </pre></div>
 </div>
 <p>I recommend referencing <a class="reference external" href="https://prism.ucalgary.ca/handle/1880/51900">this tutorial</a> for knowledge gaps here</p>
-<section id="bi-directionality">
+<div class="section" id="bi-directionality">
 <h2>Bi-Directionality<a class="headerlink" href="#bi-directionality" title="Permalink to this headline">¶</a></h2>
 <p>This algorithm will use a bi-directional algorithm in the kernel.</p>
 <p>That means, it’ll run GLCM for the I, J and J, I. This bi-directionality performance cost is negligible.</p>
 <p>This is achieved simply by adding the reflected GLCM.</p>
-</section>
-<section id="directions">
+</div>
+<div class="section" id="directions">
 <h2>Directions<a class="headerlink" href="#directions" title="Permalink to this headline">¶</a></h2>
 <p>On top of Bi-directionality, you may specify directions from 4 directions.</p>
 <ul class="simple">
@@ -190,8 +189,8 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="n">directions</span><span class="o">=</span><span class="p">(</span><span class="n">Direction</span><span class="o">.</span><span class="n">SOUTH_WEST</span><span class="p">,</span> <span class="n">Direction</span><span class="o">.</span><span class="n">SOUTH</span><span class="p">))</span>
 </pre></div>
 </div>
-</section>
-</section>
+</div>
+</div>
 
 
            </div>

@@ -104,19 +104,20 @@ class GLCMBase:
              3D: (rows, cols, channels, features),
 
         """
+
+        if im.ndim == 2:
+            raise ValueError(
+                "Must be 3D. If ar.shape == (Height, Width), "
+                "use ar[...,np.newaxis] to add the channel dimension."
+            )
+        if im.ndim != 3:
+            raise ValueError("Only 3D images allowed.")
         self.progress = tqdm(total=self.glcm_cells(im),
                              desc="GLCM Progress",
                              unit=" Cells",
                              unit_scale=True)
 
         im = binner(im, self.bin_from, self.bin_to)
-        if im.ndim == 2:
-            raise ValueError(
-                "Must be 3D, if shape == (Height, Width), "
-                "add another axis for channel."
-            )
-        if im.ndim != 3:
-            raise ValueError("Only 3D images allowed.")
         return self._from_im(im)
 
     @abstractmethod

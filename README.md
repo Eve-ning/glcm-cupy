@@ -1,4 +1,4 @@
-# 📖[Wiki](https://eve-ning.github.io/glcmbin5_cupy/)
+# 📖[Wiki](https://eve-ning.github.io/glcm-cupy/)
 
 # GLCM Bin 5 on CuPy
 

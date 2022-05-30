@@ -11,6 +11,7 @@ GLCM Implemented in CuPy
     direction
     radius_step_size
     acknowledgements
+    changelog
 
 Quick Start
 ===========

@@ -31,7 +31,7 @@ def glcm(
                                    Direction.SOUTH_WEST),
     max_partition_size: int = MAX_PARTITION_SIZE,
     max_threads: int = MAX_THREADS,
-    normalize_features: bool = True
+    normalized_features: bool = True
 ) -> np.ndarray:
     """
     Examples:
@@ -51,15 +51,21 @@ def glcm(
         directions: Directions to pair the windows.
         max_partition_size: Maximum number of windows to parse at once
         max_threads: Maximum threads for CUDA
-        normalize_features: Whether to normalize features to [0, 1]
+        normalized_features: Whether to normalize features to [0, 1]
 
     Returns:
         GLCM Features
     """
-    return GLCM(radius, bin_from, bin_to,
-                max_partition_size, max_threads,
-                normalize_features,
-                step_size, directions).run(im)
+    return GLCM(
+        radius=radius,
+        bin_from=bin_from,
+        bin_to=bin_to,
+        max_partition_size=max_partition_size,
+        max_threads=max_threads,
+        normalized_features=normalized_features,
+        step_size=step_size,
+        directions=directions
+    ).run(im)
 
 
 @dataclass

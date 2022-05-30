@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from glcm_cupy import GLCM
+from glcm_cupy.utils import binner
 
 
 @pytest.mark.parametrize(
@@ -70,7 +71,7 @@ def test_glcm_binner(bins):
     Args:
         bins: The result bins
     """
-    g = GLCM._binner(np.asarray([0, 1, 2], dtype=np.uint8), 3, bins)
+    g = binner(np.asarray([0, 1, 2], dtype=np.uint8), 3, bins)
 
     assert g[0] == 0 // 3
     assert g[1] == bins // 3

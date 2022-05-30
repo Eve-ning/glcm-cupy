@@ -19,7 +19,7 @@ def glcm_cross(
     bin_to: int = 256,
     max_partition_size: int = MAX_PARTITION_SIZE,
     max_threads: int = MAX_THREADS,
-    normalize_features: bool = True,
+    normalized_features: bool = True,
     ix_combos: List[Tuple[int, int]] = None
 ) -> np.ndarray:
     """ Runs the Cross GLCM algorithm
@@ -42,15 +42,20 @@ def glcm_cross(
         bin_to: Binarize to.
         max_partition_size: Maximum number of windows to parse at once
         max_threads: Maximum threads for CUDA
-        normalize_features: Whether to normalize features to [0, 1]
+        normalized_features: Whether to normalize features to [0, 1]
 
     Returns:
         GLCM Features
     """
-    return GLCMCross(radius, bin_from, bin_to,
-                     max_partition_size, max_threads,
-                     normalize_features,
-                     ix_combos).run(im)
+    return GLCMCross(
+        radius=radius,
+        bin_from=bin_from,
+        bin_to=bin_to,
+        max_partition_size=max_partition_size,
+        max_threads=max_threads,
+        normalized_features=normalized_features,
+        ix_combos=ix_combos
+    ).run(im)
 
 
 @dataclass
@@ -62,7 +67,7 @@ class GLCMCross(GLCMBase):
         if self.ix_combos is None:
             # noinspection PyTypeChecker
             self.ix_combos = list(combinations(range(im.shape[-1]), 2))
-        return [im[...,  ix_combo] for ix_combo in self.ix_combos]
+        return [im[..., ix_combo] for ix_combo in self.ix_combos]
 
     def glcm_cells(self, im: np.ndarray) -> float:
         """ Total number of GLCM cells to process """

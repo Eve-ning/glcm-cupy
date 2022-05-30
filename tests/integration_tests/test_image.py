@@ -9,4 +9,3 @@ def test_image():
     img = Image.open(f"{ROOT_DIR}/data/image.jpg")
     ar = np.asarray(img)[::5, ::5]
     g = GLCM(bin_to=16).run(ar)
-    pass

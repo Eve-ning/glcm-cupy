@@ -43,6 +43,7 @@ class GLCMBase:
     max_partition_size: int = MAX_PARTITION_SIZE
     max_threads: int = MAX_THREADS
     normalized_features: bool = True
+    verbose: bool = True
 
     glcm_create_kernel: RawKernel = field(
         default=glcm_module.get_function('glcmCreateKernel'),
@@ -115,7 +116,8 @@ class GLCMBase:
         self.progress = tqdm(total=self.glcm_cells(im),
                              desc="GLCM Progress",
                              unit=" Cells",
-                             unit_scale=True)
+                             unit_scale=True,
+                             disable=not self.verbose)
 
         im = binner(im, self.bin_from, self.bin_to)
         return self._from_im(im)

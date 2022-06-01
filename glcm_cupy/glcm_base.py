@@ -36,6 +36,7 @@ class GLCMBase:
         max_partition_size: Maximum number of windows to parse at once
         max_threads: Maximum number of threads to use per block
         normalize_features: Whether to normalize features to [0, 1]
+        verbose: Whether to enable TQDM logging
     """
     radius: int = 2
     bin_from: int = 256

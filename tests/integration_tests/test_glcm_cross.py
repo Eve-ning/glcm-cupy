@@ -1,7 +1,9 @@
+import inspect
+
 import numpy as np
 import pytest
 
-from glcm_cupy import GLCMCross
+from glcm_cupy import GLCMCross, glcm_cross
 
 
 def test_from_3dimage(ar_3d):
@@ -21,3 +23,16 @@ def test_from_2dimage(ar_2d):
     # This is not possible as we need > 1 channel to cross
     with pytest.raises(ValueError):
         GLCMCross().run(ar_2d[..., np.newaxis])
+
+
+def test_output_match(ar_3d):
+    """ Tests if class & function outputs match """
+    assert GLCMCross().run(ar_3d) == pytest.approx(glcm_cross(ar_3d))
+
+
+def test_signature_match():
+    """ Tests if class & function signatures match """
+    cls = dict(inspect.signature(GLCMCross).parameters)
+    fn = dict(inspect.signature(glcm_cross).parameters)
+    del fn['im']
+    assert cls == fn

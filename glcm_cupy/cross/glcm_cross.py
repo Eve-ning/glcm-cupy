@@ -20,7 +20,8 @@ def glcm_cross(
     max_partition_size: int = MAX_PARTITION_SIZE,
     max_threads: int = MAX_THREADS,
     normalized_features: bool = True,
-    ix_combos: List[Tuple[int, int]] = None
+    verbose: bool = True,
+    ix_combos: List[Tuple[int, int]] | None = None
 ) -> np.ndarray:
     """ Runs the Cross GLCM algorithm
 
@@ -43,6 +44,9 @@ def glcm_cross(
         max_partition_size: Maximum number of windows to parse at once
         max_threads: Maximum threads for CUDA
         normalized_features: Whether to normalize features to [0, 1]
+        verbose: Whether to enable TQDM logging
+        ix_combos: Set of combinations to Cross with. If None, then all.
+            E.g. ix_combos = [(0, 1), (0, 2), ..., (2, 3), (3, 3)]
 
     Returns:
         GLCM Features
@@ -54,12 +58,18 @@ def glcm_cross(
         max_partition_size=max_partition_size,
         max_threads=max_threads,
         normalized_features=normalized_features,
-        ix_combos=ix_combos
+        ix_combos=ix_combos,
+        verbose=verbose
     ).run(im)
 
 
 @dataclass
 class GLCMCross(GLCMBase):
+    """
+    Args:
+        ix_combos: Set of combinations to Cross with. If None, then all.
+            E.g. ix_combos = [(0, 1), (0, 2), ..., (2, 3), (3, 3)]
+    """
     ix_combos: List[Tuple[int, int]] | None = None
 
     def ch_combos(self, im: np.ndarray) -> List[np.ndarray]:

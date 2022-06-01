@@ -31,7 +31,8 @@ def glcm(
                                    Direction.SOUTH_WEST),
     max_partition_size: int = MAX_PARTITION_SIZE,
     max_threads: int = MAX_THREADS,
-    normalized_features: bool = True
+    normalized_features: bool = True,
+    verbose: bool = True
 ) -> np.ndarray:
     """
     Examples:
@@ -52,6 +53,7 @@ def glcm(
         max_partition_size: Maximum number of windows to parse at once
         max_threads: Maximum threads for CUDA
         normalized_features: Whether to normalize features to [0, 1]
+        verbose: Whether to enable TQDM logging
 
     Returns:
         GLCM Features
@@ -64,7 +66,8 @@ def glcm(
         max_threads=max_threads,
         normalized_features=normalized_features,
         step_size=step_size,
-        directions=directions
+        directions=directions,
+        verbose=verbose
     ).run(im)
 
 

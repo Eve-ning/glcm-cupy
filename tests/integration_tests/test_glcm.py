@@ -21,6 +21,22 @@ def test_output_match(ar_3d):
     assert GLCM().run(ar_3d) == pytest.approx(glcm(ar_3d))
 
 
+def test_from_3dimage_cp(ar_3d_cp):
+    """ Tests using a 3D Image """
+    GLCM().run(ar_3d_cp)
+
+
+def test_from_2dimage_cp(ar_2d_cp):
+    """ Tests with a 2D Image (1 Channel) """
+    GLCM().run(ar_2d_cp[..., np.newaxis])
+
+
+def test_output_match_cp(ar_3d_cp):
+    """ Tests if class & function outputs match """
+    # XXX: pytest.approx does not support CuPy.
+    # It needs to get the NumPy array instead.
+    assert GLCM().run(ar_3d_cp).get() == pytest.approx(glcm(ar_3d_cp).get())
+
 def test_signature_match():
     """ Tests if class & function signatures match """
     cls = dict(inspect.signature(GLCM).parameters)

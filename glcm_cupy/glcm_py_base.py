@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
+import cupy as cp
 import numpy as np
 
 
@@ -15,8 +16,8 @@ class GLCMPyBase:
         return self.radius * 2 + 1
 
     def glcm_ij(self,
-                i: np.ndarray,
-                j: np.ndarray) -> List[float]:
+                i: Union[np.ndarray, cp.ndarray],
+                j: Union[np.ndarray, cp.ndarray]) -> List[float]:
         """ Get GLCM features using Python
 
         Notes:
@@ -40,7 +41,10 @@ class GLCMPyBase:
         assert len(i_flat) == len(j_flat), \
             f"The shapes for i {i.shape} != j {j.shape}."
 
-        glcm = np.zeros((self.bin_to, self.bin_to), dtype=float)
+        if isinstance(i, cp.ndarray) and isinstance(j, cp.ndarray):
+            glcm = cp.zeros((self.bin_to, self.bin_to), dtype=float)
+        else:
+            glcm = np.zeros((self.bin_to, self.bin_to), dtype=float)
 
         # Populate the GLCM
         for i_, j_ in zip(i_flat, j_flat):

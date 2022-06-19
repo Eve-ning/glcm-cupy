@@ -2,24 +2,23 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from itertools import combinations
-from typing import Tuple, List, Union
+from typing import Tuple, List
 
-import cupy as cp
-import numpy as np
 from skimage.util import view_as_windows as view_as_windows_np
 
 try:
     from cucim.skimage.util.shape import view_as_windows as view_as_windows_cp
-    USE_CUCIM=True
+
+    USE_CUCIM = True
 except:
-    USE_CUCIM=False
+    USE_CUCIM = False
 
 from glcm_cupy.conf import *
 from glcm_cupy.glcm_base import GLCMBase
 
 
 def glcm_cross(
-    im: Union[np.ndarray, cp.ndarray],
+    im: ndarray,
     radius: int = 2,
     bin_from: int = 256,
     bin_to: int = 256,
@@ -28,7 +27,7 @@ def glcm_cross(
     normalized_features: bool = True,
     verbose: bool = True,
     ix_combos: List[Tuple[int, int]] | None = None
-) -> Union[np.ndarray, cp.ndarray]:
+) -> ndarray:
     """ Runs the Cross GLCM algorithm
 
     Notes:
@@ -78,16 +77,14 @@ class GLCMCross(GLCMBase):
     """
     ix_combos: List[Tuple[int, int]] | None = None
 
-    def ch_combos(self, im: Union[np.ndarray,
-                                  cp.ndarray]) -> List[Union[np.ndarray,
-                                                             cp.ndarray]]:
+    def ch_combos(self, im: ndarray) -> List[ndarray]:
         """ Get Image Channel Combinations """
         if self.ix_combos is None:
             # noinspection PyTypeChecker
             self.ix_combos = list(combinations(range(im.shape[-1]), 2))
         return [im[..., ix_combo] for ix_combo in self.ix_combos]
 
-    def glcm_cells(self, im: Union[np.ndarray, cp.ndarray]) -> float:
+    def glcm_cells(self, im: ndarray) -> float:
         """ Total number of GLCM cells to process """
         shape = self.glcm_shape(im[..., 0])
 
@@ -96,15 +93,13 @@ class GLCMCross(GLCMBase):
 
         return np.prod(shape) * len(self.ch_combos(im))
 
-    def glcm_shape(self, im_chn: Union[np.ndarray, cp.ndarray]) -> Tuple[int, int]:
+    def glcm_shape(self, im_chn: ndarray) -> Tuple[int, int]:
         """ Get per-channel shape after GLCM """
 
         return im_chn.shape[0] - 2 * self.radius, \
                im_chn.shape[1] - 2 * self.radius
 
-    def _from_im(self, im: Union[np.ndarray,
-                                 cp.ndarray]) -> Union[np.ndarray,
-                                                       cp.ndarray]:
+    def _from_im(self, im: ndarray) -> ndarray:
         """ Generates the GLCM from a multichannel image
 
         Args:
@@ -125,11 +120,7 @@ class GLCMCross(GLCMBase):
         return np.stack(glcm_chs, axis=2)
 
     def make_windows(self,
-                     im_chn: Union[np.ndarray,
-                                   cp.ndarray]) -> List[Tuple[Union[np.ndarray,
-                                                                    cp.ndarray],
-                                                              Union[np.ndarray,
-                                                                    cp.ndarray]]]:
+                     im_chn: ndarray) -> List[Tuple[ndarray, ndarray]]:
         """ Convert a image dual channel np.ndarray, to GLCM IJ windows.
 
         Examples:
@@ -183,20 +174,26 @@ class GLCMCross(GLCMBase):
 
         if isinstance(im_chn, cp.ndarray):
             if USE_CUCIM:
-                i = view_as_windows_cp(im_chn[..., 0], (self._diameter, self._diameter))
-                j = view_as_windows_cp(im_chn[..., 1], (self._diameter, self._diameter))
+                i = view_as_windows_cp(im_chn[..., 0],
+                                       (self._diameter, self._diameter))
+                j = view_as_windows_cp(im_chn[..., 1],
+                                       (self._diameter, self._diameter))
             else:
-                # This is ugly, but there is nothing we could do if cuCIM is not
-                # installed. It should not be a hard requirement.
+                # This is ugly, but there is nothing we could do if cuCIM is
+                # not installed. It should not be a hard requirement.
                 i = cp.asarray(
-                    view_as_windows_np(im_chn[..., 0].get(), (self._diameter, self._diameter)))
+                    view_as_windows_np(im_chn[..., 0].get(),
+                                       (self._diameter, self._diameter)))
                 j = cp.asarray(
-                    view_as_windows_np(im_chn[..., 1].get(), (self._diameter, self._diameter)))
+                    view_as_windows_np(im_chn[..., 1].get(),
+                                       (self._diameter, self._diameter)))
         else:
             i = cp.asarray(
-                view_as_windows_np(im_chn[..., 0], (self._diameter, self._diameter)))
+                view_as_windows_np(im_chn[..., 0],
+                                   (self._diameter, self._diameter)))
             j = cp.asarray(
-                view_as_windows_np(im_chn[..., 1], (self._diameter, self._diameter)))
+                view_as_windows_np(im_chn[..., 1],
+                                   (self._diameter, self._diameter)))
 
         i = i.reshape((-1, *i.shape[-2:])) \
             .reshape((i.shape[0] * i.shape[1], -1))

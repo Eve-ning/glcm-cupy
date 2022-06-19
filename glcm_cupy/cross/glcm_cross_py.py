@@ -1,13 +1,13 @@
 import itertools
 from dataclasses import dataclass
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
 import cupy as cp
 import numpy as np
 from skimage.util import view_as_windows
 from tqdm import tqdm
 
-from glcm_cupy.conf import NO_OF_FEATURES
+from glcm_cupy.conf import NO_OF_FEATURES, ndarray
 from glcm_cupy.glcm_py_base import GLCMPyBase
 from glcm_cupy.utils import normalize_features
 
@@ -24,14 +24,14 @@ def glcm_cross_py_im(im: np.ndarray, bin_from: int, bin_to: int,
 class GLCMCrossPy(GLCMPyBase):
     ix_combos: List[Tuple[int, int]] = None
 
-    def glcm_chn(self, ar: Union[np.ndarray, cp.ndarray]):
+    def glcm_chn(self, ar: ndarray):
         # Convert to compatible types
         if isinstance(ar, cp.ndarray):
             ar = (ar / self.bin_from * self.bin_to).astype(cp.uint8)
         else:
             ar = (ar / self.bin_from * self.bin_to).astype(np.uint8)
 
-        def flat(ar_: Union[np.ndarray, cp.ndarray]):
+        def flat(ar_: ndarray):
             ar_ = ar_.reshape((-1, self.diameter, self.diameter))
             return ar_.reshape((ar_.shape[0], -1))
 
@@ -59,13 +59,15 @@ class GLCMCrossPy(GLCMPyBase):
 
         return normalize_features(feature_ar, self.bin_to)
 
-    def glcm_im(self, ar: Union[np.ndarray, cp.ndarray]):
+    def glcm_im(self, ar: ndarray):
         if self.ix_combos is None:
-            self.ix_combos = list(itertools.combinations(range(ar.shape[-1]), 2))
+            self.ix_combos = list(
+                itertools.combinations(range(ar.shape[-1]), 2))
 
         if isinstance(ar, cp.ndarray):
             return cp.stack(
-                [self.glcm_chn(ar[..., ix_combo]) for ix_combo in self.ix_combos],
+                [self.glcm_chn(ar[..., ix_combo]) for ix_combo in
+                 self.ix_combos],
                 axis=2
             )
 

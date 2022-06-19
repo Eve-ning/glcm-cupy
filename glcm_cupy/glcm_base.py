@@ -3,10 +3,8 @@ from __future__ import annotations
 import math
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import Tuple, List, Union
+from typing import Tuple, List
 
-import cupy as cp
-import numpy as np
 from cupy import RawKernel
 from tqdm import tqdm
 
@@ -91,11 +89,11 @@ class GLCMBase:
         return self.radius * 2 + 1
 
     @abstractmethod
-    def glcm_cells(self, im: Union[np.ndarray, cp.ndarray]) -> float:
+    def glcm_cells(self, im: ndarray) -> float:
         """ Total number of GLCM Cells"""
         ...
 
-    def run(self, im: Union[np.ndarray, cp.ndarray]):
+    def run(self, im: ndarray):
         """ Executes running GLCM. Returns the GLCM Feature array
 
         Args:
@@ -129,9 +127,7 @@ class GLCMBase:
         return self._from_im(im)
 
     @abstractmethod
-    def _from_im(self, im: Union[np.ndarray,
-                                 cp.ndarray]) -> Union[np.ndarray,
-                                                       cp.ndarray]:
+    def _from_im(self, im: ndarray) -> ndarray:
         """ Generates the GLCM from a multi band image
 
         Args:
@@ -145,21 +141,14 @@ class GLCMBase:
         ...
 
     @abstractmethod
-    def make_windows(self,
-                     im_chn: Union[np.ndarray,
-                                   cp.ndarray]) -> List[Tuple[Union[np.ndarray,
-                                                                    cp.ndarray],
-                                                              Union[np.ndarray,
-                                                                    cp.ndarray]]]:
+    def make_windows(self, im_chn: ndarray) -> List[Tuple[ndarray, ndarray]]:
         ...
 
     @abstractmethod
-    def glcm_shape(self, im_chn: Union[np.ndarray, cp.ndarray]) -> Tuple:
+    def glcm_shape(self, im_chn: ndarray) -> Tuple:
         ...
 
-    def _from_channel(self, im_chn: Union[np.ndarray,
-                                          cp.ndarray]) -> Union[np.ndarray,
-                                                                cp.ndarray]:
+    def _from_channel(self, im_chn: ndarray) -> ndarray:
         """ Generates the GLCM from an image channel
 
         Returns:
@@ -172,7 +161,7 @@ class GLCMBase:
             glcm_features = [
                 self.glcm_window_ij(i, j)
                     .reshape(glcm_h, glcm_w, NO_OF_FEATURES)
-                    for i, j in self.make_windows(im_chn)
+                for i, j in self.make_windows(im_chn)
             ]
 
             ar = cp.stack(glcm_features).mean(axis=0)
@@ -188,8 +177,8 @@ class GLCMBase:
         return normalize_features(ar, self.bin_to) \
             if self.normalized_features else ar
 
-    def glcm_window_ij(self, windows_i: Union[np.ndarray, cp.ndarray],
-                       windows_j: Union[np.ndarray, cp.ndarray]):
+    def glcm_window_ij(self, windows_i: ndarray,
+                       windows_j: ndarray):
         windows_count = windows_i.shape[0]
         glcm_features = cp.zeros(
             (windows_count, NO_OF_FEATURES),
@@ -222,8 +211,8 @@ class GLCMBase:
         return glcm_features
 
     def glcm_ij(self,
-                i: Union[np.ndarray, cp.ndarray],
-                j: Union[np.ndarray, cp.ndarray]):
+                i: ndarray,
+                j: ndarray):
         """ GLCM from I J
 
         Examples:
@@ -268,7 +257,7 @@ class GLCMBase:
         no_of_values = self._diameter ** 2
 
         if i.dtype != np.uint8 or j.dtype != np.uint8 or \
-           i.dtype != cp.uint8 or j.dtype != cp.uint8:
+            i.dtype != cp.uint8 or j.dtype != cp.uint8:
             raise ValueError(
                 f"Image dtype must be np.uint8 or cp.uint8,"
                 f" i: {i.dtype} j: {j.dtype}"

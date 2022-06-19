@@ -1,4 +1,8 @@
 from pathlib import Path
+from typing import Union
+
+import cupy as cp
+import numpy as np
 
 ROOT_DIR = Path(__file__).parent.parent.absolute()
 
@@ -19,3 +23,5 @@ ASM = 2
 MEAN = 3
 VAR = 4
 CORRELATION = 5
+
+ndarray = Union[np.ndarray, cp.ndarray]

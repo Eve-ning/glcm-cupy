@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-from typing import Tuple, Union
-
-import cupy as cp
-import numpy as np
+from typing import Tuple
 
 from glcm_cupy.conf import *
 
 
-def normalize_features(ar: Union[np.ndarray, cp.ndarray], bin_to: int):
+def normalize_features(ar: ndarray, bin_to: int) -> ndarray:
     """ This scales the glcm features to [0, 1] """
     ar[..., CONTRAST] /= (bin_to - 1) ** 2
     ar[..., MEAN] /= (bin_to - 1)
@@ -40,10 +37,7 @@ def calc_grid_size(
     return b, b
 
 
-def binner(im: Union[np.ndarray,
-                     cp.ndarray],
-           bin_from: int, bin_to: int) -> Union[np.ndarray,
-                                                cp.ndarray]:
+def binner(im: ndarray, bin_from: int, bin_to: int) -> ndarray:
     """ Bins an image from a certain bin to another
 
     Args:

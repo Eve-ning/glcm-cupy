@@ -2,17 +2,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple, List, Union
+from typing import Tuple, List
 
-import cupy as cp
-import numpy as np
 from skimage.util import view_as_windows as view_as_windows_np
 
 try:
     from cucim.skimage.util.shape import view_as_windows as view_as_windows_cp
-    USE_CUCIM=True
+
+    USE_CUCIM = True
 except:
-    USE_CUCIM=False
+    USE_CUCIM = False
 
 from glcm_cupy.conf import *
 from glcm_cupy.glcm_base import GLCMBase
@@ -26,7 +25,7 @@ class Direction(Enum):
 
 
 def glcm(
-    im: Union[np.ndarray, cp.ndarray],
+    im: ndarray,
     step_size: int = 1,
     radius: int = 2,
     bin_from: int = 256,
@@ -39,7 +38,7 @@ def glcm(
     max_threads: int = MAX_THREADS,
     normalized_features: bool = True,
     verbose: bool = True
-) -> Union[np.ndarray, cp.ndarray]:
+) -> ndarray:
     """
     Examples:
         To scale image values from a 128 max value to 32, we use
@@ -92,7 +91,7 @@ class GLCM(GLCMBase):
         if self.step_size <= 0:
             raise ValueError(f"Step Size {step_size} should be >= 1")
 
-    def glcm_cells(self, im: Union[np.ndarray, cp.ndarray]) -> float:
+    def glcm_cells(self, im: ndarray) -> float:
         """ Total number of GLCM cells to process """
         if isinstance(im, cp.ndarray):
             # TODO cp.prod does not accept tuples: CuPy #4466, #6792.
@@ -104,16 +103,13 @@ class GLCM(GLCMBase):
                len(self.directions) * \
                im.shape[-1]
 
-    def glcm_shape(self, im_chn: Union[np.ndarray,
-                                       cp.ndarray]) -> Tuple[int, int]:
+    def glcm_shape(self, im_chn: ndarray) -> Tuple[int, int]:
         """ Get per-channel shape after GLCM """
 
         return (im_chn.shape[0] - 2 * self.step_size - 2 * self.radius,
                 im_chn.shape[1] - 2 * self.step_size - 2 * self.radius)
 
-    def _from_im(self, im: Union[np.ndarray,
-                                 cp.ndarray]) -> Union[np.ndarray,
-                                                       cp.ndarray]:
+    def _from_im(self, im: ndarray) -> ndarray:
         """ Generates the GLCM from a multichannel image
 
         Args:
@@ -131,12 +127,7 @@ class GLCM(GLCMBase):
             self._from_channel(im[..., ch]) for ch in range(im.shape[-1])
         ], axis=2)
 
-    def make_windows(self,
-                     im_chn: Union[np.ndarray,
-                                   cp.ndarray]) -> List[Tuple[Union[np.ndarray,
-                                                                    cp.ndarray],
-                                                              Union[np.ndarray,
-                                                                    cp.ndarray]]]:
+    def make_windows(self, im_chn: ndarray) -> List[Tuple[ndarray, ndarray]]:
         """ Convert a image channel np.ndarray, to GLCM IJ windows.
 
         Examples:
@@ -198,20 +189,23 @@ class GLCM(GLCMBase):
 
         if isinstance(im_chn, cp.ndarray):
             if USE_CUCIM:
-                ij = view_as_windows_cp(im_chn, (self._diameter, self._diameter))
+                ij = view_as_windows_cp(
+                    im_chn, (self._diameter, self._diameter)
+                )
             else:
-                # This is ugly, but there is nothing we could do if cuCIM is not
-                # installed. It should not be a hard requirement.
+                # This is ugly, but there is nothing we could do if cuCIM is
+                # not installed. It should not be a hard requirement.
                 ij = cp.asarray(
-                    view_as_windows_np(im_chn.get(), (self._diameter, self._diameter))
+                    view_as_windows_np(
+                        im_chn.get(), (self._diameter, self._diameter)
+                    )
                 )
         else:
             ij = cp.asarray(
                 view_as_windows_np(im_chn, (self._diameter, self._diameter))
             )
 
-        ijs: List[Tuple[Union[np.ndarray, cp.ndarray],
-                        Union[np.ndarray, cp.ndarray]]] = []
+        ijs: List[Tuple[ndarray, ndarray]] = []
 
         for direction in self.directions:
             i, j = self.pair_windows(ij, direction=direction)
@@ -224,8 +218,8 @@ class GLCM(GLCMBase):
 
         return ijs
 
-    def pair_windows(self, ij: Union[np.ndarray, cp.ndarray],
-                     direction: Direction):
+    def pair_windows(self, ij: ndarray,
+                     direction: Direction) -> Tuple[ndarray, ndarray]:
         """ Pairs the ij windows in specified direction
 
         Notes:

@@ -1,5 +1,9 @@
 from pathlib import Path
 
+import typing
+import cupy as cp
+import numpy as np
+
 ROOT_DIR = Path(__file__).parent.parent.absolute()
 
 MAX_VALUE_SUPPORTED = 256
@@ -19,3 +23,5 @@ ASM = 2
 MEAN = 3
 VAR = 4
 CORRELATION = 5
+
+ndarray = typing.TypeVar('ndarray', np.ndarray, cp.ndarray)

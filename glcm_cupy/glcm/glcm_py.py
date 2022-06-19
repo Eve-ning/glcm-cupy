@@ -1,18 +1,16 @@
 from dataclasses import dataclass
 
-from typing import Union
-
 import cupy as cp
 import numpy as np
 from skimage.util import view_as_windows
 from tqdm import tqdm
 
-from glcm_cupy.conf import NO_OF_FEATURES
+from glcm_cupy.conf import NO_OF_FEATURES, ndarray
 from glcm_cupy.glcm_py_base import GLCMPyBase
 from glcm_cupy.utils import normalize_features
 
 
-def glcm_py_im(ar: Union[np.ndarray, cp.ndarray], bin_from: int, bin_to: int,
+def glcm_py_im(ar: ndarray, bin_from: int, bin_to: int,
                radius: int = 2,
                step: int = 1):
     return GLCMPy(bin_from=bin_from,
@@ -21,7 +19,7 @@ def glcm_py_im(ar: Union[np.ndarray, cp.ndarray], bin_from: int, bin_to: int,
                   step=step).glcm_im(ar)
 
 
-def glcm_py_chn(ar: Union[np.ndarray, cp.ndarray],
+def glcm_py_chn(ar: ndarray,
                 bin_from: int,
                 bin_to: int,
                 radius: int = 2,
@@ -32,8 +30,8 @@ def glcm_py_chn(ar: Union[np.ndarray, cp.ndarray],
                   step=step).glcm_chn(ar)
 
 
-def glcm_py_ij(i: Union[np.ndarray, cp.ndarray],
-               j: Union[np.ndarray, cp.ndarray],
+def glcm_py_ij(i: ndarray,
+               j: ndarray,
                bin_from: int, bin_to: int):
     return GLCMPy(bin_from=bin_from,
                   bin_to=bin_to).glcm_ij(i, j)
@@ -43,7 +41,7 @@ def glcm_py_ij(i: Union[np.ndarray, cp.ndarray],
 class GLCMPy(GLCMPyBase):
     step: int = 1
 
-    def glcm_chn(self, ar: Union[np.ndarray, cp.ndarray]):
+    def glcm_chn(self, ar: ndarray):
 
         if isinstance(ar, cp.ndarray):
             ar = (ar / self.bin_from * self.bin_to).astype(cp.uint8)
@@ -51,7 +49,7 @@ class GLCMPy(GLCMPyBase):
             ar = (ar / self.bin_from * self.bin_to).astype(np.uint8)
         ar_w = view_as_windows(ar, (self.diameter, self.diameter))
 
-        def flat(ar: Union[np.ndarray, cp.ndarray]):
+        def flat(ar: ndarray):
             ar = ar.reshape((-1, self.diameter, self.diameter))
             return ar.reshape((ar.shape[0], -1))
 
@@ -80,7 +78,7 @@ class GLCMPy(GLCMPyBase):
 
         return normalize_features(feature_ar, self.bin_to)
 
-    def glcm_im(self, ar: Union[np.ndarray, cp.ndarray]):
+    def glcm_im(self, ar: ndarray):
         if isinstance(ar, cp.ndarray):
             return cp.stack([self.glcm_chn(ar[..., ch])
                              for ch

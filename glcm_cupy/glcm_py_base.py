@@ -1,8 +1,10 @@
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List
 
 import cupy as cp
 import numpy as np
+
+from glcm_cupy.conf import ndarray
 
 
 @dataclass
@@ -15,9 +17,7 @@ class GLCMPyBase:
     def diameter(self) -> int:
         return self.radius * 2 + 1
 
-    def glcm_ij(self,
-                i: Union[np.ndarray, cp.ndarray],
-                j: Union[np.ndarray, cp.ndarray]) -> List[float]:
+    def glcm_ij(self, i: ndarray, j: ndarray) -> List[float]:
         """ Get GLCM features using Python
 
         Notes:

@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
 import cupy as cp
 import numpy as np
@@ -91,18 +91,18 @@ class GLCMBase:
         return self.radius * 2 + 1
 
     @abstractmethod
-    def glcm_cells(self, im: np.ndarray) -> float:
+    def glcm_cells(self, im: Union[np.ndarray, cp.ndarray]) -> float:
         """ Total number of GLCM Cells"""
         ...
 
-    def run(self, im: np.ndarray):
+    def run(self, im: Union[np.ndarray, cp.ndarray]):
         """ Executes running GLCM. Returns the GLCM Feature array
 
         Args:
             im: 3D Image to process. Must be of (Height, Width, Channels)
 
         Returns:
-            An np.ndarray of Shape,
+            An np.ndarray or cp.ndarray of Shape,
              3D: (rows, cols, channels, features),
 
         """
@@ -114,6 +114,11 @@ class GLCMBase:
             )
         if im.ndim != 3:
             raise ValueError("Only 3D images allowed.")
+
+        # XXX: there is a bug with cupy true_div and tqdm.
+        if isinstance(im, cp.ndarray):
+            self.verbose = False
+
         self.progress = tqdm(total=self.glcm_cells(im),
                              desc="GLCM Progress",
                              unit=" Cells",
@@ -124,7 +129,9 @@ class GLCMBase:
         return self._from_im(im)
 
     @abstractmethod
-    def _from_im(self, im: np.ndarray) -> np.ndarray:
+    def _from_im(self, im: Union[np.ndarray,
+                                 cp.ndarray]) -> Union[np.ndarray,
+                                                       cp.ndarray]:
         """ Generates the GLCM from a multi band image
 
         Args:
@@ -138,15 +145,21 @@ class GLCMBase:
         ...
 
     @abstractmethod
-    def make_windows(self, im_chn: np.ndarray) -> List[Tuple[np.ndarray,
-                                                             np.ndarray]]:
+    def make_windows(self,
+                     im_chn: Union[np.ndarray,
+                                   cp.ndarray]) -> List[Tuple[Union[np.ndarray,
+                                                                    cp.ndarray],
+                                                              Union[np.ndarray,
+                                                                    cp.ndarray]]]:
         ...
 
     @abstractmethod
-    def glcm_shape(self, im_chn: np.ndarray) -> Tuple:
+    def glcm_shape(self, im_chn: Union[np.ndarray, cp.ndarray]) -> Tuple:
         ...
 
-    def _from_channel(self, im_chn: np.ndarray) -> np.ndarray:
+    def _from_channel(self, im_chn: Union[np.ndarray,
+                                          cp.ndarray]) -> Union[np.ndarray,
+                                                                cp.ndarray]:
         """ Generates the GLCM from an image channel
 
         Returns:
@@ -155,18 +168,28 @@ class GLCMBase:
 
         glcm_h, glcm_w, *_ = self.glcm_shape(im_chn)
 
-        glcm_features = [
-            self.glcm_window_ij(i, j)
-                .reshape(glcm_h, glcm_w, NO_OF_FEATURES)
-                .get() for i, j in self.make_windows(im_chn)
-        ]
+        if isinstance(im_chn, cp.ndarray):
+            glcm_features = [
+                self.glcm_window_ij(i, j)
+                    .reshape(glcm_h, glcm_w, NO_OF_FEATURES)
+                    for i, j in self.make_windows(im_chn)
+            ]
 
-        ar = np.stack(glcm_features).mean(axis=0)
+            ar = cp.stack(glcm_features).mean(axis=0)
+        else:
+            glcm_features = [
+                self.glcm_window_ij(i, j)
+                    .reshape(glcm_h, glcm_w, NO_OF_FEATURES)
+                    .get() for i, j in self.make_windows(im_chn)
+            ]
+
+            ar = np.stack(glcm_features).mean(axis=0)
 
         return normalize_features(ar, self.bin_to) \
             if self.normalized_features else ar
 
-    def glcm_window_ij(self, windows_i: np.ndarray, windows_j: np.ndarray):
+    def glcm_window_ij(self, windows_i: Union[np.ndarray, cp.ndarray],
+                       windows_j: Union[np.ndarray, cp.ndarray]):
         windows_count = windows_i.shape[0]
         glcm_features = cp.zeros(
             (windows_count, NO_OF_FEATURES),
@@ -199,8 +222,8 @@ class GLCMBase:
         return glcm_features
 
     def glcm_ij(self,
-                i: np.ndarray,
-                j: np.ndarray):
+                i: Union[np.ndarray, cp.ndarray],
+                j: Union[np.ndarray, cp.ndarray]):
         """ GLCM from I J
 
         Examples:
@@ -219,8 +242,8 @@ class GLCMBase:
             i.shape == j.shape == (100, 25)
 
         Args:
-            i: 1st np.ndarray
-            j: 2nd np.ndarray
+            i: 1st np.ndarray or cp.ndarray
+            j: 2nd np.ndarray or cp.ndarray
 
         Returns:
             The GLCM feature array, of size [partition_size, 8]
@@ -244,9 +267,10 @@ class GLCMBase:
         no_of_windows = i.shape[0]
         no_of_values = self._diameter ** 2
 
-        if i.dtype != np.uint8 or j.dtype != np.uint8:
+        if i.dtype != np.uint8 or j.dtype != np.uint8 or \
+           i.dtype != cp.uint8 or j.dtype != cp.uint8:
             raise ValueError(
-                f"Image dtype must be np.uint8,"
+                f"Image dtype must be np.uint8 or cp.uint8,"
                 f" i: {i.dtype} j: {j.dtype}"
             )
 

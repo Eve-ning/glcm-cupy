@@ -44,6 +44,15 @@ Replace the version you have on the arg.
                                                  ^^^^
                                              CUDA Version
 
+Optional Installation
+=====================
+
+This supports **RAPIDS** `cucim`.
+
+[RAPIDS Installation Guide](https://rapids.ai/start.html#requirements)
+
+*It's automatically enabled if installed.*
+
 Usage
 =====
 

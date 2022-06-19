@@ -1,6 +1,6 @@
 from pathlib import Path
+from typing import Union
 
-import typing
 import cupy as cp
 import numpy as np
 
@@ -24,4 +24,4 @@ MEAN = 3
 VAR = 4
 CORRELATION = 5
 
-ndarray = typing.TypeVar('ndarray', np.ndarray, cp.ndarray)
+ndarray = Union[np.ndarray, cp.ndarray]

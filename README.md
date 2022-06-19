@@ -1,8 +1,6 @@
 # 📖[Wiki](https://eve-ning.github.io/glcm-cupy/)
 
-# GLCM Bin 5 on CuPy
-
-This is a CuPy reimplementation of my `glcmbin5` [**on my other repository**](https://github.com/Eve-ning/glcmbin5).
+# GLCM Binned 5-Features on CuPy
 
 This directly utilizes CUDA to speed up the processing of GLCM.
 
@@ -33,9 +31,15 @@ Replace the version you have on the arg.
 conda install -c conda-forge cupy cudatoolkit=__._
 ```
 
-# Usage
+## Optional Installation
 
-The usage is simple:
+This supports **RAPIDS** `cucim`.
+
+[RAPIDS Installation Guide](https://rapids.ai/start.html#requirements)
+
+*It's automatically enabled if installed.*
+
+# Usage
 
 ```pycon
 >>> from glcm_cupy import GLCM
@@ -107,14 +111,14 @@ more GLCMs to run concurrently.
 
 ## Direction
 
-By default we have the following directions to run GLCM on.
+By default, we have the following directions to run GLCM on.
 
 - East: `Direction.EAST`
 - South East: `Direction.SOUTH_EAST`
 - South: `Direction.SOUTH`
 - South West: `Direction.SOUTH_WEST`
 
-For each direction, the GLCM will be bi-directional.
+For each direction, the GLCM will be bidirectional.
 
 We can specify only certain directions here.
 
@@ -174,24 +178,4 @@ Functions**](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#at
 
 > ... it is guaranteed to be performed without interference from other threads
 
-### Custom Atomic Add
-
-`Deprecated >=1.7`
-
-Currently `atomicAdd()` doesn't have the signature to support `uint8` or `unsigned char`. We get this implementation
-from this [**StackOverflow
-Answer**](https://stackoverflow.com/questions/5447570/cuda-atomic-operations-on-unsigned-chars)
-
-# Change Log
-
-## 1.6
-
-Dropped dependency on J variables as I & J are always the same
-
-## 1.7
-
-Fix issue with GLCM overflowing by making it `float32`
-
-## 1.8
-
-Implement Cross GLCM
+# [Change Log](https://eve-ning.github.io/glcm-cupy/changelog.html)

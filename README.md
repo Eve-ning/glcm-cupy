@@ -146,6 +146,11 @@ The result of these directions will be averaged together.
 > 
 > It's the first version of GLCM I made.
 
+## Contributors
+
+- [Julio Faracco](https://github.com/jcfaracco)
+  - Special Thanks for implementing [**CuPy input support!**](https://github.com/Eve-ning/glcm-cupy/pull/18)  
+
 ## CUDA Notes
 
 ### Why is the kernel split into 4?

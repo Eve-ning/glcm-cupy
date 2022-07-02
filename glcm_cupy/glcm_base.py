@@ -123,7 +123,7 @@ class GLCMBase:
             )
         if im.ndim != 3:
             raise ValueError("Only 3D images allowed.")
-        
+
         self.progress = tqdm(total=self.glcm_cells(im),
                              desc="GLCM Progress",
                              unit=" Cells",

@@ -1,0 +1,4 @@
+name: requirements
+dependencies:
+  - numpy
+  - pandas

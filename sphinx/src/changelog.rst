@@ -28,3 +28,6 @@ Changelog
 - `Merged PR 18 <https://github.com/Eve-ning/glcm-cupy/pull/18>`_
     - Add support to CuPy as input
     - Add optional support for RAPIDS cuCIM
+- `Merged PR 25 <https://github.com/Eve-ning/glcm-cupy/pull/25>`_
+    - Implement Integration Test checking for stability of GLCM output
+- `

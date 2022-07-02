@@ -98,14 +98,8 @@ class GLCM(GLCMBase):
         if self.step_size <= 0:
             raise ValueError(f"Step Size {step_size} should be >= 1")
 
-    def glcm_cells(self, im: ndarray) -> float:
+    def glcm_cells(self, im: ndarray) -> int:
         """ Total number of GLCM cells to process """
-        if isinstance(im, cp.ndarray):
-            # TODO cp.prod does not accept tuples: CuPy #4466, #6792.
-            shape = cp.prod(cp.array(self.glcm_shape(im[..., 0])))
-            return cp.prod(shape) * \
-                   len(self.directions) * \
-                   im.shape[-1]
         return np.prod(self.glcm_shape(im[..., 0])) * \
                len(self.directions) * \
                im.shape[-1]

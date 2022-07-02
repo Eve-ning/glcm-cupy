@@ -124,10 +124,6 @@ class GLCMBase:
         if im.ndim != 3:
             raise ValueError("Only 3D images allowed.")
 
-        # XXX: there is a bug with cupy true_div and tqdm.
-        if isinstance(im, cp.ndarray):
-            self.verbose = False
-
         self.progress = tqdm(total=self.glcm_cells(im),
                              desc="GLCM Progress",
                              unit=" Cells",

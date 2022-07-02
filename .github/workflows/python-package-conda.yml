@@ -19,7 +19,7 @@ jobs:
       uses: Jimver/cuda-toolkit@v0.2.7
       id: cuda-toolkit
       with:
-        cuda: '11.7.0'
+        cuda: '11.6.0'
     - run: |
         echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
     - name: Add conda to system path
@@ -29,7 +29,7 @@ jobs:
     - name: Install dependencies
       run: |
         conda env update --file environment.yml --name base
-        conda install -c conda-forge cupy
+        conda install -c conda-forge cupy cudatoolkit=11.6
     - name: Lint with flake8
       run: |
         conda install flake8

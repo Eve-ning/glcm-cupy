@@ -122,7 +122,7 @@ class GLCMBase:
                 "use ar[...,np.newaxis] to add the channel dimension."
             )
         if im.ndim != 3:
-            raise ValueError("Only 3D images allowed.")
+            raise ValueError("Only 3D/4D images allowed.")
 
         self.progress = tqdm(total=self.glcm_cells(im),
                              desc="GLCM Progress",
@@ -152,7 +152,7 @@ class GLCMBase:
         ...
 
     @abstractmethod
-    def glcm_shape(self, im_chn: ndarray) -> Tuple:
+    def glcm_shape(self, im_chn_shape: ndarray) -> Tuple:
         ...
 
     def _from_channel(self, im_chn: ndarray) -> ndarray:
@@ -162,7 +162,7 @@ class GLCMBase:
             The GLCM Array 3dim with shape rows, cols, feature
         """
 
-        glcm_h, glcm_w, *_ = self.glcm_shape(im_chn)
+        glcm_h, glcm_w, *_ = self.glcm_shape(im_chn.shape)
 
         if isinstance(im_chn, cp.ndarray):
             glcm_features = [

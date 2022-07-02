@@ -40,7 +40,7 @@ def test_glcm_make_windows(
     im_chn = np.zeros(im_shape, dtype=np.uint8)
 
     g = GLCM(step_size=step_size, radius=radius)
-    glcm_shape = g.glcm_shape(im_chn)
+    glcm_shape = g.glcm_shape(im_chn.shape)
 
     if glcm_shape[0] <= 0 or glcm_shape[1] <= 0:
         # If the make windows is invalid, we assert that it throws an error

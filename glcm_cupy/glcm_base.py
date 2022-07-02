@@ -18,6 +18,9 @@ FEATURES = HOMOGENEITY, CONTRAST, ASM, MEAN, VARIANCE, CORRELATION
 class GLCMBase:
     """ Initialize Settings for GLCM
 
+    Notes:
+        features is a set of named integers, defined in glcm_cupy.conf
+
     Examples:
         To scale down the image from a 128 max value to 32, we use
         bin_from = 128, bin_to = 32.
@@ -34,6 +37,7 @@ class GLCMBase:
         directions: Directions to pair the windows.
         max_partition_size: Maximum number of windows to parse at once
         max_threads: Maximum number of threads to use per block
+        features: Select features to be included
         normalize_features: Whether to normalize features to [0, 1]
         verbose: Whether to enable TQDM logging
     """

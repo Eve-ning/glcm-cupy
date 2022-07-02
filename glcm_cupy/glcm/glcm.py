@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple, List
+from typing import Tuple, List, Set
 
 from skimage.util import view_as_windows as view_as_windows_np
 
@@ -36,10 +36,15 @@ def glcm(
                                    Direction.SOUTH_WEST),
     max_partition_size: int = MAX_PARTITION_SIZE,
     max_threads: int = MAX_THREADS,
+    features: Set[int] = (HOMOGENEITY, CONTRAST, ASM,
+                          MEAN, VARIANCE, CORRELATION),
     normalized_features: bool = True,
     verbose: bool = True
 ) -> ndarray:
     """
+    Notes:
+        features is a set of named integers, defined in glcm_cupy.conf
+
     Examples:
         To scale image values from a 128 max value to 32, we use
         bin_from = 128, bin_to = 32.
@@ -57,6 +62,7 @@ def glcm(
         directions: Directions to pair the windows.
         max_partition_size: Maximum number of windows to parse at once
         max_threads: Maximum threads for CUDA
+        features: Select features to be included
         normalized_features: Whether to normalize features to [0, 1]
         verbose: Whether to enable TQDM logging
 
@@ -69,6 +75,7 @@ def glcm(
         bin_to=bin_to,
         max_partition_size=max_partition_size,
         max_threads=max_threads,
+        features=features,
         normalized_features=normalized_features,
         step_size=step_size,
         directions=directions,

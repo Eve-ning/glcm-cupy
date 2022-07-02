@@ -10,16 +10,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: Jimver/cuda-toolkit@v0.2.7
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.8
+    - name: Add Cuda
+      uses: Jimver/cuda-toolkit@v0.2.7
       id: cuda-toolkit
       with:
         cuda: '11.7.0'
-        python-version: 3.8
-    - run:
+    - run: |
         echo "Installed cuda version is: ${{steps.cuda-toolkit.outputs.cuda}}"
-    - run:
-        echo "Cuda install location: ${{steps.cuda-toolkit.outputs.CUDA_PATH}}"
-    - run: nvcc -V
     - name: Add conda to system path
       run: |
         # $CONDA is an environment variable pointing to the root of the miniconda directory
@@ -27,7 +29,7 @@ jobs:
     - name: Install dependencies
       run: |
         conda env update --file environment.yml --name base
-        conda install -c conda-forge cupy cudatoolkit=11.6
+        conda install -c conda-forge cupy
     - name: Lint with flake8
       run: |
         conda install flake8

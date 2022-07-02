@@ -31,3 +31,4 @@ Changelog
 - `Merged PR 25 <https://github.com/Eve-ning/glcm-cupy/pull/25>`_
     - Implement Integration Test checking for stability of GLCM output
 - Implemented GLCM Feature Selection to optimize out unnecessary GLCM Stages
+- Fix issue with CuPy ndarray incompatible with tqdm

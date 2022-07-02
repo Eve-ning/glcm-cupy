@@ -3,19 +3,23 @@ from __future__ import annotations
 import math
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import Tuple, List
+from typing import Tuple, List, Set
 
-from cupy import RawKernel
 from tqdm import tqdm
 
 from glcm_cupy.conf import *
-from glcm_cupy.kernel import glcm_module
+from glcm_cupy.kernel import get_glcm_module
 from glcm_cupy.utils import calc_grid_size, normalize_features, binner
+
+FEATURES = HOMOGENEITY, CONTRAST, ASM, MEAN, VARIANCE, CORRELATION
 
 
 @dataclass
 class GLCMBase:
     """ Initialize Settings for GLCM
+
+    Notes:
+        features is a set of named integers, defined in glcm_cupy.conf
 
     Examples:
         To scale down the image from a 128 max value to 32, we use
@@ -33,6 +37,7 @@ class GLCMBase:
         directions: Directions to pair the windows.
         max_partition_size: Maximum number of windows to parse at once
         max_threads: Maximum number of threads to use per block
+        features: Select features to be included
         normalize_features: Whether to normalize features to [0, 1]
         verbose: Whether to enable TQDM logging
     """
@@ -41,37 +46,30 @@ class GLCMBase:
     bin_to: int = 256
     max_partition_size: int = MAX_PARTITION_SIZE
     max_threads: int = MAX_THREADS
+    features: Set[int] = (HOMOGENEITY, CONTRAST, ASM,
+                          MEAN, VARIANCE, CORRELATION)
     normalized_features: bool = True
     verbose: bool = True
 
-    glcm_create_kernel: RawKernel = field(
-        default=glcm_module.get_function('glcmCreateKernel'),
-        init=False
-    )
-    glcm_feature_kernel_0: RawKernel = field(
-        default=glcm_module.get_function('glcmFeatureKernel0'),
-        init=False
-    )
-    glcm_feature_kernel_1: RawKernel = field(
-        default=glcm_module.get_function('glcmFeatureKernel1'),
-        init=False
-    )
-    glcm_feature_kernel_2: RawKernel = field(
-        default=glcm_module.get_function('glcmFeatureKernel2'),
-        init=False
-    )
-
-    glcm: cp.ndarray = field(init=False)
-    features: cp.ndarray = field(init=False)
+    ar_glcm: cp.ndarray = field(init=False)
+    ar_features: cp.ndarray = field(init=False)
     progress: tqdm = field(init=False)
 
     def __post_init__(self):
+        if not self.features:
+            raise ValueError(f"Features cannot be Empty")
 
-        self.glcm = cp.zeros(
+        if not all(f in FEATURES for f in self.features):
+            raise ValueError(
+                f"{[f for f in self.features if f not in FEATURES]} "
+                f"are not supported features."
+            )
+
+        self.ar_glcm = cp.zeros(
             (self.max_partition_size, self.bin_to, self.bin_to),
             dtype=cp.float32
         )
-        self.features = cp.zeros(
+        self.ar_features = cp.zeros(
             (self.max_partition_size, NO_OF_FEATURES),
             dtype=cp.float32
         )
@@ -83,6 +81,19 @@ class GLCMBase:
                 f"Target Bins {self.bin_to} must be "
                 f"[2, {MAX_VALUE_SUPPORTED}]. "
             )
+
+        module = get_glcm_module(
+            HOMOGENEITY in self.features,
+            CONTRAST in self.features,
+            ASM in self.features,
+            MEAN in self.features,
+            VARIANCE in self.features,
+            CORRELATION in self.features
+        )
+        self.glcm_create_kernel = module.get_function('glcmCreateKernel')
+        self.glcm_feature_kernel_0 = module.get_function('glcmFeatureKernel0')
+        self.glcm_feature_kernel_1 = module.get_function('glcmFeatureKernel1')
+        self.glcm_feature_kernel_2 = module.get_function('glcmFeatureKernel2')
 
     @property
     def _diameter(self):
@@ -250,8 +261,8 @@ class GLCMBase:
             raise ValueError(f"Shape of i {i.shape} != j {j.shape}")
 
         # Reset data
-        self.glcm[:] = 0
-        self.features[:] = 0
+        self.ar_glcm[:] = 0
+        self.ar_features[:] = 0
 
         no_of_windows = i.shape[0]
         no_of_values = self._diameter ** 2
@@ -275,21 +286,39 @@ class GLCMBase:
                 self.bin_to,
                 no_of_values,
                 no_of_windows,
-                self.glcm,
-                self.features
+                self.ar_glcm,
+                self.ar_features
             )
         )
 
         feature_args = dict(
             grid=grid, block=(self.max_threads,),
-            args=(self.glcm,
+            args=(self.ar_glcm,
                   self.bin_to,
                   no_of_values,
                   no_of_windows,
-                  self.features)
+                  self.ar_features,
+                  True)
         )
-        self.glcm_feature_kernel_0(**feature_args)
-        self.glcm_feature_kernel_1(**feature_args)
-        self.glcm_feature_kernel_2(**feature_args)
+        if self.do_stage(0): self.glcm_feature_kernel_0(**feature_args)
+        if self.do_stage(1): self.glcm_feature_kernel_1(**feature_args)
+        if self.do_stage(2): self.glcm_feature_kernel_2(**feature_args)
 
-        return self.features[:no_of_windows]
+        return self.ar_features[:no_of_windows]
+
+    def do_stage(self, stage_no: int) -> bool:
+        """ Determines if running the nth stage GLCM is necessary """
+        if stage_no == 2:
+            return CORRELATION in self.features
+        elif stage_no == 1:
+            return VARIANCE in self.features or \
+                   CORRELATION in self.features
+        elif stage_no == 0:
+            return (
+                HOMOGENEITY in self.features or
+                CONTRAST in self.features or
+                ASM in self.features or
+                MEAN in self.features or
+                VARIANCE in self.features or
+                CORRELATION in self.features
+            )

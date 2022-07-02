@@ -49,7 +49,7 @@ Optional Installation
 
 This supports **RAPIDS** `cucim`.
 
-[RAPIDS Installation Guide](https://rapids.ai/start.html#requirements)
+`RAPIDS Installation Guide <https://rapids.ai/start.html#requirements>`_
 
 *It's automatically enabled if installed.*
 
@@ -61,9 +61,8 @@ Use GLCM on an image like so.
 .. code-block:: python
 
     >>> from glcm_cupy import GLCM
-    >>> import numpy as np
-    >>> from PIL import Image
-    >>> ar = np.asarray(Image.open("image.jpg"))
+    >>> import cv2
+    >>> ar = cv2.imread("image.jpg")
     >>> ar.shape
     (1080, 1920, 3)
     >>> g = GLCM(...).run(ar)
@@ -72,7 +71,14 @@ Use GLCM on an image like so.
 
 Last dimension of ``g`` is the GLCM Features.
 
-To retrieve a GLCM Feature:
+To :ref:`selectively generate a GLCM Feature <select_feature>`:
+
+.. code-block:: python
+
+    >>> from glcm_cupy import CONTRAST, CORRELATION
+    >>> g = GLCM(..., features=(CONTRAST, CORRELATION)).run(ar)
+
+To :ref:`get a GLCM Feature <get_feature>`:
 
 .. code-block:: python
 

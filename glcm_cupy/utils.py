@@ -9,7 +9,7 @@ def normalize_features(ar: ndarray, bin_to: int) -> ndarray:
     """ This scales the glcm features to [0, 1] """
     ar[..., CONTRAST] /= (bin_to - 1) ** 2
     ar[..., MEAN] /= (bin_to - 1)
-    ar[..., VAR] /= (bin_to - 1) ** 2
+    ar[..., VARIANCE] /= (bin_to - 1) ** 2
     ar[..., CORRELATION] += 1
     ar[..., CORRELATION] /= 2
     return ar

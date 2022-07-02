@@ -1,7 +1,63 @@
 import cupy as cp
 
-glcm_module = cp.RawModule(
-    code=r"""
+HOMOGENEITY_FN = """
+atomicAdd(
+    &features[HOMOGENEITY + wid * NO_OF_FEATURES],
+    p / (1 + powf((i - j), 2.0f))
+);
+"""
+
+CONTRAST_FN = """
+atomicAdd(
+    &features[CONTRAST + wid * NO_OF_FEATURES],
+    p * powf(i - j, 2.0f)
+);
+"""
+
+ASM_FN = """
+atomicAdd(
+    &features[ASM + wid * NO_OF_FEATURES],
+    powf(p, 2.0f)
+);
+"""
+
+MEAN_FN = """
+atomicAdd(
+    &features[MEAN + wid * NO_OF_FEATURES],
+    p * i
+);
+"""
+
+VAR_FN = """
+atomicAdd(
+    &features[VAR + wid * NO_OF_FEATURES],
+    p * powf((i - features[MEAN + wid * NO_OF_FEATURES]), 2.0f)
+);
+"""
+
+CORRELATION_FN = """
+atomicAdd(
+    &features[CORRELATION + wid * NO_OF_FEATURES],
+    p * (i - features[MEAN + wid * NO_OF_FEATURES])
+      * (j - features[MEAN + wid * NO_OF_FEATURES])
+      / features[VAR + wid * NO_OF_FEATURES]
+);
+"""
+
+def get_glcm_module(
+    homogeneity = True,
+    contrast = True,
+    asm = True,
+    mean = True,
+    variance = True,
+    correlation = True
+):
+    if correlation:
+        variance = True
+    if variance:
+        mean = True
+    return cp.RawModule(
+        code=rf"""
 #define HOMOGENEITY 0
 #define CONTRAST 1
 #define ASM 2
@@ -10,7 +66,7 @@ glcm_module = cp.RawModule(
 #define CORRELATION 5
 #define NO_OF_FEATURES 6
 
-extern "C" {
+extern "C" {{
     __global__ void glcmCreateKernel(
         const unsigned char* windows_i,
         const unsigned char* windows_j,
@@ -19,7 +75,7 @@ extern "C" {
         const int noOfWindows,
         float* g,
         float* features)
-    {
+    {{
         /**
         =====================================
         Definitions
@@ -102,7 +158,7 @@ extern "C" {
 
         int wid_image = tid / noOfValues;
         if (tid < noOfValues * noOfWindows)
-        {
+        {{
             unsigned char row = windows_i[tid];
             unsigned char col = windows_j[tid];
             // Remember that the shape of GLCM is (glcmSize, glcmSize, noOfWindows)
@@ -118,8 +174,8 @@ extern "C" {
                 col * glcmSize +
                 wid_image * glcmArea
                 ]), 1);
-        }
-    }
+        }}
+    }}
 
     __global__ void glcmFeatureKernel0(
         const float* g,
@@ -127,7 +183,7 @@ extern "C" {
         const int noOfValues,
         const int noOfWindows,
         float* features)
-    {
+    {{
 
         /**
         ===================================
@@ -183,35 +239,18 @@ extern "C" {
         **/
 
         __syncthreads();
-
-        atomicAdd(
-            &features[HOMOGENEITY + wid * NO_OF_FEATURES],
-            p / (1 + powf((i - j), 2.0f))
-        );
-
-        atomicAdd(
-            &features[CONTRAST + wid * NO_OF_FEATURES],
-            p * powf(i - j, 2.0f)
-        );
-
-        atomicAdd(
-            &features[ASM + wid * NO_OF_FEATURES],
-            powf(p, 2.0f)
-        );
-
-        atomicAdd(
-            &features[MEAN + wid * NO_OF_FEATURES],
-            p * i
-        );
-
-    }
+        {HOMOGENEITY_FN if homogeneity else ""}
+        {CONTRAST_FN if contrast else ""}
+        {ASM_FN if asm else ""}
+        {MEAN_FN if mean else ""}
+    }}
     __global__ void glcmFeatureKernel1(
         const float* g,
         const int glcmSize,
         const int noOfValues,
         const int noOfWindows,
         float* features)
-    {
+    {{
         /**
         =====================================
         Feature Calculation
@@ -232,12 +271,8 @@ extern "C" {
 
         float p = (float)(g[tid]) / (noOfValues * 2);
 
-        atomicAdd(
-            &features[VAR + wid * NO_OF_FEATURES],
-            p * powf((i - features[MEAN + wid * NO_OF_FEATURES]), 2.0f)
-        );
-
-    }
+        {VAR_FN if variance else ""}
+    }}
 
     __global__ void glcmFeatureKernel2(
         const float* g,
@@ -245,7 +280,7 @@ extern "C" {
         const int noOfValues,
         const int noOfWindows,
         float* features)
-    {
+    {{
         /**
         =====================================
         Feature Calculation
@@ -269,13 +304,8 @@ extern "C" {
 
         float p = (float)(g[tid]) / (noOfValues * 2);
 
-        atomicAdd(
-            &features[CORRELATION + wid * NO_OF_FEATURES],
-            p * (i - features[MEAN + wid * NO_OF_FEATURES])
-              * (j - features[MEAN + wid * NO_OF_FEATURES])
-              / features[VAR + wid * NO_OF_FEATURES]
-        );
-    }
-}
+        {CORRELATION_FN if correlation else ""}
+    }}
+}}
 """
-)
+    )

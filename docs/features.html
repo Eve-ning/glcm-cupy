@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>GLCM Features &mdash; glcm_cupy 0.1.9 documentation</title>
+  <title>GLCM Feature Indexing &mdash; glcm_cupy 0.1.9 documentation</title>
   
 
   
@@ -86,7 +86,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">GLCM Features</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GLCM Feature Indexing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#selecting-features">Selecting Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-features">Getting Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feature-theory">Feature Theory</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="direction.html">Direction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
@@ -137,7 +142,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>GLCM Features</li>
+      <li>GLCM Feature Indexing</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -156,17 +161,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="glcm-features">
-<h1>GLCM Features<a class="headerlink" href="#glcm-features" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="glcm-feature-indexing">
+<h1>GLCM Feature Indexing<a class="headerlink" href="#glcm-feature-indexing" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="selecting-features">
+<span id="select-feature"></span><h2>Selecting Features<a class="headerlink" href="#selecting-features" title="Permalink to this headline">¶</a></h2>
+<p>To reduce parsing time, you can selectively parse specific features.</p>
+<p>This means that other features returned will be zeroed (or 0.5 if normalized correlation).</p>
+<p>Note that the other of <code class="docutils literal notranslate"><span class="pre">features</span></code> does not determine the order of <code class="docutils literal notranslate"><span class="pre">g</span></code>’s channel.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">,</span> <span class="n">CORRELATION</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">cv2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">(</span><span class="n">CONTRAST</span><span class="p">,</span> <span class="n">CORRELATION</span><span class="p">))</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-features">
+<span id="get-feature"></span><h2>Getting Features<a class="headerlink" href="#getting-features" title="Permalink to this headline">¶</a></h2>
+<p>To retrieve the features, use the following syntax</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">,</span> <span class="n">CORRELATION</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">CORRELATION</span><span class="p">])</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="feature-theory">
+<h2>Feature Theory<a class="headerlink" href="#feature-theory" title="Permalink to this headline">¶</a></h2>
 <p>I recommend referencing <a class="reference external" href="https://prism.ucalgary.ca/handle/1880/51900">this tutorial</a> for knowledge gaps here</p>
 <p>In total, we have 6 features.</p>
 <div class="math notranslate nohighlight">
@@ -178,6 +197,7 @@
 \text{Correlation} = \frac{(i - \mu_i)(j - \mu_j)}{\sqrt{\sigma_i^2\sigma_j^2}}\\\end{split}\]</div>
 <p>We implemented these few as they are the most orthogonal (according to the tutorial).
 However, feel free to suggest any more in the GitHub Issue page.</p>
+</div>
 </div>
 
 

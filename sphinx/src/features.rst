@@ -1,15 +1,37 @@
-GLCM Features
-=============
+GLCM Feature Indexing
+=====================
+
+.. _select_feature:
+
+Selecting Features
+------------------
+To reduce parsing time, you can selectively parse specific features.
+
+This means that other features returned will be zeroed (or 0.5 if normalized correlation).
+
+Note that the other of ``features`` does not determine the order of ``g``'s channel.
 
 .. code-block:: python
 
     >>> from glcm_cupy import GLCM, CONTRAST, CORRELATION
-    >>> import numpy as np
-    >>> from PIL import Image
-    >>> ar = np.asarray(Image.open("image.jpg"))
-    >>> g = GLCM(...).run(ar)
+    >>> import cv2
+    >>> ar = cv2.imread("image.jpg")
+    >>> g = GLCM(..., features=(CONTRAST, CORRELATION)).run(ar)
+
+.. _get_feature:
+
+Getting Features
+----------------
+To retrieve the features, use the following syntax
+
+.. code-block:: python
+
+    >>> from glcm_cupy import GLCM, CONTRAST, CORRELATION
     >>> print(g[..., CONTRAST])
     >>> print(g[..., CORRELATION])
+
+Feature Theory
+--------------
 
 I recommend referencing `this tutorial <https://prism.ucalgary.ca/handle/1880/51900>`_ for knowledge gaps here
 

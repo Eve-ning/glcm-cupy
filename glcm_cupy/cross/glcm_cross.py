@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from itertools import combinations
-from typing import Tuple, List
+from typing import Tuple, List, Set
 
 from skimage.util import view_as_windows as view_as_windows_np
 
@@ -25,10 +25,15 @@ def glcm_cross(
     max_partition_size: int = MAX_PARTITION_SIZE,
     max_threads: int = MAX_THREADS,
     normalized_features: bool = True,
+    features: Set[int] = (HOMOGENEITY, CONTRAST, ASM,
+                          MEAN, VARIANCE, CORRELATION),
     verbose: bool = True,
     ix_combos: List[Tuple[int, int]] | None = None
 ) -> ndarray:
     """ Runs the Cross GLCM algorithm
+
+    Notes:
+        features is a set of named integers, defined in glcm_cupy.conf
 
     Notes:
         This will do a combinatorix of image channels to yield GLCMs
@@ -48,6 +53,7 @@ def glcm_cross(
         bin_to: Binarize to.
         max_partition_size: Maximum number of windows to parse at once
         max_threads: Maximum threads for CUDA
+        features: Select features to be included
         normalized_features: Whether to normalize features to [0, 1]
         verbose: Whether to enable TQDM logging
         ix_combos: Set of combinations to Cross with. If None, then all.
@@ -62,6 +68,7 @@ def glcm_cross(
         bin_to=bin_to,
         max_partition_size=max_partition_size,
         max_threads=max_threads,
+        features=features,
         normalized_features=normalized_features,
         ix_combos=ix_combos,
         verbose=verbose

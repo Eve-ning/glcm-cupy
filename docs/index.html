@@ -84,7 +84,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Feature Indexing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="direction.html">Direction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
@@ -165,7 +165,12 @@
 <li class="toctree-l2"><a class="reference internal" href="glcm_cross.html#default-combinations">Default Combinations</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Feature Indexing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="features.html#selecting-features">Selecting Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.html#getting-features">Getting Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="features.html#feature-theory">Feature Theory</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="binning.html#caution">Caution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="binning.html#time-scale">Time Scale</a></li>
@@ -220,16 +225,15 @@ as it’s dependent on the version of CUDA you have.</p>
 <div class="section" id="optional-installation">
 <h1>Optional Installation<a class="headerlink" href="#optional-installation" title="Permalink to this headline">¶</a></h1>
 <p>This supports <strong>RAPIDS</strong> <cite>cucim</cite>.</p>
-<p>[RAPIDS Installation Guide](<a class="reference external" href="https://rapids.ai/start.html#requirements">https://rapids.ai/start.html#requirements</a>)</p>
+<p><a class="reference external" href="https://rapids.ai/start.html#requirements">RAPIDS Installation Guide</a></p>
 <p><em>It’s automatically enabled if installed.</em></p>
 </div>
 <div class="section" id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
 <p>Use GLCM on an image like so.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">cv2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span><span class="o">.</span><span class="n">shape</span>
 <span class="go">(1080, 1920, 3)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
@@ -238,7 +242,12 @@ as it’s dependent on the version of CUDA you have.</p>
 </pre></div>
 </div>
 <p>Last dimension of <code class="docutils literal notranslate"><span class="pre">g</span></code> is the GLCM Features.</p>
-<p>To retrieve a GLCM Feature:</p>
+<p>To <a class="reference internal" href="features.html#select-feature"><span class="std std-ref">selectively generate a GLCM Feature</span></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">CONTRAST</span><span class="p">,</span> <span class="n">CORRELATION</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">(</span><span class="n">CONTRAST</span><span class="p">,</span> <span class="n">CORRELATION</span><span class="p">))</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To <a class="reference internal" href="features.html#get-feature"><span class="std std-ref">get a GLCM Feature</span></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">CONTRAST</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>

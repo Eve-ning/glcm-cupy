@@ -40,7 +40,7 @@ def test_glcm_ij(i, j):
         float(g[..., CONTRAST].sum() / windows),
         float(g[..., ASM].sum() / windows),
         float(g[..., MEAN].sum() / windows),
-        float(g[..., VAR].sum() / windows),
+        float(g[..., VARIANCE].sum() / windows),
         float(g[..., CORRELATION].sum() / windows)
     ]
 

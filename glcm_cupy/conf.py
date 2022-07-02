@@ -21,7 +21,7 @@ HOMOGENEITY = 0
 CONTRAST = 1
 ASM = 2
 MEAN = 3
-VAR = 4
+VARIANCE = 4
 CORRELATION = 5
 
 ndarray = Union[np.ndarray, cp.ndarray]

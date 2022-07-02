@@ -8,12 +8,16 @@ from glcm_cupy import GLCMCross, glcm_cross
 
 def test_from_3dimage(ar_3d):
     """ Tests using a 3D Image """
-    GLCMCross().run(ar_3d)
+    g = GLCMCross().run(ar_3d)
+    g_exp = np.load("expected/ar_3d_glcm_cross.npy")
+    assert g == pytest.approx(g_exp, abs=1e-06)
 
 
 def test_from_3dimage_ix_combo(ar_3d):
     """ Tests using a 3D Image with selected ix_combos """
     g = GLCMCross(ix_combos=[[0, 1], [1, 2]]).run(ar_3d)
+    g_exp = np.load("expected/ar_3d_combo_glcm_cross.npy")
+    assert g == pytest.approx(g_exp, abs=1e-06)
     assert g.shape[2] == 2
 
 
@@ -27,17 +31,22 @@ def test_from_2dimage(ar_2d):
 
 def test_output_match(ar_3d):
     """ Tests if class & function outputs match """
-    assert GLCMCross().run(ar_3d) == pytest.approx(glcm_cross(ar_3d))
+    assert GLCMCross().run(ar_3d) == pytest.approx(glcm_cross(ar_3d),
+                                                   abs=1e-06)
 
 
 def test_from_3dimage_cp(ar_3d_cp):
     """ Tests using a 3D Image """
-    GLCMCross().run(ar_3d_cp)
+    g = GLCMCross().run(ar_3d_cp)
+    g_exp = np.load("expected/ar_3d_glcm_cross.npy")
+    assert g.get() == pytest.approx(g_exp, abs=1e-06)
 
 
 def test_from_3dimage_ix_combo_cp(ar_3d_cp):
     """ Tests using a 3D Image with selected ix_combos """
     g = GLCMCross(ix_combos=[[0, 1], [1, 2]]).run(ar_3d_cp)
+    g_exp = np.load("expected/ar_3d_combo_glcm_cross.npy")
+    assert g.get() == pytest.approx(g_exp, abs=1e-06)
     assert g.shape[2] == 2
 
 
@@ -53,7 +62,8 @@ def test_output_match_cp(ar_3d_cp):
     """ Tests if class & function outputs match """
     # XXX: pytest.approx does not support CuPy.
     # It needs to get the NumPy array instead.
-    assert GLCMCross().run(ar_3d_cp).get() == pytest.approx(glcm_cross(ar_3d_cp).get())
+    assert GLCMCross().run(ar_3d_cp).get() == \
+           pytest.approx(glcm_cross(ar_3d_cp).get(), abs=1e-06)
 
 
 def test_signature_match():

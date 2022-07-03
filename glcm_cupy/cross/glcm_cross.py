@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from itertools import combinations
 from typing import Tuple, List, Set
@@ -100,6 +101,19 @@ class GLCMCross(GLCMBase):
             return cp.prod(shape) * len(self.ch_combos(im))
 
         return np.prod(shape) * len(self.ch_combos(im))
+
+    def _run_batch(self, im: ndarray):
+        """ Batch running doesn't work on Cross as stacking channel interferes
+            with the combinations.
+
+        Notes:
+            This may be implemented if there's a demand for it. Though since
+            Cross GLCM is still new in concept, I'll leave it for now.
+        """
+        logging.warning("Batch Processing doesn't work for Cross GLCM. "
+                        "Using for loop processing.")
+        # TODO: Implement Batch Processing for Cross GLCM
+        return np.stack([self.run(b) for b in im])
 
     def glcm_shape(self, im_chn_shape: tuple) -> Tuple[int, int]:
         """ Get per-channel shape after GLCM """

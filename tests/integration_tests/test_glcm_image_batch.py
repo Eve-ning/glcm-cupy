@@ -1,15 +1,12 @@
 import cupy as cp
 import numpy as np
 import pytest
-from matplotlib.image import imread
 
-from glcm_cupy import GLCM
-from glcm_cupy.conf import ROOT_DIR
+from glcm_cupy import GLCM, glcm
 
 
-def test_glcm_image():
-    img = imread(f"{ROOT_DIR}/data/image.jpg")
-    ar = img[::20, ::20]
+def test_glcm_image(ar_img_3d):
+    ar = ar_img_3d[::20, ::20]
     g = GLCM(bin_to=16).run(np.stack([ar, ar]))
     g0, g1 = g[0], g[1]
     g = GLCM(bin_to=16).run(ar)
@@ -19,9 +16,8 @@ def test_glcm_image():
     assert g1 == pytest.approx(g_exp, abs=1e-06)
 
 
-def test_glcm_image_cupy():
-    img = imread(f"{ROOT_DIR}/data/image.jpg")
-    ar = cp.asarray(img)[::20, ::20]
+def test_glcm_image_cupy(ar_img_3d):
+    ar = cp.asarray(ar_img_3d)[::20, ::20]
     g = GLCM(bin_to=16).run(cp.stack([ar, ar]))
     g0, g1 = g[0], g[1]
     g_exp = np.load("expected/glcm_image.npy")

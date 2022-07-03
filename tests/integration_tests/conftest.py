@@ -1,7 +1,6 @@
 import cupy as cp
 import numpy as np
 import pytest
-from PIL import Image
 from matplotlib.image import imread
 
 from glcm_cupy.conf import ROOT_DIR

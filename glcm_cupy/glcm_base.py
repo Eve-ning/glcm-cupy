@@ -121,6 +121,8 @@ class GLCMBase:
                 "Must be 3D. If ar.shape == (Height, Width), "
                 "use ar[...,np.newaxis] to add the channel dimension."
             )
+        if im.ndim == 4:
+            return self._run_batch(im)
         if im.ndim != 3:
             raise ValueError("Only 3D/4D images allowed.")
 
@@ -132,6 +134,27 @@ class GLCMBase:
 
         im = binner(im, self.bin_from, self.bin_to)
         return self._from_im(im)
+
+    def _run_batch(self, im: ndarray):
+        """ Run as a batch instead of separately.
+
+        Notes:
+            Transforms the batch axis to concat on channel axis.
+            E.g. Shape = (2, H, W, 3)
+            Batch 1: Channel 1, 2, 3
+            Batch 2: Channel 1, 2, 3
+            Transforms -> (H, W, 6)
+            Channel: B1C1 B1C2 B1C3 B2C1 B2C2 B2C3
+        """
+        batches, *im_chn_shape, chns = im.shape
+        glcm_shape = self.glcm_shape(im_chn_shape)
+        batch_shape = (*glcm_shape, chns, batches, NO_OF_FEATURES)
+        if isinstance(im, cp.ndarray):
+            g = self.run(np.concatenate(im, axis=-1))
+            return np.moveaxis(g.reshape(batch_shape), 3, 0)
+        else:
+            g = self.run(cp.concatenate(im, axis=-1))
+            return cp.moveaxis(g.reshape(batch_shape), 3, 0)
 
     @abstractmethod
     def _from_im(self, im: ndarray) -> ndarray:

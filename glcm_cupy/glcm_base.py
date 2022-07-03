@@ -108,11 +108,12 @@ class GLCMBase:
         """ Executes running GLCM. Returns the GLCM Feature array
 
         Args:
-            im: 3D Image to process. Must be of (Height, Width, Channels)
+            im: 3D/4D Image to process. Must be of shape
+                ([Batch], Height, Width, Channels)
 
         Returns:
-            An np.ndarray or cp.ndarray of Shape,
-             3D: (rows, cols, channels, features),
+            An np.ndarray or cp.ndarray of Shape 4D/5D:
+                ([Batch], Height, Width, Channels, GLCM Features),
 
         """
 

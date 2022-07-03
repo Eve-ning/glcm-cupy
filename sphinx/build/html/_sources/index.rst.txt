@@ -10,6 +10,7 @@ GLCM Implemented in CuPy
     binning
     direction
     radius_step_size
+    batch_processing
     acknowledgements
     changelog
 
@@ -91,6 +92,13 @@ Consider ``glcm`` if not reusing ``GLCM()``
 
     >>> from glcm_cupy import glcm
     >>> g = glcm(ar, ...)
+
+:ref:`Process many same-sized images at once <batch_processing>`:
+
+.. code-block:: python
+
+    >>> g = GLCM(...).run(np.stack([ar0, ar1, ar2]))
+    >>> g0, g1, g2 = g
 
 Read More
 =========

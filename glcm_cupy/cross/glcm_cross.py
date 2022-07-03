@@ -86,10 +86,11 @@ class GLCMCross(GLCMBase):
 
     def ch_combos(self, im: ndarray) -> List[ndarray]:
         """ Get Image Channel Combinations """
+        ix_combos = self.ix_combos
         if self.ix_combos is None:
             # noinspection PyTypeChecker
-            self.ix_combos = list(combinations(range(im.shape[-1]), 2))
-        return [im[..., ix_combo] for ix_combo in self.ix_combos]
+            ix_combos = list(combinations(range(im.shape[-1]), 2))
+        return [im[..., ix_combo] for ix_combo in ix_combos]
 
     def glcm_cells(self, im: ndarray) -> float:
         """ Total number of GLCM cells to process """

@@ -54,6 +54,7 @@ class GLCMBase:
     ar_glcm: cp.ndarray = field(init=False)
     ar_features: cp.ndarray = field(init=False)
     progress: tqdm = field(init=False)
+    batches: int = field(init=False, default=1)
 
     def __post_init__(self):
         if not self.features:
@@ -116,7 +117,6 @@ class GLCMBase:
                 ([Batch], Height, Width, Channels, GLCM Features),
 
         """
-
         if im.ndim == 2:
             raise ValueError(
                 "Must be 3D. If ar.shape == (Height, Width), "

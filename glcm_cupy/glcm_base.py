@@ -151,11 +151,11 @@ class GLCMBase:
         glcm_shape = self.glcm_shape(im_chn_shape)
         batch_shape = (*glcm_shape, chns, batches, NO_OF_FEATURES)
         if isinstance(im, cp.ndarray):
-            g = self.run(np.concatenate(im, axis=-1))
-            return np.moveaxis(g.reshape(batch_shape), 3, 0)
-        else:
             g = self.run(cp.concatenate(im, axis=-1))
             return cp.moveaxis(g.reshape(batch_shape), 3, 0)
+        else:
+            g = self.run(np.concatenate(im, axis=-1))
+            return np.moveaxis(g.reshape(batch_shape), 3, 0)
 
     @abstractmethod
     def _from_im(self, im: ndarray) -> ndarray:

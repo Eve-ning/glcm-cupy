@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from itertools import combinations
 from typing import Tuple, List, Set
@@ -86,25 +87,39 @@ class GLCMCross(GLCMBase):
 
     def ch_combos(self, im: ndarray) -> List[ndarray]:
         """ Get Image Channel Combinations """
+        ix_combos = self.ix_combos
         if self.ix_combos is None:
             # noinspection PyTypeChecker
-            self.ix_combos = list(combinations(range(im.shape[-1]), 2))
-        return [im[..., ix_combo] for ix_combo in self.ix_combos]
+            ix_combos = list(combinations(range(im.shape[-1]), 2))
+        return [im[..., ix_combo] for ix_combo in ix_combos]
 
     def glcm_cells(self, im: ndarray) -> float:
         """ Total number of GLCM cells to process """
-        shape = self.glcm_shape(im[..., 0])
+        shape = self.glcm_shape(im[..., 0].shape)
 
         if isinstance(shape, cp.ndarray):
             return cp.prod(shape) * len(self.ch_combos(im))
 
         return np.prod(shape) * len(self.ch_combos(im))
 
-    def glcm_shape(self, im_chn: ndarray) -> Tuple[int, int]:
+    def _run_batch(self, im: ndarray):
+        """ Batch running doesn't work on Cross as stacking channel interferes
+            with the combinations.
+
+        Notes:
+            This may be implemented if there's a demand for it. Though since
+            Cross GLCM is still new in concept, I'll leave it for now.
+        """
+        logging.warning("Batch Processing doesn't work for Cross GLCM. "
+                        "Using for loop processing.")
+        # TODO: Implement Batch Processing for Cross GLCM
+        return np.stack([self.run(b) for b in im])
+
+    def glcm_shape(self, im_chn_shape: tuple) -> Tuple[int, int]:
         """ Get per-channel shape after GLCM """
 
-        return im_chn.shape[0] - 2 * self.radius, \
-               im_chn.shape[1] - 2 * self.radius
+        return im_chn_shape[0] - 2 * self.radius, \
+               im_chn_shape[1] - 2 * self.radius
 
     def _from_im(self, im: ndarray) -> ndarray:
         """ Generates the GLCM from a multichannel image
@@ -167,7 +182,7 @@ class GLCMCross(GLCMBase):
                 f"shape={im_chn.shape}"
             )
 
-        glcm_h, glcm_w, *_ = self.glcm_shape(im_chn)
+        glcm_h, glcm_w, *_ = self.glcm_shape(im_chn.shape)
         if glcm_h <= 0 or glcm_w <= 0:
             raise ValueError(
                 f"Step Size & Diameter exceeds size for windowing. "

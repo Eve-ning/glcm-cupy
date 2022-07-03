@@ -32,3 +32,5 @@ Changelog
     - Implement Integration Test checking for stability of GLCM output
 - Implemented GLCM Feature Selection to optimize out unnecessary GLCM Stages
 - Fix issue with CuPy ndarray incompatible with tqdm
+- Add Batch Processing for vanilla GLCM
+    - ``GLCMCross`` doesn't perform faster with this. However is compatible.

@@ -54,6 +54,7 @@ class GLCMBase:
     ar_glcm: cp.ndarray = field(init=False)
     ar_features: cp.ndarray = field(init=False)
     progress: tqdm = field(init=False)
+    batches: int = field(init=False, default=1)
 
     def __post_init__(self):
         if not self.features:
@@ -108,22 +109,23 @@ class GLCMBase:
         """ Executes running GLCM. Returns the GLCM Feature array
 
         Args:
-            im: 3D Image to process. Must be of (Height, Width, Channels)
+            im: 3D/4D Image to process. Must be of shape
+                ([Batch], Height, Width, Channels)
 
         Returns:
-            An np.ndarray or cp.ndarray of Shape,
-             3D: (rows, cols, channels, features),
+            An np.ndarray or cp.ndarray of Shape 4D/5D:
+                ([Batch], Height, Width, Channels, GLCM Features),
 
         """
-
         if im.ndim == 2:
             raise ValueError(
                 "Must be 3D. If ar.shape == (Height, Width), "
                 "use ar[...,np.newaxis] to add the channel dimension."
             )
-        if im.ndim != 3:
-            raise ValueError("Only 3D images allowed.")
-
+        elif im.ndim == 4:
+            return self._run_batch(im)
+        elif im.ndim != 3:
+            raise ValueError("Only 3D/4D images allowed.")
         self.progress = tqdm(total=self.glcm_cells(im),
                              desc="GLCM Progress",
                              unit=" Cells",
@@ -132,6 +134,31 @@ class GLCMBase:
 
         im = binner(im, self.bin_from, self.bin_to)
         return self._from_im(im)
+
+    def _run_batch(self, im: ndarray):
+        """ Run as a batch instead of separately.
+
+        Notes:
+            Transforms the batch axis to concat on channel axis.
+            E.g. Shape = (2, H, W, 3)
+            Batch 1: Channel 1, 2, 3
+            Batch 2: Channel 1, 2, 3
+            Transforms -> (H, W, 6)
+            Channel: B1C1 B1C2 B1C3 B2C1 B2C2 B2C3
+        """
+        batches, *im_chn_shape, _ = im.shape
+        glcm_shape = self.glcm_shape(im_chn_shape)
+        batch_shape = (*glcm_shape, batches, -1, NO_OF_FEATURES)
+        if isinstance(im, cp.ndarray):
+            g = self.run(cp.concatenate(im, axis=-1))
+            r = g.reshape(batch_shape)
+            a = cp.moveaxis(r, 2, 0)
+            return a
+        else:
+            g = self.run(np.concatenate(im, axis=-1))
+            r = g.reshape(batch_shape)
+            a = np.moveaxis(r, 2, 0)
+            return a
 
     @abstractmethod
     def _from_im(self, im: ndarray) -> ndarray:
@@ -152,7 +179,7 @@ class GLCMBase:
         ...
 
     @abstractmethod
-    def glcm_shape(self, im_chn: ndarray) -> Tuple:
+    def glcm_shape(self, im_chn_shape: ndarray) -> Tuple:
         ...
 
     def _from_channel(self, im_chn: ndarray) -> ndarray:
@@ -162,7 +189,7 @@ class GLCMBase:
             The GLCM Array 3dim with shape rows, cols, feature
         """
 
-        glcm_h, glcm_w, *_ = self.glcm_shape(im_chn)
+        glcm_h, glcm_w, *_ = self.glcm_shape(im_chn.shape)
 
         if isinstance(im_chn, cp.ndarray):
             glcm_features = [

@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="direction.html">Direction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#id1">1.6</a></li>
@@ -215,6 +216,13 @@
 </li>
 <li><p>Implemented GLCM Feature Selection to optimize out unnecessary GLCM Stages</p></li>
 <li><p>Fix issue with CuPy ndarray incompatible with tqdm</p></li>
+<li><dl class="simple">
+<dt>Add Batch Processing for vanilla GLCM</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">GLCMCross</span></code> doesn’t perform faster with this. However is compatible.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
 </ul>
 </div>
 </div>

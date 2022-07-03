@@ -100,15 +100,15 @@ class GLCM(GLCMBase):
 
     def glcm_cells(self, im: ndarray) -> int:
         """ Total number of GLCM cells to process """
-        return np.prod(self.glcm_shape(im[..., 0])) * \
+        return np.prod(self.glcm_shape(im[..., 0].shape)) * \
                len(self.directions) * \
                im.shape[-1]
 
-    def glcm_shape(self, im_chn: ndarray) -> Tuple[int, int]:
+    def glcm_shape(self, im_chn_shape: tuple) -> Tuple[int, int]:
         """ Get per-channel shape after GLCM """
 
-        return (im_chn.shape[0] - 2 * self.step_size - 2 * self.radius,
-                im_chn.shape[1] - 2 * self.step_size - 2 * self.radius)
+        return (im_chn_shape[0] - 2 * self.step_size - 2 * self.radius,
+                im_chn_shape[1] - 2 * self.step_size - 2 * self.radius)
 
     def _from_im(self, im: ndarray) -> ndarray:
         """ Generates the GLCM from a multichannel image
@@ -176,7 +176,7 @@ class GLCM(GLCMBase):
             raise ValueError(f"Image must be 2 dimensional. "
                              f"im.ndim={im_chn.ndim}")
 
-        glcm_h, glcm_w, *_ = self.glcm_shape(im_chn)
+        glcm_h, glcm_w, *_ = self.glcm_shape(im_chn.shape)
         if glcm_h <= 0 or glcm_w <= 0:
             raise ValueError(
                 f"Step Size & Diameter exceeds size for windowing. "

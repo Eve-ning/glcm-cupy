@@ -1,7 +1,7 @@
 import cupy as cp
 import numpy as np
 import pytest
-from PIL import Image
+from matplotlib.image import imread
 
 from glcm_cupy.conf import ROOT_DIR
 
@@ -21,7 +21,7 @@ def ar_3d_cp(ar_3d):
 
 @pytest.fixture()
 def ar_img_3d():
-    return Image.open(f"{ROOT_DIR}/data/image.jpg")
+    return imread(f"{ROOT_DIR}/data/image.jpg")
 
 
 @pytest.fixture()

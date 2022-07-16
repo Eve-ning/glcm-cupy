@@ -54,7 +54,8 @@ class GLCMPyBase:
         # Convert to probability
         glcm /= len(i_flat) * 2
 
-        homogeneity = contrast = asm = mean = var = correlation = 0
+        homogeneity = contrast = asm = mean = var = \
+            correlation = dissimilarity = 0
         for i in range(glcm.shape[0]):
             for j in range(glcm.shape[1]):
                 homogeneity += glcm[i, j] / (1 + (i - j) ** 2)
@@ -72,4 +73,4 @@ class GLCMPyBase:
                 for j in range(glcm.shape[1]):
                     correlation += glcm[i, j] * (i - mean) * (j - mean) / var
 
-        return [homogeneity, contrast, asm, mean, var, correlation]
+        return [homogeneity, contrast, asm, mean, var, correlation, dissimilarity]

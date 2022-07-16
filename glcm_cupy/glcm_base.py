@@ -11,7 +11,7 @@ from glcm_cupy.conf import *
 from glcm_cupy.kernel import get_glcm_module
 from glcm_cupy.utils import calc_grid_size, normalize_features, binner
 
-FEATURES = HOMOGENEITY, CONTRAST, ASM, MEAN, VARIANCE, CORRELATION
+FEATURES = HOMOGENEITY, CONTRAST, ASM, MEAN, VARIANCE, CORRELATION, DISSIMILARITY
 
 
 @dataclass
@@ -47,7 +47,8 @@ class GLCMBase:
     max_partition_size: int = MAX_PARTITION_SIZE
     max_threads: int = MAX_THREADS
     features: Set[int] = (HOMOGENEITY, CONTRAST, ASM,
-                          MEAN, VARIANCE, CORRELATION)
+                          MEAN, VARIANCE, CORRELATION,
+                          DISSIMILARITY)
     normalized_features: bool = True
     verbose: bool = True
 
@@ -343,5 +344,6 @@ class GLCMBase:
                 ASM in self.features or
                 MEAN in self.features or
                 VARIANCE in self.features or
-                CORRELATION in self.features
+                CORRELATION in self.features or
+                DISSIMILARITY in self.features
             )

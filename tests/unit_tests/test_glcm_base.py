@@ -39,7 +39,8 @@ def test_glcm_ij(i, j):
         float(g[..., ASM].sum() / windows),
         float(g[..., MEAN].sum() / windows),
         float(g[..., VARIANCE].sum() / windows),
-        float(g[..., CORRELATION].sum() / windows)
+        float(g[..., CORRELATION].sum() / windows),
+        float(g[..., DISSIMILARITY].sum() / windows)
     ]
 
     expected = glcm_py_ij(i, j, 256, 256)
@@ -50,7 +51,8 @@ def test_glcm_ij(i, j):
         homogeneity=float(g[..., HOMOGENEITY].sum() / windows),
         contrast=float(g[..., CONTRAST].sum() / windows),
         asm=float(g[..., ASM].sum() / windows),
-        correlation=float(g[..., CORRELATION].sum() / windows)
+        correlation=float(g[..., CORRELATION].sum() / windows),
+        dissimilarity=float(g[..., DISSIMILARITY].sum() / windows)
     )
 
     if (i == j).all():

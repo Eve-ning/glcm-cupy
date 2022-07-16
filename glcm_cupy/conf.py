@@ -15,7 +15,7 @@ MAX_THREADS = 512  # Min. Maximum supported threads.
 # Each cell is 4 bytes (float32)
 MAX_PARTITION_SIZE = 1000
 
-NO_OF_FEATURES = 6
+NO_OF_FEATURES = 7
 
 HOMOGENEITY = 0
 CONTRAST = 1
@@ -23,5 +23,6 @@ ASM = 2
 MEAN = 3
 VARIANCE = 4
 CORRELATION = 5
+DISSIMILARITY = 6
 
 ndarray = Union[np.ndarray, cp.ndarray]

@@ -81,6 +81,7 @@ These are the features implemented.
 - `MEAN = 3`
 - `VAR = 4`
 - `CORRELATION = 5`
+- `DISSIMILARITY = 6`
 
 Don't see one you need? Raise an issue, I'll (hopefully) add it.
 

@@ -58,7 +58,7 @@ class GLCMPyBase:
             correlation = dissimilarity = 0
         for i in range(glcm.shape[0]):
             for j in range(glcm.shape[1]):
-                dissimilarity += glcm[i, j] / np.abs(i - j)
+                dissimilarity += glcm[i, j] * np.abs(i - j)
                 homogeneity += glcm[i, j] / (1 + (i - j) ** 2)
                 contrast += glcm[i, j] * (i - j) ** 2
                 asm += glcm[i, j] ** 2

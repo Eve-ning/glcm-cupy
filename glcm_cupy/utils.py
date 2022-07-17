@@ -12,6 +12,7 @@ def normalize_features(ar: ndarray, bin_to: int) -> ndarray:
     ar[..., Features.VARIANCE] /= (bin_to - 1) ** 2
     ar[..., Features.CORRELATION] += 1
     ar[..., Features.CORRELATION] /= 2
+    ar[..., Features.DISSIMILARITY] /= (bin_to - 1)
     return ar
 
 

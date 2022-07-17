@@ -1,22 +1,25 @@
 import inspect
+from pathlib import Path
 
 import numpy as np
 import pytest
 
 from glcm_cupy import GLCM, glcm
 
+THIS_DIR = Path(__file__).parent
+
 
 def test_from_3dimage(ar_3d):
     """ Tests using a 3D Image """
     g = GLCM().run(ar_3d)
-    g_exp = np.load("expected/ar_3d_glcm.npy")
+    g_exp = np.load(THIS_DIR / "expected/ar_3d_glcm.npy")
     assert g == pytest.approx(g_exp, abs=1e-04)
 
 
 def test_from_2dimage(ar_2d):
     """ Tests with a 2D Image (1 Channel) """
     g = GLCM().run(ar_2d[..., np.newaxis])
-    g_exp = np.load("expected/ar_2d_glcm.npy")
+    g_exp = np.load(THIS_DIR / "expected/ar_2d_glcm.npy")
     assert g == pytest.approx(g_exp, abs=1e-04)
 
 
@@ -28,14 +31,14 @@ def test_output_match(ar_3d):
 def test_from_3dimage_cp(ar_3d_cp):
     """ Tests using a 3D Image """
     g = GLCM().run(ar_3d_cp)
-    g_exp = np.load("expected/ar_3d_glcm.npy")
+    g_exp = np.load(THIS_DIR / "expected/ar_3d_glcm.npy")
     assert g.get() == pytest.approx(g_exp, abs=1e-04)
 
 
 def test_from_2dimage_cp(ar_2d_cp):
     """ Tests with a 2D Image (1 Channel) """
     g = GLCM().run(ar_2d_cp[..., np.newaxis])
-    g_exp = np.load("expected/ar_2d_glcm.npy")
+    g_exp = np.load(THIS_DIR / "expected/ar_2d_glcm.npy")
     assert g.get() == pytest.approx(g_exp, abs=1e-04)
 
 

@@ -17,12 +17,6 @@ MAX_THREADS = 512  # Min. Maximum supported threads.
 MAX_PARTITION_SIZE = 1000
 
 
-def export(enum):
-    globals().update(enum.__members__)
-    return enum
-
-
-@export
 class Features(IntEnum):
     HOMOGENEITY = 0
     CONTRAST = 1

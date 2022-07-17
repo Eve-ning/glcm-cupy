@@ -20,7 +20,7 @@ This is slightly faster on ``GLCM``, it will start on the next image while the c
     >>> # This is why you need them to be the same size
     >>> g = GLCM(np.stack([ar0, ar1])).run(ar)
     >>> g.shape
-    (2, 1074, 1914, 3, 6)
+    (2, 1074, 1914, 3, 7)
     >>> g0, g1 = g[0], g[1]
 
 The dimensions here are ``(batch, height, width, channel, features)``.
@@ -36,7 +36,7 @@ GLCMCross
 
     >>> g = GLCMCross(np.stack([ar0, ar1])).run(ar)
     >>> g.shape
-    (2, 1074, 1914, 3, 6)
+    (2, 1074, 1914, 3, 7)
     >>> g0, g1 = g[0], g[1]
 
 Behavior of the ``ix_combos`` specified does not change.

@@ -173,7 +173,7 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># This is why you need them to be the same size</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">ar0</span><span class="p">,</span> <span class="n">ar1</span><span class="p">]))</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(2, 1074, 1914, 3, 6)</span>
+<span class="go">(2, 1074, 1914, 3, 7)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g0</span><span class="p">,</span> <span class="n">g1</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">g</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -184,7 +184,7 @@
 <p><code class="docutils literal notranslate"><span class="pre">GLCMCross</span></code> does not benefit in speed, however it may be simpler in syntax.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCMCross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">ar0</span><span class="p">,</span> <span class="n">ar1</span><span class="p">]))</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(2, 1074, 1914, 3, 6)</span>
+<span class="go">(2, 1074, 1914, 3, 7)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g0</span><span class="p">,</span> <span class="n">g1</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">g</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 </div>

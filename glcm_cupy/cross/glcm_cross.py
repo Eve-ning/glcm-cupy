@@ -26,8 +26,14 @@ def glcm_cross(
     max_partition_size: int = MAX_PARTITION_SIZE,
     max_threads: int = MAX_THREADS,
     normalized_features: bool = True,
-    features: Set[int] = (HOMOGENEITY, CONTRAST, ASM,
-                          MEAN, VARIANCE, CORRELATION),
+    features: Set[int] = (Features.HOMOGENEITY,
+                          Features.CONTRAST,
+                          Features.ASM,
+                          Features.MEAN,
+                          Features.VARIANCE,
+                          Features.CORRELATION,
+                          Features.DISSIMILARITY,
+                          ),
     verbose: bool = True,
     ix_combos: List[Tuple[int, int]] | None = None
 ) -> ndarray:

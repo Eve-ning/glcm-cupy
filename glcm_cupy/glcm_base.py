@@ -101,6 +101,7 @@ class GLCMBase:
              mean=Features.MEAN in self.features,
              variance=Features.VARIANCE in self.features,
              correlation=Features.CORRELATION in self.features,
+             dissimilarity=Features.DISSIMILARITY in self.features
         )
         self.glcm_create_kernel = module.get_function('glcmCreateKernel')
         self.glcm_feature_kernel_0 = module.get_function('glcmFeatureKernel0')

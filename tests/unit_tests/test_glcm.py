@@ -36,4 +36,4 @@ def test_channel_independence():
     g0 = glcm.run(ar0)
     g1 = glcm.run(ar1)
     g_exp = np.concatenate([g0, g1], axis=2)
-    assert g == pytest.approx(g_exp, abs=1e-06)
+    assert g == pytest.approx(g_exp, abs=1e-05)

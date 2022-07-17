@@ -27,7 +27,7 @@ def test_glcm_4d(size, bins, radius, batches):
     glcm = GLCMCross(radius=radius, bin_from=bins, bin_to=bins)
     g_batch = glcm.run(ar_batch)
     g = np.stack([glcm.run(ar) for ar in ar_batch])
-    assert g == pytest.approx(g_batch, abs=1e-06)
+    assert g == pytest.approx(g_batch, abs=1e-05)
 
 
 @pytest.mark.parametrize(
@@ -52,4 +52,4 @@ def test_glcm_4d_cp(size, bins, radius, batches):
     glcm = GLCMCross(radius=radius, bin_from=bins, bin_to=bins)
     g_batch = glcm.run(ar_batch)
     g = cp.stack([glcm.run(ar) for ar in ar_batch])
-    assert g.get() == pytest.approx(g_batch.get(), abs=1e-06)
+    assert g.get() == pytest.approx(g_batch.get(), abs=1e-05)

@@ -6,6 +6,25 @@ from glcm_cupy.glcm.glcm_py import glcm_py_im
 
 
 @pytest.mark.parametrize(
+    "ar",
+    [
+        np.ones([16, 16, 3]) * 31,
+        np.zeros([16, 16, 3])
+    ]
+)
+def test_glcm_normalize(ar):
+    """ Assert that our normalize will reduce the range to 0, 1 """
+    g = GLCM(radius=3, bin_from=32, bin_to=32,
+             normalized_features=False).run(ar)
+    assert g.max() >= 1
+    assert g.min() >= 0
+    g = GLCM(radius=3, bin_from=32, bin_to=32,
+             normalized_features=True).run(ar)
+    assert g.min() >= 0
+    assert g.max() <= 1
+
+
+@pytest.mark.parametrize(
     "size",
     [15, ]
 )

@@ -21,12 +21,12 @@ g = glcm(ar, bin_from=256, bin_to=16)
 
 #%%
 # We yield the features using constants defined in conf
-from glcm_cupy.conf import CONTRAST, CORRELATION, ASM
+from glcm_cupy.conf import Features
 
-print(g[..., CONTRAST])
-print(g[..., CORRELATION])
-print(g[..., ASM])
-#%%
+print(g[..., Features.CONTRAST])
+print(g[..., Features.CORRELATION])
+print(g[..., Features.ASM])
+# %%
 # Alternatively, since these constants are simply integers
 print(g[..., 0])
 print(g[..., 1])

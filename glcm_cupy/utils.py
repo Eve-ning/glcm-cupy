@@ -7,11 +7,12 @@ from glcm_cupy.conf import *
 
 def normalize_features(ar: ndarray, bin_to: int) -> ndarray:
     """ This scales the glcm features to [0, 1] """
-    ar[..., CONTRAST] /= (bin_to - 1) ** 2
-    ar[..., MEAN] /= (bin_to - 1)
-    ar[..., VARIANCE] /= (bin_to - 1) ** 2
-    ar[..., CORRELATION] += 1
-    ar[..., CORRELATION] /= 2
+    ar[..., Features.CONTRAST] /= (bin_to - 1) ** 2
+    ar[..., Features.MEAN] /= (bin_to - 1)
+    ar[..., Features.VARIANCE] /= (bin_to - 1) ** 2
+    ar[..., Features.CORRELATION] += 1
+    ar[..., Features.CORRELATION] /= 2
+    ar[..., Features.DISSIMILARITY] /= (bin_to - 1)
     return ar
 
 

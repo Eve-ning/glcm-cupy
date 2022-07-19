@@ -34,3 +34,5 @@ Changelog
 - Fix issue with CuPy ndarray incompatible with tqdm
 - Add Batch Processing for vanilla GLCM
     - ``GLCMCross`` doesn't perform faster with this. However is compatible.
+- Implement Dissimilarity Feature
+

@@ -11,7 +11,13 @@ from glcm_cupy.conf import *
 from glcm_cupy.kernel import get_glcm_module
 from glcm_cupy.utils import calc_grid_size, normalize_features, binner
 
-FEATURES = HOMOGENEITY, CONTRAST, ASM, MEAN, VARIANCE, CORRELATION, DISSIMILARITY
+FEATURES = Features.HOMOGENEITY, \
+           Features.CONTRAST, \
+           Features.ASM, \
+           Features.MEAN, \
+           Features.VARIANCE, \
+           Features.CORRELATION, \
+           Features.DISSIMILARITY
 
 
 @dataclass
@@ -46,9 +52,13 @@ class GLCMBase:
     bin_to: int = 256
     max_partition_size: int = MAX_PARTITION_SIZE
     max_threads: int = MAX_THREADS
-    features: Set[int] = (HOMOGENEITY, CONTRAST, ASM,
-                          MEAN, VARIANCE, CORRELATION,
-                          DISSIMILARITY)
+    features: Set[int] = (Features.HOMOGENEITY,
+                          Features.CONTRAST,
+                          Features.ASM,
+                          Features.MEAN,
+                          Features.VARIANCE,
+                          Features.CORRELATION,
+                          Features.DISSIMILARITY)
     normalized_features: bool = True
     verbose: bool = True
 
@@ -85,12 +95,13 @@ class GLCMBase:
             )
 
         module = get_glcm_module(
-            HOMOGENEITY in self.features,
-            CONTRAST in self.features,
-            ASM in self.features,
-            MEAN in self.features,
-            VARIANCE in self.features,
-            CORRELATION in self.features
+             homogeneity=Features.HOMOGENEITY in self.features,
+             contrast=Features.CONTRAST in self.features,
+             asm=Features.ASM in self.features,
+             mean=Features.MEAN in self.features,
+             variance=Features.VARIANCE in self.features,
+             correlation=Features.CORRELATION in self.features,
+             dissimilarity=Features.DISSIMILARITY in self.features
         )
         self.glcm_create_kernel = module.get_function('glcmCreateKernel')
         self.glcm_feature_kernel_0 = module.get_function('glcmFeatureKernel0')
@@ -333,17 +344,17 @@ class GLCMBase:
     def do_stage(self, stage_no: int) -> bool:
         """ Determines if running the nth stage GLCM is necessary """
         if stage_no == 2:
-            return CORRELATION in self.features
+            return Features.CORRELATION in self.features
         elif stage_no == 1:
-            return VARIANCE in self.features or \
-                   CORRELATION in self.features
+            return Features.VARIANCE in self.features or \
+                   Features.CORRELATION in self.features
         elif stage_no == 0:
             return (
-                HOMOGENEITY in self.features or
-                CONTRAST in self.features or
-                ASM in self.features or
-                MEAN in self.features or
-                VARIANCE in self.features or
-                CORRELATION in self.features or
-                DISSIMILARITY in self.features
+                Features.HOMOGENEITY in self.features or
+                Features.CONTRAST in self.features or
+                Features.ASM in self.features or
+                Features.MEAN in self.features or
+                Features.VARIANCE in self.features or
+                Features.CORRELATION in self.features or
+                Features.DISSIMILARITY in self.features
             )

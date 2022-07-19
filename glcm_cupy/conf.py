@@ -1,6 +1,6 @@
+from enum import IntEnum
 from pathlib import Path
 from typing import Union
-from enum import IntEnum
 
 import cupy as cp
 import numpy as np
@@ -16,11 +16,7 @@ MAX_THREADS = 512  # Min. Maximum supported threads.
 # Each cell is 4 bytes (float32)
 MAX_PARTITION_SIZE = 1000
 
-def export(enum):
-    globals().update(enum.__members__)
-    return enum
 
-@export
 class Features(IntEnum):
     HOMOGENEITY = 0
     CONTRAST = 1
@@ -29,6 +25,7 @@ class Features(IntEnum):
     VARIANCE = 4
     CORRELATION = 5
     DISSIMILARITY = 6
+
 
 NO_OF_FEATURES = len(Features)
 

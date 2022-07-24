@@ -14,22 +14,21 @@ First, you need to install this
 pip install glcm-cupy
 ```
 
-Then, you need **CuPy**.
-You need to [install CuPy manually](https://docs.cupy.dev/en/stable/install.html), 
-as it's dependent on the version of CUDA you have.
+Then, you need to install **CuPy** version corresponding to your CUDA version
 
 I recommend using `conda-forge` as it worked for me :)
 
-For CUDA `11.6`, we use
+```shell
+conda install -c conda-forge cupy cudatoolkit=<your_CUDA_version>
+```
+
+E.g:
+For CUDA `11.6`,
 ```shell
 conda install -c conda-forge cupy cudatoolkit=11.6
 ```
 
-Replace the version you have on the arg.
-
-```shell
-conda install -c conda-forge cupy cudatoolkit=__._
-```
+To install **CuPy** manually, see [this page](https://docs.cupy.dev/en/stable/install.html)
 
 ## Optional Installation
 

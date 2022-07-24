@@ -28,7 +28,7 @@ For CUDA `11.6`,
 conda install -c conda-forge cupy cudatoolkit=11.6
 ```
 
-Alternatively, if you prefer install **CuPy** manually, please see [this page](https://docs.cupy.dev/en/stable/install.html) for installation instructions.
+To install **CuPy** manually, see [this page](https://docs.cupy.dev/en/stable/install.html)
 
 ## Optional Installation
 

@@ -36,8 +36,13 @@ def glcm(
                                    Direction.SOUTH_WEST),
     max_partition_size: int = MAX_PARTITION_SIZE,
     max_threads: int = MAX_THREADS,
-    features: Set[int] = (HOMOGENEITY, CONTRAST, ASM,
-                          MEAN, VARIANCE, CORRELATION),
+    features: Set[int] = (Features.HOMOGENEITY,
+                          Features.CONTRAST,
+                          Features.ASM,
+                          Features.MEAN,
+                          Features.VARIANCE,
+                          Features.CORRELATION,
+                          Features.DISSIMILARITY),
     normalized_features: bool = True,
     verbose: bool = True
 ) -> ndarray:

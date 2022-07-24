@@ -95,6 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="direction.html">Direction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
@@ -194,7 +195,8 @@
 \text{Angular Second Moment (ASM)} = \sum_{i,j=0}^{N-1}P_{i,j}^2\\
 \text{GLCM Mean, } \mu = \sum_{i,j=0}^{N-1}i * P_{i,j}\\
 \text{GLCM Variance, } \sigma^2 = \sum_{i,j=0}^{N-1}P_{i,j}(i - \mu_i)^2\\
-\text{Correlation} = \frac{(i - \mu_i)(j - \mu_j)}{\sqrt{\sigma_i^2\sigma_j^2}}\\\end{split}\]</div>
+\text{Correlation} = \sum_{i,j=0}^{N-1}P_{i,j}\frac{(i - \mu_i)(j - \mu_j)}{\sqrt{\sigma_i^2\sigma_j^2}}\\
+\text{Dissimilarity} = \sum_{i,j=0}^{N-1}P_{i,j} * \left\lvert i - j \right\rvert\\\end{split}\]</div>
 <p>We implemented these few as they are the most orthogonal (according to the tutorial).
 However, feel free to suggest any more in the GitHub Issue page.</p>
 </div>

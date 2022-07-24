@@ -44,13 +44,22 @@ atomicAdd(
 );
 """
 
+
+DISSIMILARITY_FN = """
+atomicAdd(
+    &features[DISSIMILARITY + wid * NO_OF_FEATURES],
+    p * abs(i - j)
+);
+"""
+
 def get_glcm_module(
     homogeneity = True,
     contrast = True,
     asm = True,
     mean = True,
     variance = True,
-    correlation = True
+    correlation = True,
+    dissimilarity = True
 ):
     if correlation:
         variance = True
@@ -64,7 +73,8 @@ def get_glcm_module(
 #define MEAN 3
 #define VAR 4
 #define CORRELATION 5
-#define NO_OF_FEATURES 6
+#define DISSIMILARITY 6
+#define NO_OF_FEATURES 7
 
 extern "C" {{
     __global__ void glcmCreateKernel(
@@ -234,6 +244,7 @@ extern "C" {{
         | MEAN           | | MEAN           | | MEAN           |
         | VAR            | | VAR            | | VAR            |
         | CORRELATION    | | CORRELATION    | | CORRELATION    |
+        | DISSIMILARITY  | | DISSIMILARITY  | | DISSIMILARITY  | 
         +----------------+ +----------------+ +----------------+
         Window 0           Window 1           Window 2           ...
         **/
@@ -243,6 +254,7 @@ extern "C" {{
         {CONTRAST_FN if contrast else ""}
         {ASM_FN if asm else ""}
         {MEAN_FN if mean else ""}
+        {DISSIMILARITY_FN if dissimilarity else ""}
     }}
     __global__ void glcmFeatureKernel1(
         const float* g,

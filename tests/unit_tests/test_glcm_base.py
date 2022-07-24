@@ -34,12 +34,13 @@ def test_glcm_ij(i, j):
 
     # The sum of the values, since tiled, will be scaled by no of windows.
     actual = [
-        float(g[..., HOMOGENEITY].sum() / windows),
-        float(g[..., CONTRAST].sum() / windows),
-        float(g[..., ASM].sum() / windows),
-        float(g[..., MEAN].sum() / windows),
-        float(g[..., VARIANCE].sum() / windows),
-        float(g[..., CORRELATION].sum() / windows)
+        float(g[..., Features.HOMOGENEITY].sum() / windows),
+        float(g[..., Features.CONTRAST].sum() / windows),
+        float(g[..., Features.ASM].sum() / windows),
+        float(g[..., Features.MEAN].sum() / windows),
+        float(g[..., Features.VARIANCE].sum() / windows),
+        float(g[..., Features.CORRELATION].sum() / windows),
+        float(g[..., Features.DISSIMILARITY].sum() / windows)
     ]
 
     expected = glcm_py_ij(i, j, 256, 256)
@@ -47,10 +48,11 @@ def test_glcm_ij(i, j):
 
     # The sum of the values, since tiled, will be scaled by no of windows.
     actual_skimage = dict(
-        homogeneity=float(g[..., HOMOGENEITY].sum() / windows),
-        contrast=float(g[..., CONTRAST].sum() / windows),
-        asm=float(g[..., ASM].sum() / windows),
-        correlation=float(g[..., CORRELATION].sum() / windows)
+        homogeneity=float(g[..., Features.HOMOGENEITY].sum() / windows),
+        contrast=float(g[..., Features.CONTRAST].sum() / windows),
+        asm=float(g[..., Features.ASM].sum() / windows),
+        correlation=float(g[..., Features.CORRELATION].sum() / windows),
+        dissimilarity=float(g[..., Features.DISSIMILARITY].sum() / windows)
     )
 
     if (i == j).all():

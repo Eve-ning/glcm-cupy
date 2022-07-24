@@ -20,10 +20,12 @@ def glcm_py_skimage(i, j):
     homogeneity = float(greycoprops(glcm, 'homogeneity').squeeze())
     asm = float(greycoprops(glcm, 'ASM').squeeze())
     correlation = float(greycoprops(glcm, 'correlation').squeeze())
+    dissimilarity = float(greycoprops(glcm, 'dissimilarity').squeeze())
 
     return dict(
         homogeneity=homogeneity,
         contrast=contrast,
         asm=asm,
-        correlation=correlation
+        correlation=correlation,
+        dissimilarity=dissimilarity
     )

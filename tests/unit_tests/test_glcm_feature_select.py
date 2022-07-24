@@ -3,7 +3,7 @@ from itertools import chain, combinations
 import numpy as np
 import pytest
 
-from glcm_cupy import GLCM, MEAN, VARIANCE, CORRELATION
+from glcm_cupy import GLCM, Features
 from glcm_cupy.glcm_base import FEATURES
 
 
@@ -28,10 +28,10 @@ def test_glcm_feature_select(features):
         g = GLCM(radius=3, bin_from=256,
                  bin_to=16, features=features,
                  normalized_features=False).run(ar)
-        if CORRELATION in features:
-            features.add(VARIANCE)
-        if VARIANCE in features:
-            features.add(MEAN)
+        if Features.CORRELATION in features:
+            features.add(Features.VARIANCE)
+        if Features.VARIANCE in features:
+            features.add(Features.MEAN)
         features = tuple(features)
 
         assert (g[..., features] != 0).flatten().all()

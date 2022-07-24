@@ -22,7 +22,7 @@ I recommend using `conda-forge` as it worked for me :)
 conda install -c conda-forge cupy cudatoolkit=<your_CUDA_version>
 ```
 
-e.g:
+E.g:
 For CUDA `11.6`, we use
 ```shell
 conda install -c conda-forge cupy cudatoolkit=11.6

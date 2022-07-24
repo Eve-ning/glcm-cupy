@@ -23,7 +23,7 @@ conda install -c conda-forge cupy cudatoolkit=<your_CUDA_version>
 ```
 
 E.g:
-For CUDA `11.6`, we use
+For CUDA `11.6`,
 ```shell
 conda install -c conda-forge cupy cudatoolkit=11.6
 ```

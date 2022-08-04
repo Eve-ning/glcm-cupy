@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from glcm_cupy import GLCM
@@ -60,3 +61,10 @@ def test_glcm_ij(i, j):
 
     expected_skimage = glcm_py_skimage(i, j)
     assert actual_skimage == pytest.approx(expected_skimage, abs=0.01)
+
+def test_glcm_ge_bin_from():
+    """ Assert raise will happen on values >= bin_from """
+    with pytest.raises(ValueError):
+        GLCM(bin_from=256, bin_to=256).run(np.ones((10, 10)) * 256)
+    with pytest.raises(ValueError):
+        GLCM(bin_from=256, bin_to=256).run(np.ones((10, 10)) * 257)

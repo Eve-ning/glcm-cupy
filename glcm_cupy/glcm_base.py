@@ -134,6 +134,12 @@ class GLCMBase:
         if isinstance(im, np.ndarray):
             im = cp.array(im)
             was_numpy = True
+
+        if cp.nanmax(im) >= self.bin_from:
+            raise ValueError(
+                f"Found bad value ({cp.nanmax(im)}) >= bins {self.bin_from}."
+            )
+
         if im.ndim == 2:
             raise ValueError(
                 "Must be 3D. If ar.shape == (Height, Width), "

@@ -16,14 +16,17 @@ from glcm_cupy import GLCM
     'bins',
     (16,)
 )
-def test_glcm_na(inner_size, na_pad, bins):
-    """ A 3x3 == 5x5 (1 NA border padding)
+def test_glcm_na_padding(inner_size, na_pad, bins):
+    """ Tests effects of NA Padding
 
-    # # # # #
-    # 0 1 2 #      0 1 2
-    # 3 4 5 #  ==  3 4 5
-    # 6 7 8 #      6 7 8
-    # # # # #
+    Examples:
+        A 3x3 == 5x5 (1 NA border padding)
+
+        # # # # #
+        # 0 1 2 #      0 1 2
+        # 3 4 5 #  ==  3 4 5
+        # 6 7 8 #      6 7 8
+        # # # # #
 
     """
     outer_size = inner_size + na_pad * 2
@@ -35,3 +38,4 @@ def test_glcm_na(inner_size, na_pad, bins):
     ar_outer_g = glcm.run(ar_outer)
     ar_inner_g = glcm.run(ar_inner)
     assert (ar_outer_g[na_pad:-na_pad, na_pad:-na_pad] == ar_inner_g).all()
+

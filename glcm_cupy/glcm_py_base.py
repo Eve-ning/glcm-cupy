@@ -4,8 +4,6 @@ from typing import List
 import cupy as cp
 import numpy as np
 
-from glcm_cupy.conf import ndarray
-
 
 @dataclass
 class GLCMPyBase:
@@ -17,7 +15,7 @@ class GLCMPyBase:
     def diameter(self) -> int:
         return self.radius * 2 + 1
 
-    def glcm_ij(self, i: ndarray, j: ndarray) -> List[float]:
+    def glcm_ij(self, i: cp.ndarray, j: cp.ndarray) -> List[float]:
         """ Get GLCM features using Python
 
         Notes:
@@ -41,10 +39,7 @@ class GLCMPyBase:
         assert len(i_flat) == len(j_flat), \
             f"The shapes for i {i.shape} != j {j.shape}."
 
-        if isinstance(i, cp.ndarray) and isinstance(j, cp.ndarray):
-            glcm = cp.zeros((self.bin_to, self.bin_to), dtype=float)
-        else:
-            glcm = np.zeros((self.bin_to, self.bin_to), dtype=float)
+        glcm = np.zeros((self.bin_to, self.bin_to), dtype=float)
 
         # Populate the GLCM
         for i_, j_ in zip(i_flat, j_flat):

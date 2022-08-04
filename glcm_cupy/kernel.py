@@ -44,7 +44,6 @@ atomicAdd(
 );
 """
 
-
 DISSIMILARITY_FN = """
 atomicAdd(
     &features[DISSIMILARITY + wid * NO_OF_FEATURES],
@@ -52,14 +51,15 @@ atomicAdd(
 );
 """
 
+
 def get_glcm_module(
-    homogeneity = True,
-    contrast = True,
-    asm = True,
-    mean = True,
-    variance = True,
-    correlation = True,
-    dissimilarity = True
+    homogeneity=True,
+    contrast=True,
+    asm=True,
+    mean=True,
+    variance=True,
+    correlation=True,
+    dissimilarity=True
 ):
     if correlation:
         variance = True

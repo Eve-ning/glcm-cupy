@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import cupy as cp
 import numpy as np
-from skimage.util import view_as_windows
+from numpy.lib.stride_tricks import sliding_window_view
 from tqdm import tqdm
 
 from glcm_cupy.conf import NO_OF_FEATURES, ndarray
@@ -19,7 +19,7 @@ def glcm_py_im(ar: ndarray, bin_from: int, bin_to: int,
                   step=step).glcm_im(ar)
 
 
-def glcm_py_chn(ar: ndarray,
+def glcm_py_chn(ar: cp.ndarray,
                 bin_from: int,
                 bin_to: int,
                 radius: int = 2,
@@ -30,8 +30,8 @@ def glcm_py_chn(ar: ndarray,
                   step=step).glcm_chn(ar)
 
 
-def glcm_py_ij(i: ndarray,
-               j: ndarray,
+def glcm_py_ij(i: cp.ndarray,
+               j: cp.ndarray,
                bin_from: int, bin_to: int):
     return GLCMPy(bin_from=bin_from,
                   bin_to=bin_to).glcm_ij(i, j)
@@ -41,13 +41,10 @@ def glcm_py_ij(i: ndarray,
 class GLCMPy(GLCMPyBase):
     step: int = 1
 
-    def glcm_chn(self, ar: ndarray):
+    def glcm_chn(self, ar: cp.ndarray):
 
-        if isinstance(ar, cp.ndarray):
-            ar = (ar / self.bin_from * self.bin_to).astype(cp.uint8)
-        else:
-            ar = (ar / self.bin_from * self.bin_to).astype(np.uint8)
-        ar_w = view_as_windows(ar, (self.diameter, self.diameter))
+        ar = (ar / self.bin_from * self.bin_to).astype(cp.uint8)
+        ar_w = sliding_window_view(ar, (self.diameter, self.diameter))
 
         def flat(ar: ndarray):
             ar = ar.reshape((-1, self.diameter, self.diameter))
@@ -59,10 +56,7 @@ class GLCMPy(GLCMPyBase):
         ar_w_j_se = flat(ar_w[self.step * 2:, self.step * 2:])
         ar_w_j_e = flat(ar_w[self.step:-self.step, self.step * 2:])
 
-        if isinstance(ar, cp.ndarray):
-            feature_ar = cp.zeros((ar_w_i.shape[0], 4, NO_OF_FEATURES))
-        else:
-            feature_ar = np.zeros((ar_w_i.shape[0], 4, NO_OF_FEATURES))
+        feature_ar = np.zeros((ar_w_i.shape[0], 4, NO_OF_FEATURES))
 
         for j_e, ar_w_j in enumerate(
             (ar_w_j_sw, ar_w_j_s, ar_w_j_se, ar_w_j_e)):
@@ -79,10 +73,11 @@ class GLCMPy(GLCMPyBase):
         return normalize_features(feature_ar, self.bin_to)
 
     def glcm_im(self, ar: ndarray):
+        was_cupy = False
         if isinstance(ar, cp.ndarray):
-            return cp.stack([self.glcm_chn(ar[..., ch])
-                             for ch
-                             in range(ar.shape[-1])], axis=2)
-        return np.stack([self.glcm_chn(ar[..., ch])
-                         for ch
-                         in range(ar.shape[-1])], axis=2)
+            ar = np.array(ar)
+            was_cupy = True
+        _ = np.stack([self.glcm_chn(ar[..., ch])
+                      for ch
+                      in range(ar.shape[-1])], axis=2)
+        return cp.array(_) if was_cupy else _

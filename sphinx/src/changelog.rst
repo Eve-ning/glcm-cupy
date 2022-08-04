@@ -35,4 +35,4 @@ Changelog
 - Add Batch Processing for vanilla GLCM
     - ``GLCMCross`` doesn't perform faster with this. However is compatible.
 - Implement Dissimilarity Feature
-
+- Adjusts `PR 18 <https://github.com/Eve-ning/glcm-cupy/pull/18>`_ such that all inputs are coerced to CuPy if NumPy.

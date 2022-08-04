@@ -118,6 +118,11 @@ class GLCMBase:
         """ Total number of GLCM Cells"""
         ...
 
+    @property
+    def nan_replacement(self):
+        """ Replacement Value for NaN """
+        return self.bin_from
+
     def run(self, im: ndarray):
         """ Executes running GLCM. Returns the GLCM Feature array
 
@@ -156,7 +161,9 @@ class GLCMBase:
                              unit_scale=True,
                              disable=not self.verbose)
 
-        im = nan_to_num(im, self.bin_from)
+        # NaNs are replaced with the special bin_from value as uint doesn't
+        # support NaN.
+        im = nan_to_num(im, self.nan_replacement)
         im = binner(im, self.bin_from, self.bin_to)
         _ = self._from_im(im)
         return _.get() if was_numpy else _
@@ -319,6 +326,7 @@ class GLCMBase:
                 self.bin_to,
                 no_of_values,
                 no_of_windows,
+                self.nan_replacement,
                 self.ar_glcm,
                 self.ar_features
             )

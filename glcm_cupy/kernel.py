@@ -83,6 +83,7 @@ extern "C" {{
         const int glcmSize,
         const int noOfValues,
         const int noOfWindows,
+        const int nanReplacementValue,
         float* g,
         float* features)
     {{
@@ -119,6 +120,8 @@ extern "C" {{
         noOfValues = Number of values per window. In the above, it's 3 x 3 = 9
 
         noOfWindows = Number of windows in total. In the above, it's 4 x 2 = 8
+        
+        nanReplacementValue = Value substitute for NaN.
 
         g = Empty initialized GLCM array. Shape of (glcmSize, glcmSize, noOfWindows)
 
@@ -170,9 +173,9 @@ extern "C" {{
         if (tid < noOfValues * noOfWindows)
         {{
             unsigned char row = windows_i[tid];
-            if (row == glcmSize) return; 
+            if (row == nanReplacementValue) return; 
             unsigned char col = windows_j[tid];
-            if (col == glcmSize) return;
+            if (col == nanReplacementValue) return;
             // Remember that the shape of GLCM is (glcmSize, glcmSize, noOfWindows)
             atomicAdd(&(
                 g[

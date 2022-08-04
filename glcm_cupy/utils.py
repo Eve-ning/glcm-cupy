@@ -76,8 +76,8 @@ def view_as_windows_cp(arr_in: cp.ndarray, window_shape, step=1):
         Adapted from ``skimage.util import view_as_windows``
     """
     ndim = arr_in.ndim
-    arr_shape = np.array(arr_in.shape)
-    window_shape = np.array(window_shape, dtype=arr_shape.dtype)
+    arr_shape = cp.array(arr_in.shape)
+    window_shape = cp.array(window_shape, dtype=arr_shape.dtype)
 
     if step < 1:
         raise ValueError("`step` must be >= 1")
@@ -91,15 +91,16 @@ def view_as_windows_cp(arr_in: cp.ndarray, window_shape, step=1):
 
     # -- build rolling window view
     slices = tuple(slice(None, None, st) for st in step)
-    window_strides = np.array(arr_in.strides)
+    window_strides = cp.array(arr_in.strides)
 
     indexing_strides = arr_in[slices].strides
 
-    win_indices_shape = (((np.array(arr_in.shape) - np.array(window_shape))
-                          // np.array(step)) + 1)
+    win_indices_shape = (((cp.array(arr_in.shape) - cp.array(window_shape))
+                          // cp.array(step)) + 1)
 
     new_shape = tuple(list(win_indices_shape) + list(window_shape))
     strides = tuple(list(indexing_strides) + list(window_strides))
 
-    arr_out = as_strided(arr_in, shape=new_shape, strides=strides)
+    arr_out = as_strided(arr_in, shape=tuple(map(int, new_shape)),
+                         strides=tuple(map(int, strides)))
     return arr_out

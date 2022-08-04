@@ -44,20 +44,6 @@ def test_glcm(size, bins, radius):
     assert g == pytest.approx(expected, abs=0.001)
     assert g_fn == pytest.approx(expected, abs=0.001)
 
-def test_glcm_na():
-    """
-
-    N N N N
-    N 0 1 N
-    N 1 0 N
-    N N N N
-
-    """
-    ar = np.empty([3, 3, 1])
-    ar[:] = np.nan
-    ar[1, 1] = 0
-    g = GLCM(radius=0, bin_from=2, bin_to=2).run(ar)
-
 
 def test_channel_independence():
     """ This asserts that the channel GLCMs are independent """

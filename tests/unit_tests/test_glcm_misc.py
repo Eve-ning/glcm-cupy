@@ -1,5 +1,6 @@
 from typing import Tuple
 
+import cupy as cp
 import numpy as np
 import pytest
 
@@ -37,7 +38,7 @@ def test_glcm_make_windows(
         radius: Radius of each window
         step_size: Step Size distance between windows
     """
-    im_chn = np.zeros(im_shape, dtype=np.uint8)
+    im_chn = cp.zeros(im_shape, dtype=np.uint8)
 
     g = GLCM(step_size=step_size, radius=radius)
     glcm_shape = g.glcm_shape(im_chn.shape)

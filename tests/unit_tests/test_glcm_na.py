@@ -1,9 +1,22 @@
 import numpy as np
+import pytest
 
 from glcm_cupy import GLCM
 
 
-def test_glcm_na():
+@pytest.mark.parametrize(
+    'inner_size',
+    (3, 5, 7)
+)
+@pytest.mark.parametrize(
+    'na_pad',
+    (1, 2, 3)
+)
+@pytest.mark.parametrize(
+    'bins',
+    (16,)
+)
+def test_glcm_na(inner_size, na_pad, bins):
     """ A 3x3 == 5x5 (1 NA border padding)
 
     # # # # #
@@ -13,10 +26,7 @@ def test_glcm_na():
     # # # # #
 
     """
-    inner_size = 3
-    na_pad = 1
     outer_size = inner_size + na_pad * 2
-    bins = 16
     ar_inner = np.random.randint(0, bins, (inner_size, inner_size, 1))
     ar_outer = np.empty([outer_size, outer_size, 1])
     ar_outer[:] = np.nan

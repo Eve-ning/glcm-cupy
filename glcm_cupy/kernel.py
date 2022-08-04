@@ -170,7 +170,9 @@ extern "C" {{
         if (tid < noOfValues * noOfWindows)
         {{
             unsigned char row = windows_i[tid];
+            if (row == glcmSize) return; 
             unsigned char col = windows_j[tid];
+            if (col == glcmSize) return;
             // Remember that the shape of GLCM is (glcmSize, glcmSize, noOfWindows)
             atomicAdd(&(
                 g[

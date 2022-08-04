@@ -9,7 +9,8 @@ from tqdm import tqdm
 
 from glcm_cupy.conf import *
 from glcm_cupy.kernel import get_glcm_module
-from glcm_cupy.utils import calc_grid_size, normalize_features, binner
+from glcm_cupy.utils import calc_grid_size, normalize_features, binner, \
+    nan_to_num
 
 FEATURES = Features.HOMOGENEITY, \
            Features.CONTRAST, \
@@ -86,7 +87,7 @@ class GLCMBase:
             dtype=cp.float32
         )
         if self.radius < 0:
-            raise ValueError(f"Radius {self.radius} should be > 0)")
+            raise ValueError(f"Radius {self.radius} should be >= 0)")
 
         if self.bin_to not in range(2, MAX_VALUE_SUPPORTED + 1):
             raise ValueError(
@@ -144,6 +145,7 @@ class GLCMBase:
                              unit_scale=True,
                              disable=not self.verbose)
 
+        im = nan_to_num(im, self.bin_from)
         im = binner(im, self.bin_from, self.bin_to)
         return self._from_im(im)
 

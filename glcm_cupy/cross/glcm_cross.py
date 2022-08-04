@@ -6,10 +6,11 @@ from itertools import combinations
 from math import prod
 from typing import Tuple, List, Set
 
-from skimage.util import view_as_windows as view_as_windows_np
+from glcm_cupy.utils import view_as_windows_cp
 
 try:
-    from cucim.skimage.util.shape import view_as_windows as view_as_windows_cp
+    from cucim.skimage.util.shape import \
+        view_as_windows as view_as_windows_cucim
 
     USE_CUCIM = True
 except:
@@ -196,19 +197,17 @@ class GLCMCross(GLCMBase):
             )
 
         if USE_CUCIM:
-            i = view_as_windows_cp(im_chn[..., 0],
-                                   (self._diameter, self._diameter))
-            j = view_as_windows_cp(im_chn[..., 1],
-                                   (self._diameter, self._diameter))
+            i = view_as_windows_cucim(im_chn[..., 0],
+                                      (self._diameter, self._diameter))
+            j = view_as_windows_cucim(im_chn[..., 1],
+                                      (self._diameter, self._diameter))
         else:
             # This is ugly, but there is nothing we could do if cuCIM is
             # not installed. It should not be a hard requirement.
-            i = cp.asarray(
-                view_as_windows_np(im_chn[..., 0].get(),
-                                   (self._diameter, self._diameter)))
-            j = cp.asarray(
-                view_as_windows_np(im_chn[..., 1].get(),
-                                   (self._diameter, self._diameter)))
+            i = view_as_windows_cp(im_chn[..., 0],
+                                   (self._diameter, self._diameter))
+            j = view_as_windows_cp(im_chn[..., 1].get(),
+                                   (self._diameter, self._diameter))
 
         i = i.reshape((-1, *i.shape[-2:])) \
             .reshape((i.shape[0] * i.shape[1], -1))

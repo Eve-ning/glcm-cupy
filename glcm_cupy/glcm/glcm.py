@@ -4,10 +4,13 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Tuple, List, Set
 
-from skimage.util import view_as_windows as view_as_windows_np
+from line_profiler_pycharm import profile
+
+from glcm_cupy.utils import view_as_windows_cp
 
 try:
-    from cucim.skimage.util.shape import view_as_windows as view_as_windows_cp
+    from cucim.skimage.util.shape import \
+        view_as_windows as view_as_windows_cucim
 
     USE_CUCIM = True
 except:
@@ -128,6 +131,7 @@ class GLCM(GLCMBase):
             self._from_channel(im[..., ch]) for ch in range(im.shape[-1])
         ], axis=2)
 
+    @profile
     def make_windows(self, im_chn: ndarray) -> List[Tuple[ndarray, ndarray]]:
         """ Convert a image channel np.ndarray, to GLCM IJ windows.
 
@@ -188,23 +192,12 @@ class GLCM(GLCMBase):
                 f"- 2 * radius {self.radius} + 1 <= 0 was not satisfied."
             )
 
-        if isinstance(im_chn, cp.ndarray):
-            if USE_CUCIM:
-                ij = view_as_windows_cp(
-                    im_chn, (self._diameter, self._diameter)
-                )
-            else:
-                # This is ugly, but there is nothing we could do if cuCIM is
-                # not installed. It should not be a hard requirement.
-                ij = cp.asarray(
-                    view_as_windows_np(
-                        im_chn.get(), (self._diameter, self._diameter)
-                    )
-                )
-        else:
-            ij = cp.asarray(
-                view_as_windows_np(im_chn, (self._diameter, self._diameter))
+        if USE_CUCIM:
+            ij = view_as_windows_cucim(
+                im_chn, (self._diameter, self._diameter)
             )
+        else:
+            ij = view_as_windows_cp(im_chn, (self._diameter, self._diameter))
 
         ijs: List[Tuple[ndarray, ndarray]] = []
 

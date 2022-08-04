@@ -41,7 +41,7 @@ class GLCMPyBase:
         assert len(i_flat) == len(j_flat), \
             f"The shapes for i {i.shape} != j {j.shape}."
 
-        glcm = cp.zeros((self.bin_to, self.bin_to), dtype=float)
+        glcm = np.zeros((self.bin_to, self.bin_to), dtype=float)
 
         # Populate the GLCM
         for i_, j_ in zip(i_flat, j_flat):
@@ -71,6 +71,4 @@ class GLCMPyBase:
                 for j in range(glcm.shape[1]):
                     correlation += glcm[i, j] * (i - mean) * (j - mean) / var
 
-        return cp.array(
-            [homogeneity, contrast, asm, mean, var, correlation, dissimilarity]
-        )
+        return [homogeneity, contrast, asm, mean, var, correlation, dissimilarity]

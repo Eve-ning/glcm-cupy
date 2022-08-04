@@ -192,7 +192,6 @@ extern "C" {{
     __global__ void glcmFeatureKernel0(
         const float* g,
         const int glcmSize,
-        const int noOfValues,
         const int noOfWindows,
         float* features)
     {{
@@ -229,7 +228,7 @@ extern "C" {{
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / (noOfValues * 2);
+        float p = g[tid];
 
         /**
         =====================================
@@ -261,7 +260,6 @@ extern "C" {{
     __global__ void glcmFeatureKernel1(
         const float* g,
         const int glcmSize,
-        const int noOfValues,
         const int noOfWindows,
         float* features)
     {{
@@ -283,7 +281,7 @@ extern "C" {{
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / (noOfValues * 2);
+        float p = g[tid];
 
         {VAR_FN if variance else ""}
     }}
@@ -291,7 +289,6 @@ extern "C" {{
     __global__ void glcmFeatureKernel2(
         const float* g,
         const int glcmSize,
-        const int noOfValues,
         const int noOfWindows,
         float* features)
     {{
@@ -316,7 +313,7 @@ extern "C" {{
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / (noOfValues * 2);
+        float p = g[tid];
 
         {CORRELATION_FN if correlation else ""}
     }}

@@ -322,11 +322,13 @@ class GLCMBase:
             grid=grid, block=(self.max_threads,),
             args=(self.ar_glcm,
                   self.bin_to,
-                  no_of_values,
                   no_of_windows,
                   self.ar_features,
                   True)
         )
+        self.ar_glcm /= self.ar_glcm.sum(
+            axis=(1, 2)
+        )[..., np.newaxis, np.newaxis]
         if self.do_stage(0): self.glcm_feature_kernel_0(**feature_args)
         if self.do_stage(1): self.glcm_feature_kernel_1(**feature_args)
         if self.do_stage(2): self.glcm_feature_kernel_2(**feature_args)

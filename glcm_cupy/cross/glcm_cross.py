@@ -141,9 +141,9 @@ class GLCMCross(GLCMBase):
 
         return cp.stack(glcm_chs, axis=2)
 
-
     def make_windows(self,
-                     im_chn: cp.ndarray) -> List[Tuple[cp.ndarray, cp.ndarray]]:
+                     im_chn: cp.ndarray) -> List[
+        Tuple[cp.ndarray, cp.ndarray]]:
         """ Convert a image dual channel np.ndarray, to GLCM IJ windows.
 
         Examples:

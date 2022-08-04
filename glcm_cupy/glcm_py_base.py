@@ -4,8 +4,6 @@ from typing import List
 import cupy as cp
 import numpy as np
 
-from glcm_cupy.conf import ndarray
-
 
 @dataclass
 class GLCMPyBase:
@@ -71,4 +69,5 @@ class GLCMPyBase:
                 for j in range(glcm.shape[1]):
                     correlation += glcm[i, j] * (i - mean) * (j - mean) / var
 
-        return [homogeneity, contrast, asm, mean, var, correlation, dissimilarity]
+        return [homogeneity, contrast, asm, mean, var, correlation,
+                dissimilarity]

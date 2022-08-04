@@ -95,13 +95,13 @@ class GLCMBase:
             )
 
         module = get_glcm_module(
-             homogeneity=Features.HOMOGENEITY in self.features,
-             contrast=Features.CONTRAST in self.features,
-             asm=Features.ASM in self.features,
-             mean=Features.MEAN in self.features,
-             variance=Features.VARIANCE in self.features,
-             correlation=Features.CORRELATION in self.features,
-             dissimilarity=Features.DISSIMILARITY in self.features
+            homogeneity=Features.HOMOGENEITY in self.features,
+            contrast=Features.CONTRAST in self.features,
+            asm=Features.ASM in self.features,
+            mean=Features.MEAN in self.features,
+            variance=Features.VARIANCE in self.features,
+            correlation=Features.CORRELATION in self.features,
+            dissimilarity=Features.DISSIMILARITY in self.features
         )
         self.glcm_create_kernel = module.get_function('glcmCreateKernel')
         self.glcm_feature_kernel_0 = module.get_function('glcmFeatureKernel0')
@@ -187,7 +187,8 @@ class GLCMBase:
         ...
 
     @abstractmethod
-    def make_windows(self, im_chn: cp.ndarray) -> List[Tuple[cp.ndarray, cp.ndarray]]:
+    def make_windows(self, im_chn: cp.ndarray) -> List[
+        Tuple[cp.ndarray, cp.ndarray]]:
         ...
 
     @abstractmethod

@@ -43,11 +43,8 @@ class GLCMPy(GLCMPyBase):
 
     def glcm_chn(self, ar: ndarray):
 
-        if isinstance(ar, cp.ndarray):
-            ar = (ar / self.bin_from * self.bin_to).astype(cp.uint8)
-        else:
-            ar = (ar / self.bin_from * self.bin_to).astype(np.uint8)
-        ar_w = view_as_windows(ar, (self.diameter, self.diameter))
+        ar = (ar / self.bin_from * self.bin_to).astype(cp.uint8)
+        ar_w = view_as_windows(ar.get(), (self.diameter, self.diameter))
 
         def flat(ar: ndarray):
             ar = ar.reshape((-1, self.diameter, self.diameter))
@@ -59,10 +56,7 @@ class GLCMPy(GLCMPyBase):
         ar_w_j_se = flat(ar_w[self.step * 2:, self.step * 2:])
         ar_w_j_e = flat(ar_w[self.step:-self.step, self.step * 2:])
 
-        if isinstance(ar, cp.ndarray):
-            feature_ar = cp.zeros((ar_w_i.shape[0], 4, NO_OF_FEATURES))
-        else:
-            feature_ar = np.zeros((ar_w_i.shape[0], 4, NO_OF_FEATURES))
+        feature_ar = cp.zeros((ar_w_i.shape[0], 4, NO_OF_FEATURES))
 
         for j_e, ar_w_j in enumerate(
             (ar_w_j_sw, ar_w_j_s, ar_w_j_se, ar_w_j_e)):
@@ -79,10 +73,11 @@ class GLCMPy(GLCMPyBase):
         return normalize_features(feature_ar, self.bin_to)
 
     def glcm_im(self, ar: ndarray):
-        if isinstance(ar, cp.ndarray):
-            return cp.stack([self.glcm_chn(ar[..., ch])
-                             for ch
-                             in range(ar.shape[-1])], axis=2)
-        return np.stack([self.glcm_chn(ar[..., ch])
+        was_numpy = False
+        if isinstance(ar, np.ndarray):
+            ar = cp.array(ar)
+            was_numpy = True
+        _ = cp.stack([self.glcm_chn(ar[..., ch])
                          for ch
                          in range(ar.shape[-1])], axis=2)
+        return _.get() if was_numpy else _

@@ -124,12 +124,7 @@ class GLCM(GLCMBase):
         Returns:
             The GLCM Array with shape (H, W, C, F)
         """
-        if isinstance(im, cp.ndarray):
-            return cp.stack([
-                self._from_channel(im[..., ch]) for ch in range(im.shape[-1])
-            ], axis=2)
-
-        return np.stack([
+        return cp.stack([
             self._from_channel(im[..., ch]) for ch in range(im.shape[-1])
         ], axis=2)
 

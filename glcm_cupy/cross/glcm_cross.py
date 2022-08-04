@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from itertools import combinations
+from math import prod
 from typing import Tuple, List, Set
 
 from skimage.util import view_as_windows as view_as_windows_np
@@ -102,11 +103,7 @@ class GLCMCross(GLCMBase):
     def glcm_cells(self, im: ndarray) -> float:
         """ Total number of GLCM cells to process """
         shape = self.glcm_shape(im[..., 0].shape)
-
-        if isinstance(shape, cp.ndarray):
-            return cp.prod(shape) * len(self.ch_combos(im))
-
-        return np.prod(shape) * len(self.ch_combos(im))
+        return prod(shape) * len(self.ch_combos(im))
 
     def _run_batch(self, im: ndarray):
         """ Batch running doesn't work on Cross as stacking channel interferes
@@ -200,27 +197,19 @@ class GLCMCross(GLCMBase):
                 f"- 2 * radius {self.radius} + 1 <= 0 was not satisfied."
             )
 
-        if isinstance(im_chn, cp.ndarray):
-            if USE_CUCIM:
-                i = view_as_windows_cp(im_chn[..., 0],
-                                       (self._diameter, self._diameter))
-                j = view_as_windows_cp(im_chn[..., 1],
-                                       (self._diameter, self._diameter))
-            else:
-                # This is ugly, but there is nothing we could do if cuCIM is
-                # not installed. It should not be a hard requirement.
-                i = cp.asarray(
-                    view_as_windows_np(im_chn[..., 0].get(),
-                                       (self._diameter, self._diameter)))
-                j = cp.asarray(
-                    view_as_windows_np(im_chn[..., 1].get(),
-                                       (self._diameter, self._diameter)))
+        if USE_CUCIM:
+            i = view_as_windows_cp(im_chn[..., 0],
+                                   (self._diameter, self._diameter))
+            j = view_as_windows_cp(im_chn[..., 1],
+                                   (self._diameter, self._diameter))
         else:
+            # This is ugly, but there is nothing we could do if cuCIM is
+            # not installed. It should not be a hard requirement.
             i = cp.asarray(
-                view_as_windows_np(im_chn[..., 0],
+                view_as_windows_np(im_chn[..., 0].get(),
                                    (self._diameter, self._diameter)))
             j = cp.asarray(
-                view_as_windows_np(im_chn[..., 1],
+                view_as_windows_np(im_chn[..., 1].get(),
                                    (self._diameter, self._diameter)))
 
         i = i.reshape((-1, *i.shape[-2:])) \

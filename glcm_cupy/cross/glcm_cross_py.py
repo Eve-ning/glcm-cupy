@@ -24,12 +24,9 @@ def glcm_cross_py_im(im: np.ndarray, bin_from: int, bin_to: int,
 class GLCMCrossPy(GLCMPyBase):
     ix_combos: List[Tuple[int, int]] = None
 
-    def glcm_chn(self, ar: ndarray):
+    def glcm_chn(self, ar: np.ndarray):
         # Convert to compatible types
-        if isinstance(ar, cp.ndarray):
-            ar = (ar / self.bin_from * self.bin_to).astype(cp.uint8)
-        else:
-            ar = (ar / self.bin_from * self.bin_to).astype(np.uint8)
+        ar = (ar / self.bin_from * self.bin_to).astype(cp.uint8)
 
         def flat(ar_: ndarray):
             ar_ = ar_.reshape((-1, self.diameter, self.diameter))
@@ -42,10 +39,7 @@ class GLCMCrossPy(GLCMPyBase):
             view_as_windows(ar[..., 1], (self.diameter, self.diameter))
         )
 
-        if isinstance(ar, cp.ndarray):
-            feature_ar = cp.zeros((ar_w_i.shape[0], NO_OF_FEATURES))
-        else:
-            feature_ar = np.zeros((ar_w_i.shape[0], NO_OF_FEATURES))
+        feature_ar = cp.zeros((ar_w_i.shape[0], NO_OF_FEATURES))
 
         for e, (i, j) in tqdm(enumerate(zip(ar_w_i, ar_w_j)),
                               total=ar_w_i.shape[0]):

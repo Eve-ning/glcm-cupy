@@ -129,13 +129,18 @@ class GLCMBase:
                 ([Batch], Height, Width, Channels, GLCM Features),
 
         """
+        was_numpy = False
+        if isinstance(im, np.ndarray):
+            im = cp.array(im)
+            was_numpy = True
         if im.ndim == 2:
             raise ValueError(
                 "Must be 3D. If ar.shape == (Height, Width), "
                 "use ar[...,np.newaxis] to add the channel dimension."
             )
         elif im.ndim == 4:
-            return self._run_batch(im)
+            _ = self._run_batch(im)
+            return _.get() if was_numpy else _
         elif im.ndim != 3:
             raise ValueError("Only 3D/4D images allowed.")
         self.progress = tqdm(total=self.glcm_cells(im),
@@ -145,7 +150,8 @@ class GLCMBase:
                              disable=not self.verbose)
 
         im = binner(im, self.bin_from, self.bin_to)
-        return self._from_im(im)
+        _ = self._from_im(im)
+        return _.get() if was_numpy else _
 
     def _run_batch(self, im: ndarray):
         """ Run as a batch instead of separately.
@@ -161,16 +167,10 @@ class GLCMBase:
         batches, *im_chn_shape, _ = im.shape
         glcm_shape = self.glcm_shape(im_chn_shape)
         batch_shape = (*glcm_shape, batches, -1, NO_OF_FEATURES)
-        if isinstance(im, cp.ndarray):
-            g = self.run(cp.concatenate(im, axis=-1))
-            r = g.reshape(batch_shape)
-            a = cp.moveaxis(r, 2, 0)
-            return a
-        else:
-            g = self.run(np.concatenate(im, axis=-1))
-            r = g.reshape(batch_shape)
-            a = np.moveaxis(r, 2, 0)
-            return a
+        g = self.run(cp.concatenate(im, axis=-1))
+        r = g.reshape(batch_shape)
+        a = cp.moveaxis(r, 2, 0)
+        return a
 
     @abstractmethod
     def _from_im(self, im: ndarray) -> ndarray:

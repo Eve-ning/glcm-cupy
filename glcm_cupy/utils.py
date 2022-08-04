@@ -51,6 +51,4 @@ def binner(im: ndarray, bin_from: int, bin_to: int) -> ndarray:
 
     """
     # Convert to compatible types
-    if isinstance(im, cp.ndarray):
-        return (im.astype(cp.float32) / bin_from * bin_to).astype(cp.uint8)
-    return (im.astype(np.float32) / bin_from * bin_to).astype(np.uint8)
+    return (im.astype(cp.float32) / bin_from * bin_to).astype(cp.uint8)

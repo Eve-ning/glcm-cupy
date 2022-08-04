@@ -103,5 +103,3 @@ def view_as_windows_cp(arr_in: cp.ndarray, window_shape, step=1):
 
     arr_out = as_strided(arr_in, shape=new_shape, strides=strides)
     return arr_out
-
->> >> >> > master

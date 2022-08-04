@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Tuple
 
+from cupy.lib.stride_tricks import as_strided
+
 from glcm_cupy.conf import *
 
 
@@ -38,7 +40,7 @@ def calc_grid_size(
     return b, b
 
 
-def binner(im: ndarray, bin_from: int, bin_to: int) -> ndarray:
+def binner(im: cp.ndarray, bin_from: int, bin_to: int) -> cp.ndarray:
     """ Bins an image from a certain bin to another
 
     Args:
@@ -51,6 +53,40 @@ def binner(im: ndarray, bin_from: int, bin_to: int) -> ndarray:
 
     """
     # Convert to compatible types
-    if isinstance(im, cp.ndarray):
-        return (im.astype(cp.float32) / bin_from * bin_to).astype(cp.uint8)
-    return (im.astype(np.float32) / bin_from * bin_to).astype(np.uint8)
+    return (im.astype(cp.float32) / bin_from * bin_to).astype(cp.uint8)
+
+
+def view_as_windows_cp(arr_in: cp.ndarray, window_shape, step=1):
+    """ Rolling window view of the input n-dimensional array.
+
+    Notes:
+        Adapted from ``skimage.util import view_as_windows``
+    """
+    ndim = arr_in.ndim
+    arr_shape = np.array(arr_in.shape)
+    window_shape = np.array(window_shape, dtype=arr_shape.dtype)
+
+    if step < 1:
+        raise ValueError("`step` must be >= 1")
+    step = (step,) * ndim
+
+    if ((arr_shape - window_shape) < 0).any():
+        raise ValueError("`window_shape` is too large")
+
+    if ((window_shape - 1) < 0).any():
+        raise ValueError("`window_shape` is too small")
+
+    # -- build rolling window view
+    slices = tuple(slice(None, None, st) for st in step)
+    window_strides = np.array(arr_in.strides)
+
+    indexing_strides = arr_in[slices].strides
+
+    win_indices_shape = (((np.array(arr_in.shape) - np.array(window_shape))
+                          // np.array(step)) + 1)
+
+    new_shape = tuple(list(win_indices_shape) + list(window_shape))
+    strides = tuple(list(indexing_strides) + list(window_strides))
+
+    arr_out = as_strided(arr_in, shape=new_shape, strides=strides)
+    return arr_out

@@ -4,8 +4,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Tuple, List, Set
 
-from line_profiler_pycharm import profile
-
 from glcm_cupy.utils import view_as_windows_cp
 
 try:
@@ -131,7 +129,6 @@ class GLCM(GLCMBase):
             self._from_channel(im[..., ch]) for ch in range(im.shape[-1])
         ], axis=2)
 
-    @profile
     def make_windows(self, im_chn: ndarray) -> List[Tuple[ndarray, ndarray]]:
         """ Convert a image channel np.ndarray, to GLCM IJ windows.
 

@@ -19,7 +19,7 @@ def glcm_py_im(ar: ndarray, bin_from: int, bin_to: int,
                   step=step).glcm_im(ar)
 
 
-def glcm_py_chn(ar: ndarray,
+def glcm_py_chn(ar: cp.ndarray,
                 bin_from: int,
                 bin_to: int,
                 radius: int = 2,
@@ -30,8 +30,8 @@ def glcm_py_chn(ar: ndarray,
                   step=step).glcm_chn(ar)
 
 
-def glcm_py_ij(i: ndarray,
-               j: ndarray,
+def glcm_py_ij(i: cp.ndarray,
+               j: cp.ndarray,
                bin_from: int, bin_to: int):
     return GLCMPy(bin_from=bin_from,
                   bin_to=bin_to).glcm_ij(i, j)
@@ -41,7 +41,7 @@ def glcm_py_ij(i: ndarray,
 class GLCMPy(GLCMPyBase):
     step: int = 1
 
-    def glcm_chn(self, ar: ndarray):
+    def glcm_chn(self, ar: cp.ndarray):
 
         ar = (ar / self.bin_from * self.bin_to).astype(cp.uint8)
         ar_w = sliding_window_view(ar, (self.diameter, self.diameter))

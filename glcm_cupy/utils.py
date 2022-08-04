@@ -40,7 +40,7 @@ def calc_grid_size(
     return b, b
 
 
-def binner(im: ndarray, bin_from: int, bin_to: int) -> ndarray:
+def binner(im: cp.ndarray, bin_from: int, bin_to: int) -> cp.ndarray:
     """ Bins an image from a certain bin to another
 
     Args:

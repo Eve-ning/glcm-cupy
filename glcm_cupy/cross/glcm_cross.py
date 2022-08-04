@@ -92,7 +92,7 @@ class GLCMCross(GLCMBase):
     """
     ix_combos: List[Tuple[int, int]] | None = None
 
-    def ch_combos(self, im: ndarray) -> List[ndarray]:
+    def ch_combos(self, im: cp.ndarray) -> List[cp.ndarray]:
         """ Get Image Channel Combinations """
         ix_combos = self.ix_combos
         if self.ix_combos is None:
@@ -100,12 +100,12 @@ class GLCMCross(GLCMBase):
             ix_combos = list(combinations(range(im.shape[-1]), 2))
         return [im[..., ix_combo] for ix_combo in ix_combos]
 
-    def glcm_cells(self, im: ndarray) -> float:
+    def glcm_cells(self, im: cp.ndarray) -> float:
         """ Total number of GLCM cells to process """
         shape = self.glcm_shape(im[..., 0].shape)
         return prod(shape) * len(self.ch_combos(im))
 
-    def _run_batch(self, im: ndarray):
+    def _run_batch(self, im: cp.ndarray):
         """ Batch running doesn't work on Cross as stacking channel interferes
             with the combinations.
 
@@ -116,7 +116,7 @@ class GLCMCross(GLCMBase):
         logging.warning("Batch Processing doesn't work for Cross GLCM. "
                         "Using for loop processing.")
         # TODO: Implement Batch Processing for Cross GLCM
-        return np.stack([self.run(b) for b in im])
+        return cp.stack([self.run(b) for b in im])
 
     def glcm_shape(self, im_chn_shape: tuple) -> Tuple[int, int]:
         """ Get per-channel shape after GLCM """
@@ -124,7 +124,7 @@ class GLCMCross(GLCMBase):
         return im_chn_shape[0] - 2 * self.radius, \
                im_chn_shape[1] - 2 * self.radius
 
-    def _from_im(self, im: ndarray) -> ndarray:
+    def _from_im(self, im: cp.ndarray) -> cp.ndarray:
         """ Generates the GLCM from a multichannel image
 
         Args:
@@ -139,13 +139,11 @@ class GLCMCross(GLCMBase):
             raise ValueError(f"Cross GLCM needs >= 2 channels to combine")
         glcm_chs = [self._from_channel(ch_combo) for ch_combo in ch_combos]
 
-        if isinstance(glcm_chs, cp.ndarray):
-            return cp.stack(glcm_chs, axis=2)
+        return cp.stack(glcm_chs, axis=2)
 
-        return np.stack(glcm_chs, axis=2)
 
     def make_windows(self,
-                     im_chn: ndarray) -> List[Tuple[ndarray, ndarray]]:
+                     im_chn: cp.ndarray) -> List[Tuple[cp.ndarray, cp.ndarray]]:
         """ Convert a image dual channel np.ndarray, to GLCM IJ windows.
 
         Examples:

@@ -113,7 +113,7 @@ class GLCMBase:
         return self.radius * 2 + 1
 
     @abstractmethod
-    def glcm_cells(self, im: ndarray) -> float:
+    def glcm_cells(self, im: cp.ndarray) -> float:
         """ Total number of GLCM Cells"""
         ...
 
@@ -173,7 +173,7 @@ class GLCMBase:
         return a
 
     @abstractmethod
-    def _from_im(self, im: ndarray) -> ndarray:
+    def _from_im(self, im: cp.ndarray) -> ndarray:
         """ Generates the GLCM from a multi band image
 
         Args:
@@ -187,14 +187,14 @@ class GLCMBase:
         ...
 
     @abstractmethod
-    def make_windows(self, im_chn: ndarray) -> List[Tuple[ndarray, ndarray]]:
+    def make_windows(self, im_chn: cp.ndarray) -> List[Tuple[cp.ndarray, cp.ndarray]]:
         ...
 
     @abstractmethod
-    def glcm_shape(self, im_chn_shape: ndarray) -> Tuple:
+    def glcm_shape(self, im_chn_shape: cp.ndarray) -> Tuple:
         ...
 
-    def _from_channel(self, im_chn: ndarray) -> ndarray:
+    def _from_channel(self, im_chn: cp.ndarray) -> cp.ndarray:
         """ Generates the GLCM from an image channel
 
         Returns:
@@ -202,29 +202,19 @@ class GLCMBase:
         """
 
         glcm_h, glcm_w, *_ = self.glcm_shape(im_chn.shape)
+        glcm_features = [
+            self.glcm_window_ij(i, j)
+                .reshape(glcm_h, glcm_w, NO_OF_FEATURES)
+            for i, j in self.make_windows(im_chn)
+        ]
 
-        if isinstance(im_chn, cp.ndarray):
-            glcm_features = [
-                self.glcm_window_ij(i, j)
-                    .reshape(glcm_h, glcm_w, NO_OF_FEATURES)
-                for i, j in self.make_windows(im_chn)
-            ]
-
-            ar = cp.stack(glcm_features).mean(axis=0)
-        else:
-            glcm_features = [
-                self.glcm_window_ij(i, j)
-                    .reshape(glcm_h, glcm_w, NO_OF_FEATURES)
-                    .get() for i, j in self.make_windows(im_chn)
-            ]
-
-            ar = np.stack(glcm_features).mean(axis=0)
+        ar = cp.stack(glcm_features).mean(axis=0)
 
         return normalize_features(ar, self.bin_to) \
             if self.normalized_features else ar
 
-    def glcm_window_ij(self, windows_i: ndarray,
-                       windows_j: ndarray):
+    def glcm_window_ij(self, windows_i: cp.ndarray,
+                       windows_j: cp.ndarray):
         windows_count = windows_i.shape[0]
         glcm_features = cp.zeros(
             (windows_count, NO_OF_FEATURES),
@@ -257,8 +247,8 @@ class GLCMBase:
         return glcm_features
 
     def glcm_ij(self,
-                i: ndarray,
-                j: ndarray):
+                i: cp.ndarray,
+                j: cp.ndarray):
         """ GLCM from I J
 
         Examples:
@@ -302,11 +292,10 @@ class GLCMBase:
         no_of_windows = i.shape[0]
         no_of_values = self._diameter ** 2
 
-        if i.dtype != np.uint8 or j.dtype != np.uint8 or \
-            i.dtype != cp.uint8 or j.dtype != cp.uint8:
+        if i.dtype != cp.uint8 or j.dtype != cp.uint8:
             raise ValueError(
-                f"Image dtype must be np.uint8 or cp.uint8,"
-                f" i: {i.dtype} j: {j.dtype}"
+                f"Image dtype must be cp.uint8 "
+                f"i: {i.dtype} j: {j.dtype}"
             )
 
         grid = calc_grid_size(no_of_windows,

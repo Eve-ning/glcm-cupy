@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from math import prod
 from typing import Tuple, List, Set
 
 from glcm_cupy.utils import view_as_windows_cp
@@ -104,9 +105,9 @@ class GLCM(GLCMBase):
         if self.step_size <= 0:
             raise ValueError(f"Step Size {step_size} should be >= 1")
 
-    def glcm_cells(self, im: ndarray) -> int:
+    def glcm_cells(self, im: cp.ndarray) -> int:
         """ Total number of GLCM cells to process """
-        return np.prod(self.glcm_shape(im[..., 0].shape)) * \
+        return prod(self.glcm_shape(im[..., 0].shape)) * \
                len(self.directions) * \
                im.shape[-1]
 
@@ -116,7 +117,7 @@ class GLCM(GLCMBase):
         return (im_chn_shape[0] - 2 * self.step_size - 2 * self.radius,
                 im_chn_shape[1] - 2 * self.step_size - 2 * self.radius)
 
-    def _from_im(self, im: ndarray) -> ndarray:
+    def _from_im(self, im: cp.ndarray) -> cp.ndarray:
         """ Generates the GLCM from a multichannel image
 
         Args:
@@ -129,7 +130,7 @@ class GLCM(GLCMBase):
             self._from_channel(im[..., ch]) for ch in range(im.shape[-1])
         ], axis=2)
 
-    def make_windows(self, im_chn: cp.ndarray) -> List[Tuple[ndarray, ndarray]]:
+    def make_windows(self, im_chn: cp.ndarray) -> List[Tuple[cp.ndarray, cp.ndarray]]:
         """ Convert a image channel np.ndarray, to GLCM IJ windows.
 
         Examples:
@@ -196,7 +197,7 @@ class GLCM(GLCMBase):
         else:
             ij = view_as_windows_cp(im_chn, (self._diameter, self._diameter))
 
-        ijs: List[Tuple[ndarray, ndarray]] = []
+        ijs: List[Tuple[cp.ndarray, cp.ndarray]] = []
 
         for direction in self.directions:
             i, j = self.pair_windows(ij, direction=direction)

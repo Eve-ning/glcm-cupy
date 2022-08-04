@@ -28,7 +28,7 @@ class GLCMCrossPy(GLCMPyBase):
         # Convert to compatible types
         ar = (ar / self.bin_from * self.bin_to).astype(np.uint8)
 
-        def flat(ar_: ndarray):
+        def flat(ar_: cp.ndarray):
             ar_ = ar_.reshape((-1, self.diameter, self.diameter))
             return ar_.reshape((ar_.shape[0], -1))
 

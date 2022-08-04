@@ -17,7 +17,7 @@ class GLCMPyBase:
     def diameter(self) -> int:
         return self.radius * 2 + 1
 
-    def glcm_ij(self, i: ndarray, j: ndarray) -> List[float]:
+    def glcm_ij(self, i: cp.ndarray, j: cp.ndarray) -> List[float]:
         """ Get GLCM features using Python
 
         Notes:

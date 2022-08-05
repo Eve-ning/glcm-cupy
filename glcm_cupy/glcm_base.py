@@ -121,7 +121,7 @@ class GLCMBase:
     @property
     def nan_replacement(self):
         """ Replacement Value for NaN """
-        return self.bin_from
+        return self.bin_to
 
     def run(self, im: ndarray):
         """ Executes running GLCM. Returns the GLCM Feature array

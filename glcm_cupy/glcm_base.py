@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import Tuple, List, Set
+from typing import Tuple, List, Sequence
 
 from tqdm import tqdm
 
@@ -53,13 +53,13 @@ class GLCMBase:
     bin_to: int = 256
     max_partition_size: int = MAX_PARTITION_SIZE
     max_threads: int = MAX_THREADS
-    features: Set[int] = (Features.HOMOGENEITY,
-                          Features.CONTRAST,
-                          Features.ASM,
-                          Features.MEAN,
-                          Features.VARIANCE,
-                          Features.CORRELATION,
-                          Features.DISSIMILARITY)
+    features: Sequence[int] = (Features.HOMOGENEITY,
+                               Features.CONTRAST,
+                               Features.ASM,
+                               Features.MEAN,
+                               Features.VARIANCE,
+                               Features.CORRELATION,
+                               Features.DISSIMILARITY)
     normalized_features: bool = True
     verbose: bool = True
 

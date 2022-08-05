@@ -121,7 +121,7 @@ class GLCMBase:
     @property
     def nan_replacement(self):
         """ Replacement Value for NaN """
-        return self.bin_from
+        return self.bin_to
 
     def run(self, im: ndarray):
         """ Executes running GLCM. Returns the GLCM Feature array
@@ -340,8 +340,8 @@ class GLCMBase:
                   self.ar_features,
                   True)
         )
-        self.ar_glcm /= self.ar_glcm.sum(
-            axis=(1, 2)
+        self.ar_glcm /= np.nansum(
+            self.ar_glcm, axis=(1, 2)
         )[..., np.newaxis, np.newaxis]
         if self.do_stage(0): self.glcm_feature_kernel_0(**feature_args)
         if self.do_stage(1): self.glcm_feature_kernel_1(**feature_args)

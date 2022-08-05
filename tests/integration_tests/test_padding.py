@@ -56,10 +56,3 @@ def test_signature_match():
     fn = dict(inspect.signature(glcm).parameters)
     del fn['im']
     assert cls == fn
-
-def test_padding():
-    """ Tests if class & function signatures match """
-    cls = dict(inspect.signature(GLCM).parameters)
-    fn = dict(inspect.signature(glcm).parameters)
-    del fn['im']
-    assert cls == fn

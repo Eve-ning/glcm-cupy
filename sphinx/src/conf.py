@@ -31,8 +31,7 @@ release = '0.1.9'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx_rtd_theme', 'myst_parser',
-    'sphinx_toolbox.sidebar_links','sphinx_toolbox.github']
+extensions = ['sphinx_rtd_theme', 'myst_parser']
 
 # Sidebar Links
 github_username = 'Eve-ning'

@@ -89,7 +89,7 @@
   {
    "cell_type": "markdown",
    "source": [
-    "Notice that the dimensions reduces by $2 \\times (\\text{Step Size} + \\text{Radius})$\n",
+    "Notice that the dimensions reduces by `2 * (step_size + radius)`\n",
     "\n",
     "We can counter this by adding `np.nan` around the edges of the image."
    ],

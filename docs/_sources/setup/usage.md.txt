@@ -68,8 +68,6 @@ F: \text{Features}
 
 ```{seealso}
 
-- {ref}`Selectively Generate a GLCM Feature <select_feature>`:
-- {ref}`Get a GLCM Feature <get_feature>`:
-- {ref}`Process many same-sized images at once <batch_processing>`:
+Learn how to use `glcm-cupy` from the examples in the sidebar on the left!
 ```
 

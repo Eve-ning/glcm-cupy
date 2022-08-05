@@ -1,6 +1,5 @@
 # GLCM Implemented in CuPy
 
-
 ```{toctree}
 ---
 maxdepth: 1
@@ -9,17 +8,6 @@ caption: Setup
 
 Installation <setup/installation>
 Usage <setup/usage>
-```
-
-```{toctree}
----
-maxdepth: 1
-caption: Examples
----
-
-Transformation <examples/image_transformation>
-Transformation w/ Padding <examples/image_padding>
-Transformation w/ Missing Values <examples/image_hole>
 ```
 
 ```{toctree}
@@ -37,15 +25,16 @@ Cross GLCM <glcm_cross>
 Batch Processing <batch_processing>
 ```
 
+```{toctree}
+---
+maxdepth: 1
+caption: Examples
+---
 
-## Read More
-
-View the articles on the left side-bar to learn more!
-```{note}
-
-[GLCM Texture: A Tutorial v. 3.0 March 2017](https://prism.ucalgary.ca/handle/1880/51900)
+Transformation <examples/image_transformation>
+Transformation w/ Padding <examples/image_padding>
+Transformation w/ Missing Values <examples/image_hole>
 ```
-
 
 ```{toctree}
 ---
@@ -56,3 +45,13 @@ caption: Development
 Acknowledgements <acknowledgements>
 Change Log <changelog>
 ```
+
+## Read More
+
+View the articles on the left side-bar to learn more!
+
+```{note}
+
+[GLCM Texture: A Tutorial v. 3.0 March 2017](https://prism.ucalgary.ca/handle/1880/51900)
+```
+

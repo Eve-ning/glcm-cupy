@@ -8,6 +8,7 @@ GLCM Implemented in CuPy
     glcm_cross
     features
     binning
+    nan_handling
     direction
     radius_step_size
     batch_processing

@@ -227,11 +227,11 @@ extern "C" {{
         const int glcmArea = glcmSize * glcmSize;
         const int wid = tid / glcmArea;
         if (wid >= noOfWindows) return;
+        float p = g[tid];
+        if (p == 0) return;
 
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
-
-        float p = g[tid];
 
         /**
         =====================================
@@ -276,15 +276,16 @@ extern "C" {{
 
         int blockId = blockIdx.y * gridDim.x + blockIdx.x;
         int tid = blockId * blockDim.x + threadIdx.x;
-
+        
         const int glcmArea = glcmSize * glcmSize;
         const int wid = tid / glcmArea;
         if (wid >= noOfWindows) return;
+        float p = g[tid];
+        if (p == 0) return;
 
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = g[tid];
 
         {VAR_FN if variance else ""}
     }}
@@ -309,14 +310,14 @@ extern "C" {{
         const int glcmArea = glcmSize * glcmSize;
         const int wid = tid / glcmArea;
         if (wid >= noOfWindows) return;
+        float p = g[tid];
+        if (p == 0) return;
 
         // As we invert Variance, they should never be 0.
         if (features[VAR + wid * NO_OF_FEATURES] == 0) return;
 
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
-
-        float p = g[tid];
 
         {CORRELATION_FN if correlation else ""}
     }}

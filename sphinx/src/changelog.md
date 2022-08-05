@@ -22,7 +22,7 @@
     - Reduces duplicate code for handling NumPy and CuPy arrays conditionally.
 - [Merged PR 36](https://github.com/Eve-ning/glcm-cupy/pull/36)
     - Implement NaN Handling by ignoring contribution to GLCM
-  
+
 ## 1.9
 
 - [Merged PR 10](https://github.com/Eve-ning/glcm-cupy/pull/10)
@@ -40,6 +40,9 @@
     - Fix `test_from_2d_image` failing due to missing 3rd dimension
     - Remove `test_image_tiff` as it's redundant
     - Fix reference `GLCM._binner` to `binner` in `utils`
+- [Merged PR 41](https://github.com/Eve-ning/glcm-cupy/pull/41)
+    - Resolved issue where NA replacement value was incorrectly set to `bin_from`
+    - Resolved issue where NA summing used `.sum` instead of `np.nansum`
 
 ## 1.8
 

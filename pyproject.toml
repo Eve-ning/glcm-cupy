@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "glcm_cupy"
-version = "0.1.9"
+version = "0.1.10"
 description = "Binned GLCM 5 Features implemented in CuPy"
 authors = ["Evening"]
 license = "MIT"

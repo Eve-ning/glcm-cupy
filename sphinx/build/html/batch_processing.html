@@ -24,6 +24,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -38,7 +39,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Acknowledgements" href="acknowledgements.html" />
-    <link rel="prev" title="Radius &amp; Step Size" href="radius_step_size.html" /> 
+    <link rel="prev" title="Cross GLCM" href="glcm_cross.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,19 +83,23 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Feature Indexing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="direction.html">Directions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="direction.html">Direction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nan_handling.html">NaN Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Batch Processing</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#glcmcross">GLCMCross</a></li>
 </ul>
 </li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Change Log</a></li>
 </ul>
 
             
@@ -146,7 +151,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/batch_processing.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/batch_processing.md.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -160,11 +165,14 @@
            <div itemprop="articleBody">
             
   <div class="section" id="batch-processing">
-<h1>Batch Processing<a class="headerlink" href="#batch-processing" title="Permalink to this headline">¶</a></h1>
-<p id="id1"><em>Note: It’s not faster than a loop on ``GLCMCross``</em></p>
-<p>If you have multiple images of the <strong>SAME SIZE</strong>, you may opt to run them concurrently.</p>
-<p>This is slightly faster on <code class="docutils literal notranslate"><span class="pre">GLCM</span></code>, it will start on the next image while the current is still being processed.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span>
+<h1>Batch Processing<a class="headerlink" href="#batch-processing" title="Permalink to this heading">¶</a></h1>
+<div class="admonition note" id="id1">
+<p class="admonition-title">Note</p>
+<p>It’s not faster than a loop with <code class="docutils literal notranslate"><span class="pre">GLCMCross</span></code></p>
+</div>
+<p>For multiple images of the <strong>SAME SIZE</strong>, you may run them concurrently.</p>
+<p>This is slightly faster on <code class="docutils literal notranslate"><span class="pre">GLCM</span></code> as it will start on the next image while the current is still being processed.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">cv2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ar0</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s2">&quot;image_0.jpg&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ar1</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s2">&quot;image_1.jpg&quot;</span><span class="p">)</span>
@@ -178,11 +186,14 @@
 </pre></div>
 </div>
 <p>The dimensions here are <code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">height,</span> <span class="pre">width,</span> <span class="pre">channel,</span> <span class="pre">features)</span></code>.</p>
-<p>So, to retrieve the 1st image’s glcm, <cite>g[0]</cite></p>
+<p>So, to retrieve the 1st image’s glcm, <code class="docutils literal notranslate"><span class="pre">g[0]</span></code></p>
 <div class="section" id="glcmcross">
-<h2>GLCMCross<a class="headerlink" href="#glcmcross" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">GLCMCross</span></code> does not benefit in speed, however it may be simpler in syntax.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCMCross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">ar0</span><span class="p">,</span> <span class="n">ar1</span><span class="p">]))</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
+<h2>GLCMCross<a class="headerlink" href="#glcmcross" title="Permalink to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It’s not faster than a loop with <code class="docutils literal notranslate"><span class="pre">GLCMCross</span></code>,  however it may be simpler in syntax.</p>
+</div>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCMCross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">ar0</span><span class="p">,</span> <span class="n">ar1</span><span class="p">]))</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">shape</span>
 <span class="go">(2, 1074, 1914, 3, 7)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">g0</span><span class="p">,</span> <span class="n">g1</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">g</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -204,7 +215,7 @@
         <a href="acknowledgements.html" class="btn btn-neutral float-right" title="Acknowledgements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="radius_step_size.html" class="btn btn-neutral float-left" title="Radius &amp; Step Size" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="glcm_cross.html" class="btn btn-neutral float-left" title="Cross GLCM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

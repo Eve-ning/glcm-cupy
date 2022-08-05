@@ -1,4 +1,7 @@
-# 📖[Wiki](https://eve-ning.github.io/glcm-cupy/)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/glcm-cupy?style=for-the-badge)
+![PyPI](https://img.shields.io/pypi/v/glcm-cupy?style=for-the-badge)
+![PyPI - License](https://img.shields.io/pypi/l/glcm-cupy?style=for-the-badge)
+# 📖[Read The Wiki](https://eve-ning.github.io/glcm-cupy/)
 
 # GLCM Binned 5-Features on CuPy
 
@@ -49,7 +52,7 @@ This supports **RAPIDS** `cucim`.
 (1080, 1920, 3)
 >>> g = GLCM(...).run(ar)
 >>> g.shape
-(1074, 1914, 3, 8)
+(1074, 1914, 3, 7)
 ```
 
 The last dimension of `g` is the GLCM Features.
@@ -57,8 +60,8 @@ The last dimension of `g` is the GLCM Features.
 To retrieve a specific GLCM Feature:
 
 ```pycon
->>> from glcm_cupy import CONTRAST
->>> g[..., CONTRAST].shape
+>>> from glcm_cupy import Features
+>>> g[..., Features.CONTRAST].shape
 (1074, 1914, 3)
 ```
 

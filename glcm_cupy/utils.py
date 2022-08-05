@@ -56,6 +56,19 @@ def binner(im: cp.ndarray, bin_from: int, bin_to: int) -> cp.ndarray:
     return (im.astype(cp.float32) / bin_from * bin_to).astype(cp.uint8)
 
 
+def nan_to_num(im: ndarray, nan: int) -> ndarray:
+    """ Converts nan to another value
+
+    Args:
+        im: Image as np.ndarray or cp.ndarray
+        nan: Target value
+
+    """
+    if isinstance(im, cp.ndarray):
+        return cp.nan_to_num(im, copy=False, nan=nan)
+    return np.nan_to_num(im, copy=False, nan=nan)
+
+
 def view_as_windows_cp(arr_in: cp.ndarray, window_shape, step=1):
     """ Rolling window view of the input n-dimensional array.
 

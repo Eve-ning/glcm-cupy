@@ -9,7 +9,8 @@ from tqdm import tqdm
 
 from glcm_cupy.conf import *
 from glcm_cupy.kernel import get_glcm_module
-from glcm_cupy.utils import calc_grid_size, normalize_features, binner
+from glcm_cupy.utils import calc_grid_size, normalize_features, binner, \
+    nan_to_num
 
 FEATURES = Features.HOMOGENEITY, \
            Features.CONTRAST, \
@@ -86,7 +87,7 @@ class GLCMBase:
             dtype=cp.float32
         )
         if self.radius < 0:
-            raise ValueError(f"Radius {self.radius} should be > 0)")
+            raise ValueError(f"Radius {self.radius} should be >= 0)")
 
         if self.bin_to not in range(2, MAX_VALUE_SUPPORTED + 1):
             raise ValueError(
@@ -117,6 +118,11 @@ class GLCMBase:
         """ Total number of GLCM Cells"""
         ...
 
+    @property
+    def nan_replacement(self):
+        """ Replacement Value for NaN """
+        return self.bin_from
+
     def run(self, im: ndarray):
         """ Executes running GLCM. Returns the GLCM Feature array
 
@@ -133,6 +139,12 @@ class GLCMBase:
         if isinstance(im, np.ndarray):
             im = cp.array(im)
             was_numpy = True
+
+        if cp.nanmax(im) >= self.bin_from:
+            raise ValueError(
+                f"Found bad value ({cp.nanmax(im)}) >= bins {self.bin_from}."
+            )
+
         if im.ndim == 2:
             raise ValueError(
                 "Must be 3D. If ar.shape == (Height, Width), "
@@ -149,6 +161,9 @@ class GLCMBase:
                              unit_scale=True,
                              disable=not self.verbose)
 
+        # NaNs are replaced with the special bin_from value as uint doesn't
+        # support NaN.
+        im = nan_to_num(im, self.nan_replacement)
         im = binner(im, self.bin_from, self.bin_to)
         _ = self._from_im(im)
         return _.get() if was_numpy else _
@@ -311,6 +326,7 @@ class GLCMBase:
                 self.bin_to,
                 no_of_values,
                 no_of_windows,
+                self.nan_replacement,
                 self.ar_glcm,
                 self.ar_features
             )
@@ -320,11 +336,13 @@ class GLCMBase:
             grid=grid, block=(self.max_threads,),
             args=(self.ar_glcm,
                   self.bin_to,
-                  no_of_values,
                   no_of_windows,
                   self.ar_features,
                   True)
         )
+        self.ar_glcm /= self.ar_glcm.sum(
+            axis=(1, 2)
+        )[..., np.newaxis, np.newaxis]
         if self.do_stage(0): self.glcm_feature_kernel_0(**feature_args)
         if self.do_stage(1): self.glcm_feature_kernel_1(**feature_args)
         if self.do_stage(2): self.glcm_feature_kernel_2(**feature_args)

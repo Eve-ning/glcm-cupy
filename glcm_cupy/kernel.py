@@ -83,6 +83,7 @@ extern "C" {{
         const int glcmSize,
         const int noOfValues,
         const int noOfWindows,
+        const int nanReplacementValue,
         float* g,
         float* features)
     {{
@@ -119,6 +120,8 @@ extern "C" {{
         noOfValues = Number of values per window. In the above, it's 3 x 3 = 9
 
         noOfWindows = Number of windows in total. In the above, it's 4 x 2 = 8
+        
+        nanReplacementValue = Value substitute for NaN.
 
         g = Empty initialized GLCM array. Shape of (glcmSize, glcmSize, noOfWindows)
 
@@ -170,7 +173,9 @@ extern "C" {{
         if (tid < noOfValues * noOfWindows)
         {{
             unsigned char row = windows_i[tid];
+            if (row == nanReplacementValue) return; 
             unsigned char col = windows_j[tid];
+            if (col == nanReplacementValue) return;
             // Remember that the shape of GLCM is (glcmSize, glcmSize, noOfWindows)
             atomicAdd(&(
                 g[
@@ -190,7 +195,6 @@ extern "C" {{
     __global__ void glcmFeatureKernel0(
         const float* g,
         const int glcmSize,
-        const int noOfValues,
         const int noOfWindows,
         float* features)
     {{
@@ -227,7 +231,7 @@ extern "C" {{
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / (noOfValues * 2);
+        float p = g[tid];
 
         /**
         =====================================
@@ -259,7 +263,6 @@ extern "C" {{
     __global__ void glcmFeatureKernel1(
         const float* g,
         const int glcmSize,
-        const int noOfValues,
         const int noOfWindows,
         float* features)
     {{
@@ -281,7 +284,7 @@ extern "C" {{
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / (noOfValues * 2);
+        float p = g[tid];
 
         {VAR_FN if variance else ""}
     }}
@@ -289,7 +292,6 @@ extern "C" {{
     __global__ void glcmFeatureKernel2(
         const float* g,
         const int glcmSize,
-        const int noOfValues,
         const int noOfWindows,
         float* features)
     {{
@@ -314,7 +316,7 @@ extern "C" {{
         const float i = (float)((tid % glcmArea) / glcmSize);
         const float j = (float)((tid % glcmArea) % glcmSize);
 
-        float p = (float)(g[tid]) / (noOfValues * 2);
+        float p = g[tid];
 
         {CORRELATION_FN if correlation else ""}
     }}

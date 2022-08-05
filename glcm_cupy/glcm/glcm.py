@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from math import prod
-from typing import Tuple, List, Set
+from typing import Tuple, List, Sequence
 
 from glcm_cupy.utils import view_as_windows_cp
 
@@ -32,19 +32,19 @@ def glcm(
     radius: int = 2,
     bin_from: int = 256,
     bin_to: int = 256,
-    directions: List[Direction] = (Direction.EAST,
-                                   Direction.SOUTH_EAST,
-                                   Direction.SOUTH,
-                                   Direction.SOUTH_WEST),
+    directions: Sequence[Direction] = (Direction.EAST,
+                                       Direction.SOUTH_EAST,
+                                       Direction.SOUTH,
+                                       Direction.SOUTH_WEST),
     max_partition_size: int = MAX_PARTITION_SIZE,
     max_threads: int = MAX_THREADS,
-    features: Set[int] = (Features.HOMOGENEITY,
-                          Features.CONTRAST,
-                          Features.ASM,
-                          Features.MEAN,
-                          Features.VARIANCE,
-                          Features.CORRELATION,
-                          Features.DISSIMILARITY),
+    features: Sequence[int] = (Features.HOMOGENEITY,
+                               Features.CONTRAST,
+                               Features.ASM,
+                               Features.MEAN,
+                               Features.VARIANCE,
+                               Features.CORRELATION,
+                               Features.DISSIMILARITY),
     normalized_features: bool = True,
     verbose: bool = True
 ) -> ndarray:
@@ -93,7 +93,7 @@ def glcm(
 @dataclass
 class GLCM(GLCMBase):
     step_size: int = 1
-    directions: List[Direction] = (
+    directions: Sequence[Direction] = (
         Direction.EAST,
         Direction.SOUTH_EAST,
         Direction.SOUTH,

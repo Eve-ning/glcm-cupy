@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from itertools import combinations
 from math import prod
-from typing import Tuple, List, Set
+from typing import Tuple, List, Sequence
 
 from skimage.util import view_as_windows
 
@@ -28,16 +28,16 @@ def glcm_cross(
     max_partition_size: int = MAX_PARTITION_SIZE,
     max_threads: int = MAX_THREADS,
     normalized_features: bool = True,
-    features: Set[int] = (Features.HOMOGENEITY,
-                          Features.CONTRAST,
-                          Features.ASM,
-                          Features.MEAN,
-                          Features.VARIANCE,
-                          Features.CORRELATION,
-                          Features.DISSIMILARITY,
-                          ),
+    features: Sequence[int] = (Features.HOMOGENEITY,
+                               Features.CONTRAST,
+                               Features.ASM,
+                               Features.MEAN,
+                               Features.VARIANCE,
+                               Features.CORRELATION,
+                               Features.DISSIMILARITY,
+                               ),
     verbose: bool = True,
-    ix_combos: List[Tuple[int, int]] | None = None
+    ix_combos: Sequence[Tuple[int, int]] | None = None
 ) -> ndarray:
     """ Runs the Cross GLCM algorithm
 
@@ -91,7 +91,7 @@ class GLCMCross(GLCMBase):
         ix_combos: Set of combinations to Cross with. If None, then all.
             E.g. ix_combos = [(0, 1), (0, 2), ..., (2, 3), (3, 3)]
     """
-    ix_combos: List[Tuple[int, int]] | None = None
+    ix_combos: Sequence[Tuple[int, int]] | None = None
 
     def ch_combos(self, im: cp.ndarray) -> List[cp.ndarray]:
         """ Get Image Channel Combinations """

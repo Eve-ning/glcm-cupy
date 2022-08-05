@@ -36,7 +36,9 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Radius &amp; Step Size" href="radius_step_size.html" />
+    <link rel="prev" title="Binning" href="binning.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -80,16 +82,21 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Feature Indexing</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="direction.html">GLCM Directions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="direction.html">Direction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">NaN Handling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#padding">Padding</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Change Log</a></li>
 </ul>
 
             
@@ -141,7 +148,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/nan_handling.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/nan_handling.md.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -159,10 +166,11 @@
 <p>NaN Values, <code class="docutils literal notranslate"><span class="pre">np.nan</span></code>, <code class="docutils literal notranslate"><span class="pre">cp.nan</span></code>, are ignored. This means, they are <strong>skipped</strong> when populating GLCM.</p>
 <p>This creates a <strong>Partial GLCM</strong></p>
 <p>Take for example a 4 x 4 image with 3 x 3 windows</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># # # #  Window  # # #     1 2 3  Pairs  (#, 1), (#, 2), (#, 3) Filter (1, 6)</span>
-<span class="c1"># 1 2 3   ---&gt;   # 1 2  &amp;  5 6 7   ---&gt;  (#, 5), (1, 6), (2, 7)  ---&gt;  (2, 7)</span>
-<span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">7</span>          <span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span>     <span class="mi">9</span> <span class="c1"># #         (4, 9), (5, #), (6, #)        (4, 9)</span>
-<span class="mi">8</span> <span class="mi">9</span> <span class="c1"># #</span>
+<p>.. code-block::</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span># # # #  Window  # # #     1 2 3  Pairs  (#, 1), (#, 2), (#, 3) Filter (1, 6)
+# 1 2 3   ---&gt;   # 1 2  &amp;  5 6 7   ---&gt;  (#, 5), (1, 6), (2, 7)  ---&gt;  (2, 7)
+4 5 6 7          4 5 6     9 # #         (4, 9), (5, #), (6, #)        (4, 9)
+8 9 # #
 </pre></div>
 </div>
 <p>Thus, we will have a probability GLCM of 3 1/3 cells.</p>
@@ -178,6 +186,15 @@ at the borders.</p>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="radius_step_size.html" class="btn btn-neutral float-right" title="Radius &amp; Step Size" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="binning.html" class="btn btn-neutral float-left" title="Binning" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

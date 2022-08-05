@@ -29,18 +29,22 @@ def test_glcm_normalize(ar):
     [15, ]
 )
 @pytest.mark.parametrize(
-    "bins",
+    "bin_from",
+    [4, 16]
+)
+@pytest.mark.parametrize(
+    "bin_to",
     [4, 16]
 )
 @pytest.mark.parametrize(
     "radius",
     [1, 2, 4]
 )
-def test_glcm(size, bins, radius):
-    ar = np.random.randint(0, bins, [size, size, 1])
-    g = GLCM(radius=radius, bin_from=bins, bin_to=bins).run(ar)
-    g_fn = glcm(ar, radius=radius, bin_from=bins, bin_to=bins)
-    expected = glcm_py_im(ar, radius=radius, bin_from=bins, bin_to=bins)
+def test_glcm(size, bin_from, bin_to, radius):
+    ar = np.random.randint(0, bin_from, [size, size, 1])
+    g = GLCM(radius=radius, bin_from=bin_from, bin_to=bin_to).run(ar)
+    g_fn = glcm(ar, radius=radius, bin_from=bin_from, bin_to=bin_to)
+    expected = glcm_py_im(ar, radius=radius, bin_from=bin_from, bin_to=bin_to)
     assert g == pytest.approx(expected, abs=0.001)
     assert g_fn == pytest.approx(expected, abs=0.001)
 

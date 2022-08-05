@@ -26,6 +26,11 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -36,9 +41,11 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/mystnb.css" type="text/css" />
+  <link rel="stylesheet" href="_static/togglebutton.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="GLCM Feature Indexing" href="features.html" /> 
+    <link rel="next" title="Installation" href="setup/installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,7 +89,18 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Setup</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="setup/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup/usage.html">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/image_transformation.html">Transformation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/image_padding.html">Transformation w/ Padding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/image_hole.html">Transformation w/ Missing Values</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="direction.html">Directions</a></li>
@@ -163,6 +181,21 @@
   <div class="section" id="glcm-implemented-in-cupy">
 <h1>GLCM Implemented in CuPy<a class="headerlink" href="#glcm-implemented-in-cupy" title="Permalink to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Setup</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="setup/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup/usage.html">Usage</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/image_transformation.html">Transformation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/image_padding.html">Transformation w/ Padding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/image_hole.html">Transformation w/ Missing Values</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
@@ -173,65 +206,6 @@
 <li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
 </ul>
-</div>
-<div class="section" id="quick-start">
-<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h2>
-<p><strong>Python &gt;= 3.7</strong></p>
-<p>First, you need to install this</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install glcm-cupy
-</pre></div>
-</div>
-<p>Then, you need to install <strong>CuPy</strong> version corresponding to your CUDA version</p>
-<p>I recommend using <code class="docutils literal notranslate"><span class="pre">conda-forge</span></code> as it worked for me :)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>conda install -c conda-forge cupy <span class="nv">cudatoolkit</span><span class="o">=</span>&lt;your_CUDA_version&gt;
-</pre></div>
-</div>
-<p>E.g:
-For CUDA <code class="docutils literal notranslate"><span class="pre">11.6</span></code>,</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>conda install -c conda-forge cupy <span class="nv">cudatoolkit</span><span class="o">=</span><span class="m">11</span>.6
-</pre></div>
-</div>
-<p>To install <strong>CuPy</strong> manually, see <a class="reference external" href="https://docs.cupy.dev/en/stable/install.html">this page</a></p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This supports <strong>RAPIDS</strong> <code class="docutils literal notranslate"><span class="pre">cucim</span></code>, automatically enabled if installed.
-<a class="reference external" href="https://rapids.ai/start.html#requirements">RAPIDS Installation Guide</a></p>
-</div>
-</div>
-<div class="section" id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h2>
-<p>Use GLCM on an image like so.</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">cv2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(1080, 1920, 3)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(1074, 1914, 3, 6)</span>
-</pre></div>
-</div>
-<p>Last dimension of <code class="docutils literal notranslate"><span class="pre">g</span></code> is the GLCM Features.</p>
-<p>To <a class="reference internal" href="features.html#select-feature"><span class="std std-ref">selectively generate a GLCM Feature</span></a>:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">CONTRAST</span><span class="p">,</span> <span class="n">CORRELATION</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="p">(</span><span class="n">CONTRAST</span><span class="p">,</span> <span class="n">CORRELATION</span><span class="p">))</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>To <a class="reference internal" href="features.html#get-feature"><span class="std std-ref">get a GLCM Feature</span></a>:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">CONTRAST</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
-</pre></div>
-</div>
-<p>Consider <code class="docutils literal notranslate"><span class="pre">glcm</span></code> if not reusing <code class="docutils literal notranslate"><span class="pre">GLCM()</span></code></p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">glcm</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">glcm</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-</pre></div>
-</div>
-<p><a class="reference internal" href="batch_processing.html#id1"><span class="std std-ref">Process many same-sized images at once</span></a>:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">ar0</span><span class="p">,</span> <span class="n">ar1</span><span class="p">,</span> <span class="n">ar2</span><span class="p">]))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g0</span><span class="p">,</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span> <span class="o">=</span> <span class="n">g</span>
-</pre></div>
-</div>
 </div>
 <div class="section" id="read-more">
 <h2>Read More<a class="headerlink" href="#read-more" title="Permalink to this heading">¶</a></h2>
@@ -258,7 +232,7 @@ For CUDA <code class="docutils literal notranslate"><span class="pre">11.6</span
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="features.html" class="btn btn-neutral float-right" title="GLCM Feature Indexing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="setup/installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

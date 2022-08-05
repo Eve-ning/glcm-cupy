@@ -1,12 +1,14 @@
 # GLCM Implemented in CuPy
 
+
 ```{toctree}
 ---
 maxdepth: 1
+caption: GLCM
 ---
 
-GLCM Features <features>
-GLCM Directions <direction>
+Features <features>
+Directions <direction>
 Binning <binning>
 NaN Handling <nan_handling>
 Radius & Step Size <radius_step_size>
@@ -14,15 +16,6 @@ Cross GLCM <glcm_cross>
 Batch Processing <batch_processing>
 ```
 
-```{toctree}
----
-maxdepth: 1
-hidden:
----
-
-Acknowledgements <acknowledgements>
-Change Log <changelog>
-```
 
 ## Quick Start
 
@@ -51,13 +44,13 @@ conda install -c conda-forge cupy cudatoolkit=11.6
 
 To install **CuPy** manually, see [this page](https://docs.cupy.dev/en/stable/install.html)
 
-### Optional Installation
+```{note}
 
-This supports **RAPIDS** `cucim`.
-
+This supports **RAPIDS** `cucim`, automatically enabled if installed.
 [RAPIDS Installation Guide](https://rapids.ai/start.html#requirements)
+```
 
-*It's automatically enabled if installed.*
+
 
 ## Usage
 
@@ -107,5 +100,18 @@ Consider ``glcm`` if not reusing ``GLCM()``
 ## Read More
 
 View the articles on the left side-bar to learn more!
+```{note}
 
-- [GLCM Texture: A Tutorial v. 3.0 March 2017](https://prism.ucalgary.ca/handle/1880/51900)
+[GLCM Texture: A Tutorial v. 3.0 March 2017](https://prism.ucalgary.ca/handle/1880/51900)
+```
+
+
+```{toctree}
+---
+maxdepth: 1
+caption: Development
+---
+
+Acknowledgements <acknowledgements>
+Change Log <changelog>
+```

@@ -24,6 +24,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -82,20 +83,22 @@
               
             
             
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="direction.html">GLCM Directions</a></li>
+              <p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="direction.html">Directions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nan_handling.html">NaN Handling</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Radius &amp; Step Size</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#radius">Radius</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#step-size">Step Size</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#checking-suitability">Checking Suitability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#checking-suitability-with">Checking Suitability with</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Change Log</a></li>
@@ -164,42 +167,39 @@
            <div itemprop="articleBody">
             
   <div class="section" id="radius-step-size">
-<h1>Radius &amp; Step Size<a class="headerlink" href="#radius-step-size" title="Permalink to this headline">¶</a></h1>
-<p>.. code-block:: python</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt; from glcm_cupy import GLCM
-&gt;&gt;&gt; import numpy as np
-&gt;&gt;&gt; from PIL import Image
-&gt;&gt;&gt; ar = np.asarray(Image.open(&quot;image.jpg&quot;))
-&gt;&gt;&gt; g = GLCM(radius=1, step_size=1).run(ar)
+<h1>Radius &amp; Step Size<a class="headerlink" href="#radius-step-size" title="Permalink to this heading">¶</a></h1>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="section" id="radius">
-<h2>Radius<a class="headerlink" href="#radius" title="Permalink to this headline">¶</a></h2>
+<h2>Radius<a class="headerlink" href="#radius" title="Permalink to this heading">¶</a></h2>
 <p>The radius defines the window radius for each GLCM window.</p>
 <p>If the radius is 1, we have diameter of 3 as it includes the center pixel</p>
 </div>
 <div class="section" id="step-size">
-<h2>Step Size<a class="headerlink" href="#step-size" title="Permalink to this headline">¶</a></h2>
+<h2>Step Size<a class="headerlink" href="#step-size" title="Permalink to this heading">¶</a></h2>
 <p>The step size defines the distance between each window.</p>
 <p>If it’s diagonal, it treats a diagonal step as 1. It’s not the euclidean distance.</p>
 </div>
-<div class="section" id="checking-suitability">
-<h2>Checking Suitability<a class="headerlink" href="#checking-suitability" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="checking-suitability-with">
+<h2>Checking Suitability with<a class="headerlink" href="#checking-suitability-with" title="Permalink to this heading">¶</a></h2>
 <p>If the image is too small for the radius &amp; step size it will be rejected.</p>
 <p>You may check the resulting shape ahead of time by</p>
-<p>.. code-block:: python</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt; from glcm_cupy import GLCM, CONTRAST, CORRELATION, glcm_shape
-&gt;&gt;&gt; import numpy as np
-&gt;&gt;&gt; from PIL import Image
-&gt;&gt;&gt; ar = np.asarray(Image.open(&quot;image.jpg&quot;))
-&gt;&gt;&gt; shape_after = glcm_shape(ar, step_size=..., radius=...)
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shape_after</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">()</span><span class="o">.</span><span class="n">glcm_shape</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=...</span><span class="p">,</span> <span class="n">radius</span><span class="o">=...</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If <code class="docutils literal notranslate"><span class="pre">shape_after</span></code> has any values <code class="docutils literal notranslate"><span class="pre">&lt;=0</span></code>, you know that it’ll fail.</p>
 <p>This is the signature of that helper function</p>
-<p>.. code-block:: python</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>def glcm_shape(im_shape: Tuple, step_size: int, radius: int):
-    ...
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">def glcm_shape(im_shape: Tuple, step_size: int, radius: int):</span>
+<span class="go">    ...</span>
 </pre></div>
 </div>
 </div>

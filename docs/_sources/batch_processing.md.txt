@@ -2,7 +2,10 @@
 
 (batch_processing)=
 
-*Note: It's not faster than a loop on ``GLCMCross``*
+```{note}
+
+It's not faster than a loop with ``GLCMCross``
+```
 
 For multiple images of the **SAME SIZE**, you may run them concurrently.
 
@@ -28,7 +31,10 @@ So, to retrieve the 1st image's glcm, `g[0]`
 
 ## GLCMCross
 
-``GLCMCross`` does not benefit in speed, however it may be simpler in syntax.
+```{note}
+
+It's not faster than a loop with ``GLCMCross``,  however it may be simpler in syntax.
+```
 
 ```pycon
 >>> g = GLCMCross(np.stack([ar0, ar1])).run(ar)

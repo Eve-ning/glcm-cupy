@@ -24,6 +24,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
@@ -83,20 +84,22 @@
               
             
             
-              <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">GLCM Features</a><ul>
+              <p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Features</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#selecting-features">Selecting Features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#getting-features">Getting Features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#feature-theory">Feature Theory</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="direction.html">GLCM Directions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="direction.html">Directions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nan_handling.html">NaN Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Change Log</a></li>
@@ -165,12 +168,18 @@
            <div itemprop="articleBody">
             
   <div class="section" id="glcm-feature-indexing">
-<h1>GLCM Feature Indexing<a class="headerlink" href="#glcm-feature-indexing" title="Permalink to this headline">¶</a></h1>
+<h1>GLCM Feature Indexing<a class="headerlink" href="#glcm-feature-indexing" title="Permalink to this heading">¶</a></h1>
 <div class="section" id="selecting-features">
-<span id="select-feature"></span><h2>Selecting Features<a class="headerlink" href="#selecting-features" title="Permalink to this headline">¶</a></h2>
+<span id="select-feature"></span><h2>Selecting Features<a class="headerlink" href="#selecting-features" title="Permalink to this heading">¶</a></h2>
 <p>To reduce run time, you can select specific features.</p>
-<p>This means unselected features returned will be zeroed (or 0.5 if normalized correlation).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unselected features returned will be zeroed (or 0.5 if normalized correlation).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <p>Note that the order of <code class="docutils literal notranslate"><span class="pre">features</span></code> does not determine the order of <code class="docutils literal notranslate"><span class="pre">g</span></code>’s channel.</p>
+</div>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">,</span> <span class="n">CORRELATION</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">cv2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">)</span>
@@ -179,17 +188,20 @@
 </div>
 </div>
 <div class="section" id="getting-features">
-<span id="get-feature"></span><h2>Getting Features<a class="headerlink" href="#getting-features" title="Permalink to this headline">¶</a></h2>
+<span id="get-feature"></span><h2>Getting Features<a class="headerlink" href="#getting-features" title="Permalink to this heading">¶</a></h2>
 <p>To retrieve the features, use the following syntax</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">,</span> <span class="n">CORRELATION</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">CORRELATION</span><span class="p">])</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">Features</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Features</span><span class="o">.</span><span class="n">CONTRAST</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Features</span><span class="o">.</span><span class="n">CORRELATION</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="feature-theory">
-<h2>Feature Theory<a class="headerlink" href="#feature-theory" title="Permalink to this headline">¶</a></h2>
-<p>Definitions from <a class="reference external" href="https://prism.ucalgary.ca/handle/1880/51900">GLCM Texture: A Tutorial v. 3.0 March 2017</a></p>
+<h2>Feature Theory<a class="headerlink" href="#feature-theory" title="Permalink to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>See Definitions from <a class="reference external" href="https://prism.ucalgary.ca/handle/1880/51900">GLCM Texture: A Tutorial v. 3.0 March 2017</a></p>
+</div>
 <p>In total, we have 6 features.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\text{Homogeneity} = \sum_{i,j=0}^{N-1}\frac{P_{i,j}}{1+(i-j)^2}\\

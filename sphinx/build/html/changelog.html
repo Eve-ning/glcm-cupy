@@ -24,6 +24,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -81,23 +82,25 @@
               
             
             
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="direction.html">GLCM Directions</a></li>
+              <p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="direction.html">Directions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nan_handling.html">NaN Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Change Log</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id1">1.6</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id2">1.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">1.10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">1.9</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id3">1.8</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id4">1.9</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id5">1.10</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">1.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">1.6</a></li>
 </ul>
 </li>
 </ul>
@@ -165,60 +168,9 @@
            <div itemprop="articleBody">
             
   <div class="section" id="changelog">
-<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">¶</a></h1>
 <div class="section" id="id1">
-<h2>1.6<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>Dropped dependency on J variables as I &amp; J are always the same</p></li>
-</ul>
-</div>
-<div class="section" id="id2">
-<h2>1.7<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>Fix issue with GLCM overflowing by making it float32</p></li>
-</ul>
-</div>
-<div class="section" id="id3">
-<h2>1.8<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/pull/7">Merged PR 7</a></p>
-<ul>
-<li><p>Implement Cross GLCM</p></li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="section" id="id4">
-<h2>1.9<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/pull/10">Merged PR 10</a></p>
-<ul>
-<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/issues/9">Resolved Issue #9</a></p></li>
-<li><p>Add bad <code class="docutils literal notranslate"><span class="pre">ndim</span></code> raise</p></li>
-<li><p>Improve raise message on bad <code class="docutils literal notranslate"><span class="pre">ndim</span></code></p></li>
-</ul>
-</li>
-<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/pull/14">Merged PR 14</a></p>
-<ul>
-<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/issues/11">Resolved Issue #11</a></p></li>
-<li><p>Allow <code class="docutils literal notranslate"><span class="pre">tqdm</span></code> to be silenced</p></li>
-</ul>
-</li>
-<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/pull/15">Merged PR 15</a></p>
-<ul>
-<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/issues/13">Resolved Issue #13</a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">normalize_features</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">normalized_features</span></code></p></li>
-<li><p>Fix <code class="docutils literal notranslate"><span class="pre">glcm</span></code> and <code class="docutils literal notranslate"><span class="pre">glcm_cross</span></code> unexpected arg order behaviour</p></li>
-<li><p>Remove <code class="docutils literal notranslate"><span class="pre">test__from_windows()</span></code> as it’s redundant</p></li>
-<li><p>Fix <code class="docutils literal notranslate"><span class="pre">test_from_2d_image</span></code> failing due to missing 3rd dimension</p></li>
-<li><p>Remove <code class="docutils literal notranslate"><span class="pre">test_image_tiff</span></code> as it’s redundant</p></li>
-<li><p>Fix reference <code class="docutils literal notranslate"><span class="pre">GLCM._binner</span></code> to <code class="docutils literal notranslate"><span class="pre">binner</span></code> in <code class="docutils literal notranslate"><span class="pre">utils</span></code></p></li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="section" id="id5">
-<h2>1.10<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<h2>1.10<a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/pull/18">Merged PR 18</a></p>
 <ul>
@@ -267,6 +219,69 @@
 <li><p>Implement NaN Handling by ignoring contribution to GLCM</p></li>
 </ul>
 </li>
+</ul>
+<table class="hlist"><tr><td><ul class="simple">
+<li><p>A list of</p></li>
+<li><p>short items</p></li>
+</ul>
+</td><td><ul class="simple">
+<li><p>that should be</p></li>
+<li><p>displayed</p></li>
+</ul>
+</td><td><ul class="simple">
+<li><p>horizontally</p></li>
+</ul>
+</td></tr></table>
+</div>
+<div class="section" id="id2">
+<h2>1.9<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/pull/10">Merged PR 10</a></p>
+<ul>
+<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/issues/9">Resolved Issue #9</a></p></li>
+<li><p>Add bad <code class="docutils literal notranslate"><span class="pre">ndim</span></code> raise</p></li>
+<li><p>Improve raise message on bad <code class="docutils literal notranslate"><span class="pre">ndim</span></code></p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/pull/14">Merged PR 14</a></p>
+<ul>
+<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/issues/11">Resolved Issue #11</a></p></li>
+<li><p>Allow <code class="docutils literal notranslate"><span class="pre">tqdm</span></code> to be silenced</p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/pull/15">Merged PR 15</a></p>
+<ul>
+<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/issues/13">Resolved Issue #13</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">normalize_features</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">normalized_features</span></code></p></li>
+<li><p>Fix <code class="docutils literal notranslate"><span class="pre">glcm</span></code> and <code class="docutils literal notranslate"><span class="pre">glcm_cross</span></code> unexpected arg order behaviour</p></li>
+<li><p>Remove <code class="docutils literal notranslate"><span class="pre">test__from_windows()</span></code> as it’s redundant</p></li>
+<li><p>Fix <code class="docutils literal notranslate"><span class="pre">test_from_2d_image</span></code> failing due to missing 3rd dimension</p></li>
+<li><p>Remove <code class="docutils literal notranslate"><span class="pre">test_image_tiff</span></code> as it’s redundant</p></li>
+<li><p>Fix reference <code class="docutils literal notranslate"><span class="pre">GLCM._binner</span></code> to <code class="docutils literal notranslate"><span class="pre">binner</span></code> in <code class="docutils literal notranslate"><span class="pre">utils</span></code></p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2>1.8<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/Eve-ning/glcm-cupy/pull/7">Merged PR 7</a></p>
+<ul>
+<li><p>Implement Cross GLCM</p></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h2>1.7<a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fix issue with GLCM overflowing by making it float32</p></li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h2>1.6<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Dropped dependency on J variables as I &amp; J are always the same</p></li>
 </ul>
 </div>
 </div>

@@ -6,9 +6,13 @@
 
 To reduce run time, you can select specific features.
 
-This means unselected features returned will be zeroed (or 0.5 if normalized correlation).
+```{note}
+Unselected features returned will be zeroed (or 0.5 if normalized correlation).
+```
 
+```{note}
 Note that the order of ``features`` does not determine the order of ``g``'s channel.
+```
 
 ```pycon
 >>> from glcm_cupy import GLCM, CONTRAST, CORRELATION
@@ -24,14 +28,16 @@ Note that the order of ``features`` does not determine the order of ``g``'s chan
 To retrieve the features, use the following syntax
 
 ```pycon
->>> from glcm_cupy import GLCM, CONTRAST, CORRELATION
->>> print(g[..., CONTRAST])
->>> print(g[..., CORRELATION])
+>>> from glcm_cupy import Features
+>>> print(g[..., Features.CONTRAST])
+>>> print(g[..., Features.CORRELATION])
 ```
 
 ## Feature Theory
 
-Definitions from [GLCM Texture: A Tutorial v. 3.0 March 2017](https://prism.ucalgary.ca/handle/1880/51900) 
+```{note}
+See Definitions from [GLCM Texture: A Tutorial v. 3.0 March 2017](https://prism.ucalgary.ca/handle/1880/51900) 
+```
 
 In total, we have 6 features.
 

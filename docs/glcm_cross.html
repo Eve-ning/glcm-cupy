@@ -24,6 +24,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -82,9 +83,10 @@
               
             
             
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="direction.html">GLCM Directions</a></li>
+              <p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="direction.html">Directions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nan_handling.html">NaN Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
@@ -96,6 +98,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Change Log</a></li>
@@ -164,10 +167,10 @@
            <div itemprop="articleBody">
             
   <div class="section" id="cross-glcm">
-<h1>Cross GLCM<a class="headerlink" href="#cross-glcm" title="Permalink to this headline">¶</a></h1>
+<h1>Cross GLCM<a class="headerlink" href="#cross-glcm" title="Permalink to this heading">¶</a></h1>
 <p>Cross GLCM is when I &amp; J for GLCM is taken from separate images, yielding statistical relationships between images</p>
 <div class="section" id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h2>
 <p>Use Cross GLCM on an image like so.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCMCross</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -193,7 +196,7 @@
 </div>
 </div>
 <div class="section" id="selecting-and-retrieving-combinations">
-<h2>Selecting and Retrieving Combinations<a class="headerlink" href="#selecting-and-retrieving-combinations" title="Permalink to this headline">¶</a></h2>
+<h2>Selecting and Retrieving Combinations<a class="headerlink" href="#selecting-and-retrieving-combinations" title="Permalink to this heading">¶</a></h2>
 <p>In each <code class="docutils literal notranslate"><span class="pre">GLCMCross()</span></code> instance, is a <code class="docutils literal notranslate"><span class="pre">ix_combos</span></code> property to specify combinations</p>
 <p>In a 3 channel image, the following will only cross indices, 0 with 1, 1 with 2, <strong>skipping</strong> 0 with 2</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">glcm</span>
@@ -205,13 +208,15 @@
 <p><code class="docutils literal notranslate"><span class="pre">g[:,:,0,:]</span></code> retrieves 0 cross 1, <code class="docutils literal notranslate"><span class="pre">g[:,:,1,:]</span></code> retrieves 1 cross 2.</p>
 </div>
 <div class="section" id="default-combinations">
-<h2>Default Combinations<a class="headerlink" href="#default-combinations" title="Permalink to this headline">¶</a></h2>
-<p>By default, <code class="docutils literal notranslate"><span class="pre">ix_combos</span> <span class="pre">is</span> <span class="pre">None</span></code>, using all possible combinations.
-After <code class="docutils literal notranslate"><span class="pre">run(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ix_combos</span></code> will be populated with combinations used.
-Thus, you can retrieve the default ordering of the 3rd dimension.</p>
-<p>The combinations is in the order of <code class="docutils literal notranslate"><span class="pre">itertools.combinations(range(CHANNELS),</span> <span class="pre">2)</span></code>.</p>
-<p><strong>Caveat:</strong> When using <code class="docutils literal notranslate"><span class="pre">glcm_cross</span></code>, you can’t retrieve the generated order.
+<h2>Default Combinations<a class="headerlink" href="#default-combinations" title="Permalink to this heading">¶</a></h2>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">ix_combos</span> <span class="pre">is</span> <span class="pre">None</span></code>, uses all possible combinations. After <code class="docutils literal notranslate"><span class="pre">run(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ix_combos</span></code> will be populated
+with combinations used. Thus, you can retrieve the default ordering of the 3rd dimension.</p>
+<p>The combinations uses the ordering of <code class="docutils literal notranslate"><span class="pre">itertools.combinations(range(CHANNELS),</span> <span class="pre">2)</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using <code class="docutils literal notranslate"><span class="pre">glcm_cross</span></code>, you can’t retrieve the generated order.
 However, you may use <code class="docutils literal notranslate"><span class="pre">itertools.combinations</span></code> to indirectly yield it.</p>
+</div>
 </div>
 </div>
 

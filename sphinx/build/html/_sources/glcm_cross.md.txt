@@ -51,11 +51,13 @@ In a 3 channel image, the following will only cross indices, 0 with 1, 1 with 2,
 
 ## Default Combinations
 
-By default, ``ix_combos is None``, using all possible combinations. 
-After ``run(...)``, ``ix_combos`` will be populated with combinations used.
-Thus, you can retrieve the default ordering of the 3rd dimension.
+By default, ``ix_combos is None``, uses all possible combinations. After ``run(...)``, ``ix_combos`` will be populated
+with combinations used. Thus, you can retrieve the default ordering of the 3rd dimension.
 
-The combinations is in the order of ``itertools.combinations(range(CHANNELS), 2)``.
+The combinations uses the ordering of ``itertools.combinations(range(CHANNELS), 2)``.
 
-**Caveat:** When using ``glcm_cross``, you can't retrieve the generated order.
+```{warning}
+
+When using ``glcm_cross``, you can't retrieve the generated order.
 However, you may use ``itertools.combinations`` to indirectly yield it.
+```

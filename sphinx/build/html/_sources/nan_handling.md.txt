@@ -1,6 +1,11 @@
 NaN Handling
 ============
 
+```{versionadded} 0.10
+
+Added NaN Handling.
+```
+
 NaN Values, ``np.nan``, ``cp.nan``, are ignored. This means, they are **skipped** when populating GLCM.
 
 This creates a **Partial GLCM**

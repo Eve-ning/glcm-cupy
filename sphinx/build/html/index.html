@@ -24,6 +24,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -81,15 +82,17 @@
               
             
             
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="direction.html">GLCM Directions</a></li>
+              <p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="direction.html">Directions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nan_handling.html">NaN Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Change Log</a></li>
@@ -158,11 +161,12 @@
            <div itemprop="articleBody">
             
   <div class="section" id="glcm-implemented-in-cupy">
-<h1>GLCM Implemented in CuPy<a class="headerlink" href="#glcm-implemented-in-cupy" title="Permalink to this headline">¶</a></h1>
+<h1>GLCM Implemented in CuPy<a class="headerlink" href="#glcm-implemented-in-cupy" title="Permalink to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="features.html">GLCM Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="direction.html">GLCM Directions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="direction.html">Directions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nan_handling.html">NaN Handling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
@@ -170,10 +174,8 @@
 <li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
 </ul>
 </div>
-<div class="toctree-wrapper compound">
-</div>
 <div class="section" id="quick-start">
-<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h2>
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h2>
 <p><strong>Python &gt;= 3.7</strong></p>
 <p>First, you need to install this</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install glcm-cupy
@@ -190,15 +192,14 @@ For CUDA <code class="docutils literal notranslate"><span class="pre">11.6</span
 </pre></div>
 </div>
 <p>To install <strong>CuPy</strong> manually, see <a class="reference external" href="https://docs.cupy.dev/en/stable/install.html">this page</a></p>
-<div class="section" id="optional-installation">
-<h3>Optional Installation<a class="headerlink" href="#optional-installation" title="Permalink to this headline">¶</a></h3>
-<p>This supports <strong>RAPIDS</strong> <code class="docutils literal notranslate"><span class="pre">cucim</span></code>.</p>
-<p><a class="reference external" href="https://rapids.ai/start.html#requirements">RAPIDS Installation Guide</a></p>
-<p><em>It’s automatically enabled if installed.</em></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This supports <strong>RAPIDS</strong> <code class="docutils literal notranslate"><span class="pre">cucim</span></code>, automatically enabled if installed.
+<a class="reference external" href="https://rapids.ai/start.html#requirements">RAPIDS Installation Guide</a></p>
 </div>
 </div>
 <div class="section" id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h2>
 <p>Use GLCM on an image like so.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">cv2</span>
@@ -233,11 +234,19 @@ For CUDA <code class="docutils literal notranslate"><span class="pre">11.6</span
 </div>
 </div>
 <div class="section" id="read-more">
-<h2>Read More<a class="headerlink" href="#read-more" title="Permalink to this headline">¶</a></h2>
+<h2>Read More<a class="headerlink" href="#read-more" title="Permalink to this heading">¶</a></h2>
 <p>View the articles on the left side-bar to learn more!</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://prism.ucalgary.ca/handle/1880/51900">GLCM Texture: A Tutorial v. 3.0 March 2017</a></p></li>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://prism.ucalgary.ca/handle/1880/51900">GLCM Texture: A Tutorial v. 3.0 March 2017</a></p>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Change Log</a></li>
 </ul>
+</div>
 </div>
 </div>
 

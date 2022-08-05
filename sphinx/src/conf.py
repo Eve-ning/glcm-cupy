@@ -23,8 +23,7 @@ copyright = '2022, Eve-ning'
 author = 'Eve-ning'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.9'
-
+release = '0.1.10'
 
 # -- General configuration ---------------------------------------------------
 
@@ -37,8 +36,6 @@ extensions = ['sphinx_rtd_theme', 'myst_parser']
 github_username = 'Eve-ning'
 github_repository = 'glcm-cupy'
 
-
-
 source_suffix = ['.rst', '.md']
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -47,7 +44,6 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-
 
 # -- Options for HTML output -------------------------------------------------
 

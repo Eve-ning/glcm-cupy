@@ -44,7 +44,7 @@
     - Resolved issue where NA replacement value was incorrectly set to `bin_from`
     - Resolved issue where NA summing used `.sum` instead of `np.nansum`
 - [Merged PR 42](https://github.com/Eve-ning/glcm-cupy/pull/42)
-    - Optimize kernel, allow kernel early exit if Probability `p==0`
+    - Optimize kernel, allow thread early exit if Probability `p==0`
     - Fix `List` / `Set` like typehints not flexible enough. Migrate to `typing.Sequence`
   
 ## 1.8

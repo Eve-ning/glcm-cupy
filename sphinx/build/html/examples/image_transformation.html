@@ -120,6 +120,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#plot-transformation">Plot Transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#things-to-note">Things to Note</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="image_padding.html">Transformation w/ Padding</a></li>
@@ -211,9 +215,16 @@
 <p>Read the image and divide it by 16 to reduce runtime</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ar</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="s2">&quot;../data/image.jpg&quot;</span><span class="p">)[::</span><span class="mi">4</span><span class="p">,</span> <span class="p">::</span><span class="mi">4</span><span class="p">]</span>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ar</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="s2">&quot;../../../data/image.jpg&quot;</span><span class="p">)[::</span><span class="mi">4</span><span class="p">,</span> <span class="p">::</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.image.AxesImage at 0x1ec2b9548e0&gt;
+</pre></div>
+</div>
+<img alt="../_images/b412d981f3eb79435519cf60082138d004738285ae02bc2003038fe52dc6b9bc.png" src="../_images/b412d981f3eb79435519cf60082138d004738285ae02bc2003038fe52dc6b9bc.png" />
 </div>
 </div>
 </div>
@@ -247,7 +258,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 751k/751k [00:01&lt;00:00, 658k Cells/s] 
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 751k/751k [00:01&lt;00:00, 673k Cells/s] 
 </pre></div>
 </div>
 </div>
@@ -256,6 +267,7 @@
 <div class="section" id="option-2-use-glcm-to-transform">
 <h3>Option 2: Use <code class="docutils literal notranslate"><span class="pre">glcm</span></code> to transform<a class="headerlink" href="#option-2-use-glcm-to-transform" title="Permalink to this heading">¶</a></h3>
 <p>Alternatively, use the functional call</p>
+<p>Notice how the number of cells is doubled, because by default, we use 4 directions!</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">glcm</span>
@@ -265,7 +277,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 1.50M/1.50M [00:04&lt;00:00, 351k Cells/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 1.50M/1.50M [00:04&lt;00:00, 347k Cells/s]
 </pre></div>
 </div>
 </div>
@@ -277,6 +289,7 @@
 <p>After Transformation, extract features</p>
 <div class="section" id="option-1-extract-features-with-features">
 <h3>Option 1: Extract Features with <code class="docutils literal notranslate"><span class="pre">Features</span></code><a class="headerlink" href="#option-1-extract-features-with-features" title="Permalink to this heading">¶</a></h3>
+<p>Each 2D channel is transformed into its own 2D GLCM Feature channel, with reduced height &amp; width</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># We yield the features using constants defined in conf</span>
@@ -296,6 +309,7 @@
 <div class="section" id="option-2-extract-features-with-integers">
 <h3>Option 2: Extract Features with integers<a class="headerlink" href="#option-2-extract-features-with-integers" title="Permalink to this heading">¶</a></h3>
 <p>Alternatively, since these constants are simply integers</p>
+<p>You may inspect the source of <code class="docutils literal notranslate"><span class="pre">Features</span></code> to yield the integers</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -312,7 +326,8 @@
 </div>
 <div class="section" id="plot-transformation">
 <h2>Plot Transformation<a class="headerlink" href="#plot-transformation" title="Permalink to this heading">¶</a></h2>
-<p>On a tangent, we use <code class="docutils literal notranslate"><span class="pre">ImageGrid</span></code> to plot the results</p>
+<p>Plot features with <code class="docutils literal notranslate"><span class="pre">ImageGrid</span></code>.</p>
+<p>Some features have extremely low values, thus we cube root it to spread it out.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot in a grid</span>
@@ -336,6 +351,20 @@
 </div>
 <img alt="../_images/681526c915f5ec63a4015f50be41bfa7535cd6cf46a7d96ea623ba339e07d8fd.png" src="../_images/681526c915f5ec63a4015f50be41bfa7535cd6cf46a7d96ea623ba339e07d8fd.png" />
 </div>
+</div>
+</div>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>You have learnt how <code class="docutils literal notranslate"><span class="pre">GLCM</span></code> and <code class="docutils literal notranslate"><span class="pre">glcm</span></code> transforms the image array</p></li>
+<li><p>The input criterion</p></li>
+<li><p>How to extract features</p></li>
+<li><p>The shape shrink of GLCM</p></li>
+</ul>
+<div class="section" id="things-to-note">
+<h3>Things to Note<a class="headerlink" href="#things-to-note" title="Permalink to this heading">¶</a></h3>
+<p>Not all features are significantly orthogonal.</p>
+<p>It’s best to research on which features to use or do feature selection to reduce run time of GLCM.</p>
 </div>
 </div>
 </div>

@@ -113,6 +113,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#read-image-and-cast-type">Read Image and cast type</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#create-artificial-hole-missing-data">Create artificial hole, missing data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#transform-plot-transformation">Transform &amp; Plot Transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -202,10 +206,14 @@
 <p>Note that <code class="docutils literal notranslate"><span class="pre">NaN</span></code> values can only be assigned to <code class="docutils literal notranslate"><span class="pre">float</span></code> like arrays.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ar</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="s2">&quot;../data/image.jpg&quot;</span><span class="p">)[</span><span class="mi">100</span><span class="p">:</span><span class="mi">200</span><span class="p">,</span> <span class="mi">100</span><span class="p">:</span><span class="mi">200</span><span class="p">]</span>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ar</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="s2">&quot;../../../data/image.jpg&quot;</span><span class="p">)[:</span><span class="mi">1000</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="p">:</span><span class="mi">1000</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
 <span class="n">ar</span> <span class="o">=</span> <span class="n">ar</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/b73bd63db379ce14fbfe47deb413fea52a622ea1bc4fd24705ade13fcc6c84f9.png" src="../_images/b73bd63db379ce14fbfe47deb413fea52a622ea1bc4fd24705ade13fcc6c84f9.png" />
 </div>
 </div>
 </div>
@@ -213,7 +221,7 @@
 <h2>Create artificial hole, missing data<a class="headerlink" href="#create-artificial-hole-missing-data" title="Permalink to this heading">¶</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ar</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="o">-</span><span class="mi">40</span><span class="p">,</span> <span class="mi">40</span><span class="p">:</span><span class="o">-</span><span class="mi">40</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ar</span><span class="p">[</span><span class="mi">100</span><span class="p">:</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">:</span><span class="o">-</span><span class="mi">100</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ar</span> <span class="o">/</span> <span class="mi">256</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Image with NaN Hole&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -221,7 +229,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/7d38467abf4f9e9c7d0f5e05c89a6d6e1edbf5d695c2d2f259f4150c0e78f86a.png" src="../_images/7d38467abf4f9e9c7d0f5e05c89a6d6e1edbf5d695c2d2f259f4150c0e78f86a.png" />
+<img alt="../_images/837c337102c73dd0b7846c80d03f0618604da04d4675e7ddffef0b0f5aa8bd3f.png" src="../_images/837c337102c73dd0b7846c80d03f0618604da04d4675e7ddffef0b0f5aa8bd3f.png" />
 </div>
 </div>
 </div>
@@ -255,14 +263,25 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 106k/106k [00:00&lt;00:00, 257k Cells/s] 
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 714k/714k [00:02&lt;00:00, 330k Cells/s]  
 </pre></div>
 </div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0.5, 0.98, &#39;Padded GLCM Features (Cube Rooted for visibility)&#39;)
 </pre></div>
 </div>
-<img alt="../_images/266f6299ea4a34a47e68971260ca2b8b03feb2305608507f02877ae7375998ae.png" src="../_images/266f6299ea4a34a47e68971260ca2b8b03feb2305608507f02877ae7375998ae.png" />
+<img alt="../_images/3f3d304285d4396f8a3970ba1406dccbb39977e3ec67bce570500631a0defb65.png" src="../_images/3f3d304285d4396f8a3970ba1406dccbb39977e3ec67bce570500631a0defb65.png" />
 </div>
+</div>
+</div>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">glcm-cupy</span></code> can work around <strong>NaN</strong> values</p></li>
+</ul>
+<div class="section" id="see-also">
+<h3>See Also<a class="headerlink" href="#see-also" title="Permalink to this heading">¶</a></h3>
+<p>As we can use <strong>NaNs</strong>, we can <strong>pad</strong> the image to avoid reducing the height and width!</p>
+<p>See the padding example if you haven’t</p>
 </div>
 </div>
 </div>

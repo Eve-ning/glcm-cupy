@@ -1,0 +1,295 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Cross GLCM &mdash; glcm_cupy 0.1.10 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Batch Processing" href="batch_processing.html" />
+    <link rel="prev" title="Radius &amp; Step Size" href="radius_step_size.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> glcm_cupy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Setup</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup/glcm_usage.html">GLCM Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup/glcm_cross_usage.html">GLCM Cross Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_transformation.html">Transformation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_padding.html">Transformation w/ Padding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_hole.html">Transformation w/ Missing Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/batch_images.html">Batched Transformation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_cross_transformation.html">Cross Transformation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="directions.html">Directions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nan_handling.html">NaN Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Cross GLCM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#selecting-and-retrieving-combinations">Selecting and Retrieving Combinations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#default-combinations">Default Combinations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ix_combos.html">GLCM Cross Index Combinations</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/cuda_notes.html">CUDA Kernel Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">glcm_cupy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Cross GLCM</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/glcm/glcm_cross.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cross-glcm">
+<h1>Cross GLCM<a class="headerlink" href="#cross-glcm" title="Permalink to this heading">¶</a></h1>
+<p>Cross GLCM is when I &amp; J for GLCM is taken from separate images, yielding statistical relationships between images</p>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">¶</a></h2>
+<p>Use Cross GLCM on an image like so.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCMCross</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(1080, 1920, 3)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCMCross</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(1080, 1920, 3, 6)</span>
+</pre></div>
+</div>
+<p>Last dimension of <code class="docutils literal notranslate"><span class="pre">g</span></code> is the GLCM Features.</p>
+<p>To retrieve a GLCM Feature:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">CONTRAST</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">CONTRAST</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+<p>Consider <code class="docutils literal notranslate"><span class="pre">glcm_cross</span></code> if not reusing <code class="docutils literal notranslate"><span class="pre">GLCMCross()</span></code></p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">glcm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">glcm_cross</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="selecting-and-retrieving-combinations">
+<h2>Selecting and Retrieving Combinations<a class="headerlink" href="#selecting-and-retrieving-combinations" title="Permalink to this heading">¶</a></h2>
+<p>In each <code class="docutils literal notranslate"><span class="pre">GLCMCross()</span></code> instance, is a <code class="docutils literal notranslate"><span class="pre">ix_combos</span></code> property to specify combinations</p>
+<p>In a 3 channel image, the following will only cross indices, 0 with 1, 1 with 2, <strong>skipping</strong> 0 with 2</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">glcm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCMCross</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">ix_combos</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(1080, 1920, 2, 6)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">g[:,:,0,:]</span></code> retrieves 0 cross 1, <code class="docutils literal notranslate"><span class="pre">g[:,:,1,:]</span></code> retrieves 1 cross 2.</p>
+</div>
+<div class="section" id="default-combinations">
+<h2>Default Combinations<a class="headerlink" href="#default-combinations" title="Permalink to this heading">¶</a></h2>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">ix_combos</span> <span class="pre">is</span> <span class="pre">None</span></code>, uses all possible combinations. After <code class="docutils literal notranslate"><span class="pre">run(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ix_combos</span></code> will be populated
+with combinations used. Thus, you can retrieve the default ordering of the 3rd dimension.</p>
+<p>The combinations uses the ordering of <code class="docutils literal notranslate"><span class="pre">itertools.combinations(range(CHANNELS),</span> <span class="pre">2)</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using <code class="docutils literal notranslate"><span class="pre">glcm_cross</span></code>, you can’t retrieve the generated order.
+However, you may use <code class="docutils literal notranslate"><span class="pre">itertools.combinations</span></code> to indirectly yield it.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="batch_processing.html" class="btn btn-neutral float-right" title="Batch Processing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="radius_step_size.html" class="btn btn-neutral float-left" title="Radius &amp; Step Size" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Eve-ning
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -37,13 +37,13 @@ maxdepth: 1
 caption: GLCM
 ---
 
-Features <features>
-Directions <direction>
-Binning <binning>
-NaN Handling <nan_handling>
-Radius & Step Size <radius_step_size>
-Cross GLCM <glcm_cross>
-Batch Processing <batch_processing>
+Features <glcm/features>
+Directions <glcm/directions>
+Binning <glcm/binning>
+NaN Handling <glcm/nan_handling>
+Radius & Step Size <glcm/radius_step_size>
+Cross GLCM <glcm/glcm_cross>
+Batch Processing <glcm/batch_processing>
 ```
 
 Unsure what are the arguments & terms? Take a look at the details
@@ -56,8 +56,9 @@ maxdepth: 1
 caption: Development
 ---
 
-Acknowledgements <acknowledgements>
-Change Log <changelog>
+Acknowledgements <development/acknowledgements>
+Change Log <development/changelog>
+CUDA Kernel Notes <development/cuda_notes>
 ```
 
 ## Read More

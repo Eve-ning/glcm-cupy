@@ -51,12 +51,12 @@ F: \text{Features}
 
 | Argument                                   | Description                              | Default                                |
 |--------------------------------------------|------------------------------------------|----------------------------------------|
-| [directions](../direction)                 | List of `GLCM.Direction` for GLCM to use | `(Direction.EAST, Direction....)`      |
-| [features](../features)                    | List of `GLCM.Features` for GLCM to use  | `(Features.HOMOGENEITY, Features....)` |
-| [step_size](../radius_step_size)           | Distance between GLCM Windows            | `1`                                    |
-| [radius](../radius_step_size)              | Radius of GLCM Windows                   | `2`                                    |
-| [bin_from](../binning)                     | Maximum Value + 1 of the array.          | `256`                                  |
-| [bin_to](../binning)                       | Maximum Value + 1 of the array           | `256`                                  |
+| [directions](directions)                   | List of `GLCM.Direction` for GLCM to use | `(Direction.EAST, Direction....)`      |
+| [features](features)                       | List of `GLCM.Features` for GLCM to use  | `(Features.HOMOGENEITY, Features....)` |
+| [step_size](step_size)                     | Distance between GLCM Windows            | `1`                                    |
+| [radius](radius)                           | Radius of GLCM Windows                   | `2`                                    |
+| [bin_from](bin_from)                       | Maximum Value + 1 of the array.          | `256`                                  |
+| [bin_to](bin_to)                           | Maximum Value + 1 of the array           | `256`                                  |
 | [normalized_features](normalized_features) | Whether to scale features to `[0, 1]`    | `True`                                 |
 | verbose                                    | Whether `tqdm` outputs progress          | `True`                                 |
 | max_partition_size[^*]                     | No. of windows parsed per GLCM Matrix    | `10000`                                |

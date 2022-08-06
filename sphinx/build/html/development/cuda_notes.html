@@ -1,0 +1,282 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>CUDA Notes &mdash; glcm_cupy 0.1.10 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Changelog" href="changelog.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> glcm_cupy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Setup</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup/usage.html">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_transformation.html">Transformation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_padding.html">Transformation w/ Padding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_hole.html">Transformation w/ Missing Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/batch_images.html">Batched Transformation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_cross_transformation.html">Cross Transformation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/directions.html">Directions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/binning.html">Binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/nan_handling.html">NaN Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/radius_step_size.html">Radius &amp; Step Size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/glcm_cross.html">Cross GLCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/batch_processing.html">Batch Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Change Log</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CUDA Kernel Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#why-conditional-modules">Why conditional modules?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-is-the-kernel-split-into-4">Why is the kernel split into 4?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#atomic-add">Atomic Add</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">glcm_cupy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>CUDA Notes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/development/cuda_notes.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cuda-notes">
+<h1>CUDA Notes<a class="headerlink" href="#cuda-notes" title="Permalink to this heading">¶</a></h1>
+<p>Some notes I took down while creating the kernel in <code class="docutils literal notranslate"><span class="pre">glcm_cupy.kernel</span></code></p>
+<div class="section" id="why-conditional-modules">
+<h2>Why conditional modules?<a class="headerlink" href="#why-conditional-modules" title="Permalink to this heading">¶</a></h2>
+<p>A huge benefit to dynamically compiled CUDA is the option to remove unneeded code.</p>
+<p>Thus, when <a class="reference internal" href="../glcm/features.html#select-feature"><span class="std std-ref">selecting features</span></a> the compilations are different.</p>
+</div>
+<div class="section" id="why-is-the-kernel-split-into-4">
+<h2>Why is the kernel split into 4?<a class="headerlink" href="#why-is-the-kernel-split-into-4" title="Permalink to this heading">¶</a></h2>
+<p>The kernel is split into 4 sections</p>
+<ol class="arabic simple">
+<li><p>GLCM Creation</p></li>
+<li><p>Features (ASM, Contrast, Homogeneity, GLCM Mean I, GLCM Mean J, Dissimilarity)</p></li>
+<li><p>Features (GLCM Variance I, GLCM Variance J)</p></li>
+<li><p>Features (GLCM Correlation)</p></li>
+</ol>
+<ul class="simple">
+<li><p>(2) is dependent on (1)</p></li>
+<li><p>(3) is dependent on (2)</p></li>
+<li><p>(4) is dependent on (3)</p></li>
+</ul>
+<p>It’s not possible for a single kernel to sync all threads. Thus, they are separated.</p>
+<p>There are some other solutions tried</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">__syncthreads()</span></code> will not work as we require to sync all blocks.</p>
+<ol class="arabic simple">
+<li><p>We can’t put all calculations in a block due to the thread limit of 512, 1024, 2048.</p></li>
+<li><p>We require 256 * 256 threads minimum to support a GLCM of max value 255.</p></li>
+</ol>
+</li>
+<li><p><strong>Cooperative Groups</strong> imposes a 24 block limit.</p></li>
+</ol>
+</div>
+<div class="section" id="atomic-add">
+<h2>Atomic Add<a class="headerlink" href="#atomic-add" title="Permalink to this heading">¶</a></h2>
+<p>Threads cannot write to a single pointer in parallel, information will be overwritten and lost. This is the <strong>Race
+Condition</strong>.</p>
+<p>In order to avoid this, we use <a class="reference external" href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#atomic-functions"><strong>Atomic
+Functions</strong></a>.</p>
+<blockquote>
+<div><p>… it is guaranteed to be performed without interference from other threads</p>
+</div></blockquote>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="changelog.html" class="btn btn-neutral float-left" title="Changelog" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Eve-ning
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

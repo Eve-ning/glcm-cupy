@@ -114,18 +114,19 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../direction.html">Directions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../binning.html">Binning</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../nan_handling.html">NaN Handling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../radius_step_size.html">Radius &amp; Step Size</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../glcm_cross.html">Cross GLCM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../batch_processing.html">Batch Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/directions.html">Directions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/binning.html">Binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/nan_handling.html">NaN Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/radius_step_size.html">Radius &amp; Step Size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/glcm_cross.html">Cross GLCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm/batch_processing.html">Batch Processing</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../acknowledgements.html">Acknowledgements</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/changelog.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/cuda_notes.html">CUDA Kernel Notes</a></li>
 </ul>
 
             
@@ -242,31 +243,31 @@ F: \text{Features}\end{split}\]</div>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><a class="reference internal" href="../direction.html"><span class="doc std std-doc">directions</span></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../glcm/directions.html#id1"><span class="std std-ref">directions</span></a></p></td>
 <td><p>List of <code class="docutils literal notranslate"><span class="pre">GLCM.Direction</span></code> for GLCM to use</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">(Direction.EAST,</span> <span class="pre">Direction....)</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../features.html"><span class="doc std std-doc">features</span></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../glcm/features.html#features"><span class="std std-ref">features</span></a></p></td>
 <td><p>List of <code class="docutils literal notranslate"><span class="pre">GLCM.Features</span></code> for GLCM to use</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">(Features.HOMOGENEITY,</span> <span class="pre">Features....)</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../radius_step_size.html"><span class="doc std std-doc">step_size</span></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../glcm/radius_step_size.html#id2"><span class="std std-ref">step_size</span></a></p></td>
 <td><p>Distance between GLCM Windows</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../radius_step_size.html"><span class="doc std std-doc">radius</span></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../glcm/radius_step_size.html#id1"><span class="std std-ref">radius</span></a></p></td>
 <td><p>Radius of GLCM Windows</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../binning.html"><span class="doc std std-doc">bin_from</span></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../glcm/binning.html#bin-from"><span class="std std-ref">bin_from</span></a></p></td>
 <td><p>Maximum Value + 1 of the array.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">256</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../binning.html"><span class="doc std std-doc">bin_to</span></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../glcm/binning.html#bin-to"><span class="std std-ref">bin_to</span></a></p></td>
 <td><p>Maximum Value + 1 of the array</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">256</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../features.html#normalized-features"><span class="std std-ref">normalized_features</span></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../glcm/features.html#normalized-features"><span class="std std-ref">normalized_features</span></a></p></td>
 <td><p>Whether to scale features to <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>

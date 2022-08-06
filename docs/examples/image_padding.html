@@ -209,7 +209,7 @@ We will only discuss with <code class="docutils literal notranslate"><span class
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.image.AxesImage at 0x27e3a3f9ca0&gt;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.image.AxesImage at 0x1ffe596bca0&gt;
 </pre></div>
 </div>
 <img alt="../_images/0c5fcfe9846b9920392cd5358fe5dd38aaf3a00d33d8310776211c56acfc2737.png" src="../_images/0c5fcfe9846b9920392cd5358fe5dd38aaf3a00d33d8310776211c56acfc2737.png" />
@@ -229,7 +229,7 @@ We will only discuss with <code class="docutils literal notranslate"><span class
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 44.7k/44.7k [00:00&lt;00:00, 237k Cells/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 44.7k/44.7k [00:00&lt;00:00, 258k Cells/s]
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(75, 75, 3) (61, 61, 3, 7)
@@ -253,15 +253,15 @@ We will only discuss with <code class="docutils literal notranslate"><span class
                 <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="n">padding</span><span class="p">,),</span> <span class="p">(</span><span class="n">padding</span><span class="p">,),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)),</span>
                 <span class="n">constant_values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
 <span class="n">ar_g</span> <span class="o">=</span> <span class="n">glcm</span><span class="p">(</span><span class="n">ar_pad</span><span class="p">,</span> <span class="n">bin_from</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">bin_to</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="n">step_size</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">ar</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ar</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">ar_g</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 67.5k/67.5k [00:00&lt;00:00, 154k Cells/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 67.5k/67.5k [00:00&lt;00:00, 159k Cells/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(75, 75, 3) (61, 61, 3, 7)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(75, 75, 3) (75, 75, 3, 7)
 </pre></div>
 </div>
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -294,7 +294,7 @@ We will only discuss with <code class="docutils literal notranslate"><span class
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0.5, 0.98, &#39;Padded GLCM Features (Cube Rooted for visibility)&#39;)
 </pre></div>
 </div>
-<img alt="../_images/e71459b477d3f5395ecc849ed58599a44ca081bf559b55e7123f1b58db564ffa.png" src="../_images/e71459b477d3f5395ecc849ed58599a44ca081bf559b55e7123f1b58db564ffa.png" />
+<img alt="../_images/13b4167e01a3fa0997467f50387acfa7d4a11ef9b5d3f2d116ff42f1f1b677fd.png" src="../_images/13b4167e01a3fa0997467f50387acfa7d4a11ef9b5d3f2d116ff42f1f1b677fd.png" />
 </div>
 </div>
 </div>

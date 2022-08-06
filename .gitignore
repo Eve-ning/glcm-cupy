@@ -5,3 +5,5 @@
 *.tif
 *.pclprof
 *.csv
+sphinx/build/*
+

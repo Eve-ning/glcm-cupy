@@ -33,6 +33,25 @@ To retrieve the features, use the following syntax
 >>> print(g[..., Features.CORRELATION])
 ```
 
+(normalized_features)=
+
+## Feature Normalization
+
+By calculating the possible max and min of each feature, we can normalize them to [0, 1]
+
+The un-normalized ranges:
+
+```{math}
+\text{ASM} \in [0, 1] \\
+\text{Homogeneity} \in [0, 1] \\
+\text{Contrast} \in [0, (B - 1) ^ 2] \\
+\text{Mean} \in [0, (B - 1)] \\
+\text{Variance} \in [0, (B - 1) ^ 2] \\
+\text{Correlation} \in [-1, 1] \\
+\text{Dissimilarity} \in [0, B - 1] \\
+B: \text{GLCM Bins}
+```
+
 ## Feature Theory
 
 ```{note}

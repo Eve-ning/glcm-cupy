@@ -46,7 +46,7 @@
   <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="GLCM Feature Indexing" href="../features.html" />
+    <link rel="next" title="Transformation" href="../examples/image_transformation.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
@@ -104,6 +104,14 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_transformation.html">Transformation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_padding.html">Transformation w/ Padding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_hole.html">Transformation w/ Missing Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/batch_images.html">Batched Transformation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/image_cross_transformation.html">Cross Transformation</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
@@ -113,14 +121,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../radius_step_size.html">Radius &amp; Step Size</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glcm_cross.html">Cross GLCM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../batch_processing.html">Batch Processing</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../examples/image_transformation.html">Transformation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/image_padding.html">Transformation w/ Padding</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/image_hole.html">Transformation w/ Missing Values</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/batch_images.html">Batched Transformation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/image_cross_transformation.html">Cross Transformation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
@@ -242,56 +242,58 @@ F: \text{Features}\end{split}\]</div>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">directions</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../direction.html"><span class="doc std std-doc">directions</span></a></p></td>
 <td><p>List of <code class="docutils literal notranslate"><span class="pre">GLCM.Direction</span></code> for GLCM to use</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">(Direction.EAST,</span> <span class="pre">Direction....)</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">features</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../features.html"><span class="doc std std-doc">features</span></a></p></td>
 <td><p>List of <code class="docutils literal notranslate"><span class="pre">GLCM.Features</span></code> for GLCM to use</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">(Features.HOMOGENEITY,</span> <span class="pre">Features....)</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">step_size</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../radius_step_size.html"><span class="doc std std-doc">step_size</span></a></p></td>
 <td><p>Distance between GLCM Windows</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">radius</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../radius_step_size.html"><span class="doc std std-doc">radius</span></a></p></td>
 <td><p>Radius of GLCM Windows</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bin_from</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../binning.html"><span class="doc std std-doc">bin_from</span></a></p></td>
 <td><p>Maximum Value + 1 of the array.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">256</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bin_to</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../binning.html"><span class="doc std std-doc">bin_to</span></a></p></td>
 <td><p>Maximum Value + 1 of the array</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">256</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">normalized_features</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../features.html"><span class="doc std std-doc">normalized_features</span></a></p></td>
 <td><p>Whether to scale features to <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">verbose</span></code></p></td>
+<tr class="row-odd"><td><p>verbose</p></td>
 <td><p>Whether <code class="docutils literal notranslate"><span class="pre">tqdm</span></code> outputs progress</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>*<code class="docutils literal notranslate"><span class="pre">max_partition_size</span></code></p></td>
+<tr class="row-even"><td><p>max_partition_size<a class="footnote-reference brackets" href="#id3" id="id1">1</a></p></td>
 <td><p>No. of windows parsed per GLCM Matrix</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">10000</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>*<code class="docutils literal notranslate"><span class="pre">max_threads</span></code></p></td>
+<tr class="row-odd"><td><p>max_threads<a class="footnote-reference brackets" href="#id3" id="id2">1</a></p></td>
 <td><p>No. of threads per CUDA block</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">512</span></code></p></td>
 </tr>
 </tbody>
 </table>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>* Recommend to not change</p>
-</div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Learn how to use <code class="docutils literal notranslate"><span class="pre">glcm-cupy</span></code> from the examples in the sidebar on the left!</p>
 </div>
+<hr class="footnotes docutils" />
+<dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets">1</span><span class="fn-backref">(<a href="#id1">1</a>,<a href="#id2">2</a>)</span></dt>
+<dd><p>Recommend to not change.</p>
+</dd>
+</dl>
 </div>
 </div>
 
@@ -303,7 +305,7 @@ F: \text{Features}\end{split}\]</div>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../features.html" class="btn btn-neutral float-right" title="GLCM Feature Indexing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../examples/image_transformation.html" class="btn btn-neutral float-right" title="Transformation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

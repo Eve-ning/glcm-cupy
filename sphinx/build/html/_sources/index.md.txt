@@ -10,6 +10,27 @@ Installation <setup/installation>
 Usage <setup/usage>
 ```
 
+First time using `glcm-cupy`? Take a look at the articles above to set-up!
+
+---
+
+```{toctree}
+---
+maxdepth: 1
+caption: Examples
+---
+
+Transformation <examples/image_transformation>
+Transformation w/ Padding <examples/image_padding>
+Transformation w/ Missing Values <examples/image_hole>
+Batched Transformation <examples/batch_images>
+Cross Transformation <examples/image_cross_transformation>
+```
+
+Before jumping to the documentation, take a look at some common use cases above.
+
+---
+
 ```{toctree}
 ---
 maxdepth: 1
@@ -25,18 +46,9 @@ Cross GLCM <glcm_cross>
 Batch Processing <batch_processing>
 ```
 
-```{toctree}
----
-maxdepth: 1
-caption: Examples
----
+Unsure what are the arguments & terms? Take a look at the details
 
-Transformation <examples/image_transformation>
-Transformation w/ Padding <examples/image_padding>
-Transformation w/ Missing Values <examples/image_hole>
-Batched Transformation <examples/batch_images>
-Cross Transformation <examples/image_cross_transformation>
-```
+---
 
 ```{toctree}
 ---

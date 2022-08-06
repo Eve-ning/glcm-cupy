@@ -7,7 +7,8 @@ caption: Setup
 ---
 
 Installation <setup/installation>
-Usage <setup/usage>
+GLCM Usage <setup/glcm_usage>
+GLCM Cross Usage <setup/glcm_cross_usage>
 ```
 
 First time using `glcm-cupy`? Take a look at the articles above to set-up!
@@ -44,6 +45,7 @@ NaN Handling <glcm/nan_handling>
 Radius & Step Size <glcm/radius_step_size>
 Cross GLCM <glcm/glcm_cross>
 Batch Processing <glcm/batch_processing>
+GLCM Cross Index Combinations <glcm/ix_combos>
 ```
 
 Unsure what are the arguments & terms? Take a look at the details

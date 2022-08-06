@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Radius &amp; Step Size &mdash; glcm_cupy 0.1.10 documentation</title>
+  <title>GLCM Cross Index Combinations &mdash; glcm_cupy 0.1.10 documentation</title>
   
 
   
@@ -45,8 +45,8 @@
   <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Cross GLCM" href="glcm_cross.html" />
-    <link rel="prev" title="NaN Handling" href="nan_handling.html" /> 
+    <link rel="next" title="Acknowledgements" href="../development/acknowledgements.html" />
+    <link rel="prev" title="Batch Processing" href="batch_processing.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -110,15 +110,10 @@
 <li class="toctree-l1"><a class="reference internal" href="directions.html">Directions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binning.html">Binning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nan_handling.html">NaN Handling</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Radius &amp; Step Size</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#radius">Radius</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#step-size">Step Size</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#checking-suitability-with">Checking Suitability with</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="radius_step_size.html">Radius &amp; Step Size</a></li>
 <li class="toctree-l1"><a class="reference internal" href="glcm_cross.html">Cross GLCM</a></li>
 <li class="toctree-l1"><a class="reference internal" href="batch_processing.html">Batch Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ix_combos.html">GLCM Cross Index Combinations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GLCM Cross Index Combinations</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
@@ -170,13 +165,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>Radius &amp; Step Size</li>
+      <li>GLCM Cross Index Combinations</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/glcm/radius_step_size.md.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/glcm/ix_combos.md.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -189,42 +184,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="radius-step-size">
-<h1>Radius &amp; Step Size<a class="headerlink" href="#radius-step-size" title="Permalink to this heading">¶</a></h1>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span>
+  <div class="section" id="glcm-cross-index-combinations">
+<h1>GLCM Cross Index Combinations<a class="headerlink" href="#glcm-cross-index-combinations" title="Permalink to this heading">¶</a></h1>
+<p id="ix-combos">By default, if <code class="docutils literal notranslate"><span class="pre">ix_combos</span></code> is None, all combinations are used.
+You can override the combinations.</p>
+<p>For example for 3 channels, if you only want to cross <strong>Channel 0 &amp; 1</strong> then <strong>Channel 1 &amp; 2</strong>,
+then <code class="docutils literal notranslate"><span class="pre">ix_combos=[(0,</span> <span class="pre">1),</span> <span class="pre">(1,</span> <span class="pre">2)]</span></code></p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCMCross</span><span class="p">,</span> <span class="n">Direction</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCMCross</span><span class="p">(</span><span class="n">ix_combos</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>In a full example:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span><span class="p">,</span> <span class="n">Direction</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ar</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">GLCMCross</span><span class="p">(</span><span class="n">ix_combos</span><span class="o">=</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span>
 </pre></div>
 </div>
-<div class="section" id="radius">
-<h2>Radius<a class="headerlink" href="#radius" title="Permalink to this heading">¶</a></h2>
-<p id="id1">The radius defines the window radius for each GLCM window.</p>
-<p>If the radius is 1, we have diameter of 3 as it includes the center pixel</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The order of <code class="docutils literal notranslate"><span class="pre">ix_combos</span></code> will impact the resulting array.</p>
 </div>
-<div class="section" id="step-size">
-<h2>Step Size<a class="headerlink" href="#step-size" title="Permalink to this heading">¶</a></h2>
-<p id="id2">The step size defines the distance between each window.</p>
-<p>If it’s diagonal, it treats a diagonal step as 1. It’s not the euclidean distance.</p>
-</div>
-<div class="section" id="checking-suitability-with">
-<h2>Checking Suitability with<a class="headerlink" href="#checking-suitability-with" title="Permalink to this heading">¶</a></h2>
-<p>If the image is too small for the radius &amp; step size it will be rejected.</p>
-<p>You may check the resulting shape ahead of time by</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">GLCM</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;image.jpg&quot;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">shape_after</span> <span class="o">=</span> <span class="n">GLCM</span><span class="p">()</span><span class="o">.</span><span class="n">glcm_shape</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=...</span><span class="p">,</span> <span class="n">radius</span><span class="o">=...</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>If <code class="docutils literal notranslate"><span class="pre">shape_after</span></code> has any values <code class="docutils literal notranslate"><span class="pre">&lt;=0</span></code>, you know that it’ll fail.</p>
-<p>This is the signature of that helper function</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">def glcm_shape(im_shape: Tuple, step_size: int, radius: int):</span>
-<span class="go">    ...</span>
-</pre></div>
-</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">ix_combos=[(0,</span> <span class="pre">1),</span> <span class="pre">(0,</span> <span class="pre">1)]</span></code>, note that the computation will be repeated!</p>
 </div>
 </div>
 
@@ -236,10 +220,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="glcm_cross.html" class="btn btn-neutral float-right" title="Cross GLCM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../development/acknowledgements.html" class="btn btn-neutral float-right" title="Acknowledgements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="nan_handling.html" class="btn btn-neutral float-left" title="NaN Handling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="batch_processing.html" class="btn btn-neutral float-left" title="Batch Processing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

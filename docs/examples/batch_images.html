@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Batch Transformation &mdash; glcm_cupy 0.1.10 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GLCM Cross Transformation" href="image_cross_transformation.html" />
+    <link rel="prev" title="Transformation with Missing Values" href="image_hole.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> glcm_cupy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Setup</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup/usage.html">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">GLCM</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../direction.html">Directions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../binning.html">Binning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nan_handling.html">NaN Handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../radius_step_size.html">Radius &amp; Step Size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glcm_cross.html">Cross GLCM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../batch_processing.html">Batch Processing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="image_transformation.html">Transformation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_padding.html">Transformation w/ Padding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_hole.html">Transformation w/ Missing Values</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Batched Transformation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#read-image-and-split-them">Read Image and Split them</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inspect-split-array-shape">Inspect split array shape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transform-plot-results">Transform &amp; Plot Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="image_cross_transformation.html">Cross Transformation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Change Log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">glcm_cupy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Batch Transformation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/examples/batch_images.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="batch-transformation">
+<h1>Batch Transformation<a class="headerlink" href="#batch-transformation" title="Permalink to this heading">¶</a></h1>
+<p>With multiple images <strong>of the same size</strong>, you can batch transform them</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.image</span> <span class="kn">import</span> <span class="n">imread</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">ImageGrid</span>
+<span class="kn">from</span> <span class="nn">skimage.util</span> <span class="kn">import</span> <span class="n">view_as_blocks</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="read-image-and-split-them">
+<h2>Read Image and Split them<a class="headerlink" href="#read-image-and-split-them" title="Permalink to this heading">¶</a></h2>
+<p>We split the image into 4 <strong>125 x 125 x 3</strong> images</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ar</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="s2">&quot;../../../data/image.jpg&quot;</span><span class="p">)[:</span><span class="mi">250</span><span class="p">,</span> <span class="p">:</span><span class="mi">250</span><span class="p">]</span>
+<span class="n">ars</span> <span class="o">=</span> <span class="n">view_as_blocks</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span> <span class="p">(</span><span class="mi">125</span><span class="p">,</span> <span class="mi">125</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">125</span><span class="p">,</span> <span class="mi">125</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ars</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">222</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ars</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ars</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">224</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ars</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.image.AxesImage at 0x225b5154220&gt;
+</pre></div>
+</div>
+<img alt="../_images/e5c46ac0b8a74383ccbaefcfc949c27c34ac7fce7da89661449f0c9c56252392.png" src="../_images/e5c46ac0b8a74383ccbaefcfc949c27c34ac7fce7da89661449f0c9c56252392.png" />
+</div>
+</div>
+</div>
+<div class="section" id="inspect-split-array-shape">
+<h2>Inspect split array shape<a class="headerlink" href="#inspect-split-array-shape" title="Permalink to this heading">¶</a></h2>
+<p>Note that the shape expected is <strong>B x H x W x C</strong>.</p>
+<ul class="simple">
+<li><p>B: Batch</p></li>
+<li><p>H: Height</p></li>
+<li><p>W: Width</p></li>
+<li><p>C: Channel</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ars</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(4, 125, 125, 3)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="transform-plot-results">
+<h2>Transform &amp; Plot Results<a class="headerlink" href="#transform-plot-results" title="Permalink to this heading">¶</a></h2>
+<p>Each image is separately transformed.</p>
+<p>There is slight speedup by doing batch processing, however, it’s minimal and mainly for convenience.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">glcm_cupy</span> <span class="kn">import</span> <span class="n">glcm</span>
+
+<span class="n">radius</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">step_size</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">gs</span> <span class="o">=</span> <span class="n">glcm</span><span class="p">(</span><span class="n">ars</span><span class="p">,</span> <span class="n">bin_from</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">bin_to</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="n">step_size</span><span class="p">)</span>
+<span class="c1"># Plot in a grid</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">ImageGrid</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="mi">111</span><span class="p">,</span>
+                 <span class="n">nrows_ncols</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                 <span class="n">axes_pad</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">f_ix</span><span class="p">,</span> <span class="n">title</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">gs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+                           <span class="p">(</span><span class="s2">&quot;HOMOGENEITY&quot;</span><span class="p">,</span> <span class="s2">&quot;CONTRAST&quot;</span><span class="p">,</span> <span class="s2">&quot;ASM&quot;</span><span class="p">,</span> <span class="s2">&quot;MEAN&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;VARIANCE&quot;</span><span class="p">,</span> <span class="s2">&quot;CORRELATION&quot;</span><span class="p">,</span> <span class="s2">&quot;DISSIMILARITY&quot;</span><span class="p">),</span> <span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">...</span><span class="p">,</span> <span class="n">f_ix</span><span class="p">]</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;Padded GLCM Features for 1st Image (Cube Rooted for visibility)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 680k/680k [00:02&lt;00:00, 336k Cells/s] 
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0.5, 0.98, &#39;Padded GLCM Features for 1st Image (Cube Rooted for visibility)&#39;)
+</pre></div>
+</div>
+<img alt="../_images/d8f40eb49e2f2dde6b520547e532f3aa12d945386690b0c82e39aff6264d0870.png" src="../_images/d8f40eb49e2f2dde6b520547e532f3aa12d945386690b0c82e39aff6264d0870.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot in a grid</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">ImageGrid</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="mi">111</span><span class="p">,</span>
+                 <span class="n">nrows_ncols</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                 <span class="n">axes_pad</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">f_ix</span><span class="p">,</span> <span class="n">title</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">gs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+                           <span class="p">(</span><span class="s2">&quot;HOMOGENEITY&quot;</span><span class="p">,</span> <span class="s2">&quot;CONTRAST&quot;</span><span class="p">,</span> <span class="s2">&quot;ASM&quot;</span><span class="p">,</span> <span class="s2">&quot;MEAN&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;VARIANCE&quot;</span><span class="p">,</span> <span class="s2">&quot;CORRELATION&quot;</span><span class="p">,</span> <span class="s2">&quot;DISSIMILARITY&quot;</span><span class="p">),</span> <span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="o">...</span><span class="p">,</span> <span class="n">f_ix</span><span class="p">]</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;Padded GLCM Features for 2nd Image (Cube Rooted for visibility)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0.5, 0.98, &#39;Padded GLCM Features for 2nd Image (Cube Rooted for visibility)&#39;)
+</pre></div>
+</div>
+<img alt="../_images/3f094195920c21e92526c5a4a3f054fab6bd6f0260381994639bc8ce42824b07.png" src="../_images/3f094195920c21e92526c5a4a3f054fab6bd6f0260381994639bc8ce42824b07.png" />
+</div>
+</div>
+</div>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">glcm-cupy</span></code> works with batched images, for convenience and a small speed up!</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="image_cross_transformation.html" class="btn btn-neutral float-right" title="GLCM Cross Transformation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="image_hole.html" class="btn btn-neutral float-left" title="Transformation with Missing Values" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Eve-ning
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

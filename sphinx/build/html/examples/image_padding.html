@@ -115,6 +115,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="image_hole.html">Transformation w/ Missing Values</a></li>
+<li class="toctree-l1"><a class="reference internal" href="batch_images.html">Batched Transformation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_cross_transformation.html">Cross Transformation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
@@ -204,7 +206,7 @@ We will only discuss with <code class="docutils literal notranslate"><span class
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.image.AxesImage at 0x257830fdac0&gt;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.image.AxesImage at 0x27e3a3f9ca0&gt;
 </pre></div>
 </div>
 <img alt="../_images/0c5fcfe9846b9920392cd5358fe5dd38aaf3a00d33d8310776211c56acfc2737.png" src="../_images/0c5fcfe9846b9920392cd5358fe5dd38aaf3a00d33d8310776211c56acfc2737.png" />
@@ -224,7 +226,7 @@ We will only discuss with <code class="docutils literal notranslate"><span class
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 44.7k/44.7k [00:00&lt;00:00, 233k Cells/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 44.7k/44.7k [00:00&lt;00:00, 237k Cells/s]
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(75, 75, 3) (61, 61, 3, 7)
@@ -247,16 +249,16 @@ We will only discuss with <code class="docutils literal notranslate"><span class
 <span class="n">ar_pad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">ar</span><span class="p">,</span>
                 <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="n">padding</span><span class="p">,),</span> <span class="p">(</span><span class="n">padding</span><span class="p">,),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)),</span>
                 <span class="n">constant_values</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-<span class="n">g</span> <span class="o">=</span> <span class="n">glcm</span><span class="p">(</span><span class="n">ar_pad</span><span class="p">,</span> <span class="n">bin_from</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">bin_to</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="n">step_size</span><span class="p">)</span>
+<span class="n">ar_g</span> <span class="o">=</span> <span class="n">glcm</span><span class="p">(</span><span class="n">ar_pad</span><span class="p">,</span> <span class="n">bin_from</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">bin_to</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span> <span class="n">step_size</span><span class="o">=</span><span class="n">step_size</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">ar</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 67.5k/67.5k [00:00&lt;00:00, 165k Cells/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>GLCM Progress: 100%|██████████| 67.5k/67.5k [00:00&lt;00:00, 154k Cells/s]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(75, 75, 3) (75, 75, 3, 7)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(75, 75, 3) (61, 61, 3, 7)
 </pre></div>
 </div>
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -276,10 +278,10 @@ We will only discuss with <code class="docutils literal notranslate"><span class
                  <span class="n">nrows_ncols</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
                  <span class="n">axes_pad</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
 
-<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">f_ix</span><span class="p">,</span> <span class="n">title</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">f_ix</span><span class="p">,</span> <span class="n">title</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">ar_g</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
                            <span class="p">(</span><span class="s2">&quot;HOMOGENEITY&quot;</span><span class="p">,</span> <span class="s2">&quot;CONTRAST&quot;</span><span class="p">,</span> <span class="s2">&quot;ASM&quot;</span><span class="p">,</span> <span class="s2">&quot;MEAN&quot;</span><span class="p">,</span>
                             <span class="s2">&quot;VARIANCE&quot;</span><span class="p">,</span> <span class="s2">&quot;CORRELATION&quot;</span><span class="p">,</span> <span class="s2">&quot;DISSIMILARITY&quot;</span><span class="p">),</span> <span class="p">):</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">g</span><span class="p">[:</span><span class="mi">100</span><span class="p">,</span> <span class="p">:</span><span class="mi">100</span><span class="p">,</span> <span class="p">:,</span> <span class="n">f_ix</span><span class="p">]</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">ar_g</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">f_ix</span><span class="p">]</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;Padded GLCM Features (Cube Rooted for visibility)&#39;</span><span class="p">)</span>
 </pre></div>
@@ -289,7 +291,7 @@ We will only discuss with <code class="docutils literal notranslate"><span class
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0.5, 0.98, &#39;Padded GLCM Features (Cube Rooted for visibility)&#39;)
 </pre></div>
 </div>
-<img alt="../_images/643e9de18fe28ac592a927863242f553790d2d1de1ab0965851064bbe908764b.png" src="../_images/643e9de18fe28ac592a927863242f553790d2d1de1ab0965851064bbe908764b.png" />
+<img alt="../_images/e71459b477d3f5395ecc849ed58599a44ca081bf559b55e7123f1b58db564ffa.png" src="../_images/e71459b477d3f5395ecc849ed58599a44ca081bf559b55e7123f1b58db564ffa.png" />
 </div>
 </div>
 </div>

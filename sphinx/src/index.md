@@ -34,6 +34,8 @@ caption: Examples
 Transformation <examples/image_transformation>
 Transformation w/ Padding <examples/image_padding>
 Transformation w/ Missing Values <examples/image_hole>
+Batched Transformation <examples/batch_images>
+Cross Transformation <examples/image_cross_transformation>
 ```
 
 ```{toctree}
